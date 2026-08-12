@@ -22,22 +22,18 @@ Checkout field collection settings.
 ```php
 use UnivaPay\Models\Builders\MerchantWebhookCheckoutConfigurationBuilder;
 use UnivaPay\Models\Builders\MerchantWebhookCheckoutToggleBuilder;
-use UnivaPay\ApiHelper;
 
 $merchantWebhookCheckoutConfiguration = MerchantWebhookCheckoutConfigurationBuilder::init()
     ->ecEmail(
         MerchantWebhookCheckoutToggleBuilder::init()
             ->enabled(true)
-            ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
             ->build()
     )
     ->ecProducts(
         MerchantWebhookCheckoutToggleBuilder::init()
             ->enabled(true)
-            ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
             ->build()
     )
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

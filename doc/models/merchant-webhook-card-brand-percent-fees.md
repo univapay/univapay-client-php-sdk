@@ -28,16 +28,11 @@ Per-card-brand percent fee overrides.
 
 ```php
 use UnivaPay\Models\Builders\MerchantWebhookCardBrandPercentFeesBuilder;
-use UnivaPay\ApiHelper;
 
 $merchantWebhookCardBrandPercentFees = MerchantWebhookCardBrandPercentFeesBuilder::init()
     ->visa(3.6)
-    ->americanExpress(133.02)
     ->mastercard(3.6)
-    ->maestro(115.58)
-    ->discover(104.6)
     ->jcb(3.8)
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

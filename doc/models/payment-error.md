@@ -23,13 +23,11 @@ The HTTP status will return success (2xx), but the resource `status` will be `fa
 
 ```php
 use UnivaPay\Models\Builders\PaymentErrorBuilder;
-use UnivaPay\ApiHelper;
 
 $paymentError = PaymentErrorBuilder::init()
     ->code(301)
     ->message('Card number error.')
     ->detail('The provided card number failed validation.')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

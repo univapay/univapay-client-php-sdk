@@ -24,17 +24,7 @@ Schedule settings applied to a subscription.
 
 ```php
 use UnivaPay\Models\Builders\SubscriptionScheduleSettingsBuilder;
-use UnivaPay\Utils\DateTimeHelper;
-use UnivaPay\Models\SubscriptionTerminationMode;
-use UnivaPay\ApiHelper;
 
-$subscriptionScheduleSettings = SubscriptionScheduleSettingsBuilder::init()
-    ->startOn(DateTimeHelper::fromSimpleDate('2016-03-13'))
-    ->zoneId('zone_id0')
-    ->preserveEndOfMonth(false)
-    ->retryInterval('retry_interval4')
-    ->terminationMode(SubscriptionTerminationMode::IMMEDIATE)
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
-    ->build();
+$subscriptionScheduleSettings = SubscriptionScheduleSettingsBuilder::init()->build();
 ```
 

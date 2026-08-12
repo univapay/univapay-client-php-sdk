@@ -31,7 +31,6 @@ use UnivaPay\Models\Builders\IssuerTokenBuilder;
 use UnivaPay\Models\IssuerTokenPaymentType;
 use UnivaPay\Models\IssuerTokenCallMethod;
 use UnivaPay\Models\Builders\IssuerTokenPayloadBuilder;
-use UnivaPay\ApiHelper;
 
 $issuerToken = IssuerTokenBuilder::init(
     IssuerTokenPaymentType::ONLINE
@@ -41,15 +40,8 @@ $issuerToken = IssuerTokenBuilder::init(
     ->payload(
         IssuerTokenPayloadBuilder::init()
             ->requestData('example')
-            ->sSpcd('sSpcd6')
-            ->sCptok('sCptok0')
-            ->sTerkn('sTerkn6')
-            ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
             ->build()
     )
-    ->accountId('account_id2')
-    ->branchCode('branch_code8')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

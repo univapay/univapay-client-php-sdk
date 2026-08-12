@@ -21,18 +21,13 @@ Request body for updating a cancel. Only `metadata` is settable by merchants. Al
 ```php
 use UnivaPay\Models\Builders\CancelUpdateRequestBuilder;
 use UnivaPay\Models\Builders\GenericMetadataBuilder;
-use UnivaPay\ApiHelper;
 
 $cancelUpdateRequest = CancelUpdateRequestBuilder::init()
     ->metadata(
         GenericMetadataBuilder::init()
             ->orderId('12345')
-            ->univapayName('univapay-name8')
-            ->univapayPhoneNumber('univapay-phone-number2')
-            ->additionalProperty('exampleAdditionalProperty', 'String4')
             ->build()
     )
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

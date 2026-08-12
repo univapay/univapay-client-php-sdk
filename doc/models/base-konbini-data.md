@@ -23,13 +23,11 @@ Base Konbini Data schema.
 ```php
 use UnivaPay\Models\Builders\BaseKonbiniDataBuilder;
 use UnivaPay\Models\BaseKonbiniDataConvenienceStore;
-use UnivaPay\ApiHelper;
 
 $baseKonbiniData = BaseKonbiniDataBuilder::init()
     ->customerName('Taro Yamada')
     ->convenienceStore(BaseKonbiniDataConvenienceStore::SEVEN_ELEVEN)
     ->expirationPeriod('P7D')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

@@ -22,15 +22,7 @@ Schedule settings that can be updated on a subscription.
 
 ```php
 use UnivaPay\Models\Builders\SubscriptionUpdateScheduleSettingsBuilder;
-use UnivaPay\Models\SubscriptionTerminationMode;
-use UnivaPay\Utils\DateTimeHelper;
-use UnivaPay\ApiHelper;
 
-$subscriptionUpdateScheduleSettings = SubscriptionUpdateScheduleSettingsBuilder::init()
-    ->terminationMode(SubscriptionTerminationMode::IMMEDIATE)
-    ->startOn(DateTimeHelper::fromRfc3339DateTime('2016-03-13T12:52:32.123Z'))
-    ->retryInterval('retry_interval8')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
-    ->build();
+$subscriptionUpdateScheduleSettings = SubscriptionUpdateScheduleSettingsBuilder::init()->build();
 ```
 

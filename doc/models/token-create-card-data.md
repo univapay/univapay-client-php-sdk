@@ -33,19 +33,11 @@ Token Create Card Data schema.
 
 ```php
 use UnivaPay\Models\Builders\TokenCreateCardDataBuilder;
-use UnivaPay\ApiHelper;
 
 $tokenCreateCardData = TokenCreateCardDataBuilder::init(
     '4242424242424242',
     '12',
     '2026'
-)
-    ->cardholder('cardholder8')
-    ->cvv('cvv0')
-    ->line1('line14')
-    ->line2('line26')
-    ->state('state2')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
-    ->build();
+)->build();
 ```
 

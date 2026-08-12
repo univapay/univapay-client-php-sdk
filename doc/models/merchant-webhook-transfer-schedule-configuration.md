@@ -27,17 +27,13 @@ Transfer schedule configuration inherited by the merchant.
 
 ```php
 use UnivaPay\Models\Builders\MerchantWebhookTransferScheduleConfigurationBuilder;
-use UnivaPay\ApiHelper;
 
 $merchantWebhookTransferScheduleConfiguration = MerchantWebhookTransferScheduleConfigurationBuilder::init()
     ->waitPeriod('P7D')
     ->period('weekly')
     ->fullPeriodRequired(false)
-    ->dayOfWeek('day_of_week8')
-    ->weekOfMonth(26)
     ->weeklyClosingDay('sunday')
     ->weeklyPayoutDay('friday')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

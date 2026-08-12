@@ -21,14 +21,7 @@ Configuration for credit card company side installments.
 
 ```php
 use UnivaPay\Models\Builders\SubscriptionInstallmentPlanBuilder;
-use UnivaPay\Models\InstallmentPlanType;
-use UnivaPay\Models\InstallmentFixedCycles;
-use UnivaPay\ApiHelper;
 
-$subscriptionInstallmentPlan = SubscriptionInstallmentPlanBuilder::init()
-    ->planType(InstallmentPlanType::REVOLVING)
-    ->fixedCycles(InstallmentFixedCycles::CYCLES_3)
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
-    ->build();
+$subscriptionInstallmentPlan = SubscriptionInstallmentPlanBuilder::init()->build();
 ```
 

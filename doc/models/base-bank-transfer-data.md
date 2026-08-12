@@ -22,13 +22,11 @@ Base Bank Transfer Data schema.
 
 ```php
 use UnivaPay\Models\Builders\BaseBankTransferDataBuilder;
-use UnivaPay\ApiHelper;
 
 $baseBankTransferData = BaseBankTransferDataBuilder::init()
     ->brand('aozora_bank')
     ->expirationPeriod('PT168H')
     ->expirationTimeShift('23:59:59+09:00')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

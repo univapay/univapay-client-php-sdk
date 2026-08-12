@@ -165,7 +165,7 @@ class UnivapayClientSdkClient implements ConfigurationInterface
             ->converter(new CompatibilityConverter())
             ->jsonHelper(ApiHelper::getJsonHelper())
             ->apiCallback($this->config['httpCallback'] ?? null)
-            ->userAgent('PHP-SDK/1.0.0 (OS: {os-info}, Engine: {engine}/{engine-version})')
+            ->userAgent('PHP-SDK/1.0.1 (OS: {os-info}, Engine: {engine}/{engine-version})')
             ->globalConfig($this->getGlobalConfiguration())
             ->serverUrls(self::ENVIRONMENT_MAP[$this->getEnvironment()], Server::DEFAULT_)
             ->authManagers(['JWT_TOKEN' => $this->bearerAuthManager])
@@ -275,6 +275,37 @@ class UnivapayClientSdkClient implements ConfigurationInterface
             $this->bearerAuthManager->getSecretKey(),
             $this->bearerAuthManager->getJwtToken()
         );
+    }
+
+    /**
+     * The merchant this client's app token was issued for, decoded from the
+     * configured JWT.
+     *
+     * Both merchant-level and store-level app tokens carry a merchant, so this
+     * is set for either kind of token.
+     *
+     * @return string|null The merchant id as a UUID string, or null if no JWT is
+     *         configured or its `merchant_id` claim is absent or not a UUID.
+     */
+    public function getCurrentMerchantId(): ?string
+    {
+        return AppJwt::readUuidClaim($this->bearerAuthManager->getJwtToken(), 'merchant_id');
+    }
+
+    /**
+     * The store this client's app token was issued for, decoded from the
+     * configured JWT.
+     *
+     * Only store-level app tokens are scoped to a store. A merchant-level token
+     * carries no `store_id` claim, so this returns null for one -- use
+     * `getStoresApi()` to list the merchant's stores instead.
+     *
+     * @return string|null The store id as a UUID string, or null if no JWT is
+     *         configured or its `store_id` claim is absent or not a UUID.
+     */
+    public function getCurrentStoreId(): ?string
+    {
+        return AppJwt::readUuidClaim($this->bearerAuthManager->getJwtToken(), 'store_id');
     }
 
     public function getLoggingConfigurationBuilder(): ?LoggingConfigurationBuilder

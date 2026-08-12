@@ -20,12 +20,9 @@ Request body for updating a customs declaration. Backend patch handling keeps th
 
 ```php
 use UnivaPay\Models\Builders\CustomsDeclarationPatchRequestBuilder;
-use UnivaPay\ApiHelper;
 
 $customsDeclarationPatchRequest = CustomsDeclarationPatchRequestBuilder::init(
     '1234567891'
-)
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
-    ->build();
+)->build();
 ```
 

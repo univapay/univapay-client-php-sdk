@@ -33,23 +33,13 @@ Request payload for creating a subscription.
 ```php
 use UnivaPay\Models\Builders\SubscriptionCreateRequestBuilder;
 use UnivaPay\Models\SubscriptionPeriod;
-use UnivaPay\ApiHelper;
 
 $subscriptionCreateRequest = SubscriptionCreateRequestBuilder::init(
     '11ef32a7-3a71-8662-803f-1bc27702eeec',
     1250,
     'USD'
 )
-    ->initialAmount(194)
     ->period(SubscriptionPeriod::MONTHLY)
-    ->cyclicalPeriod('cyclical_period4')
-    ->scheduleSettings(
-        null
-    )
-    ->installmentPlan(
-        null
-    )
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

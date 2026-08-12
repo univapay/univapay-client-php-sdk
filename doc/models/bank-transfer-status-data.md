@@ -34,7 +34,6 @@ use UnivaPay\Models\Builders\BankTransferStatusDataBuilder;
 use UnivaPay\Models\BankTransferPaymentStatus;
 use UnivaPay\Utils\DateTimeHelper;
 use UnivaPay\Models\Builders\GenericMetadataBuilder;
-use UnivaPay\ApiHelper;
 
 $bankTransferStatusData = BankTransferStatusDataBuilder::init()
     ->id('11ef0000-0000-4000-8000-000000000002')
@@ -57,7 +56,6 @@ $bankTransferStatusData = BankTransferStatusDataBuilder::init()
             ->orderId('order_12345')
             ->build()
     )
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

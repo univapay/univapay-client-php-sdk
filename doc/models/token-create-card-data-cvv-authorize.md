@@ -21,12 +21,10 @@ Token Create Card Data Cvv Authorize schema.
 
 ```php
 use UnivaPay\Models\Builders\TokenCreateCardDataCvvAuthorizeBuilder;
-use UnivaPay\ApiHelper;
 
 $tokenCreateCardDataCvvAuthorize = TokenCreateCardDataCvvAuthorizeBuilder::init()
     ->enabled(false)
     ->currency('JPY')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

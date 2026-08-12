@@ -27,7 +27,6 @@ Token Response Card Data Billing schema.
 ```php
 use UnivaPay\Models\Builders\TokenResponseCardDataBillingBuilder;
 use UnivaPay\Models\Builders\TokenResponsePhoneNumberBuilder;
-use UnivaPay\ApiHelper;
 
 $tokenResponseCardDataBilling = TokenResponseCardDataBillingBuilder::init()
     ->line1('1-1-1')
@@ -42,7 +41,6 @@ $tokenResponseCardDataBilling = TokenResponseCardDataBillingBuilder::init()
             ->localNumber('08012341234')
             ->build()
     )
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

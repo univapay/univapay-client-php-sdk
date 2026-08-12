@@ -22,15 +22,7 @@ Fields that can be updated on the next scheduled payment.
 
 ```php
 use UnivaPay\Models\Builders\SubscriptionUpdateNextPaymentBuilder;
-use UnivaPay\Utils\DateTimeHelper;
-use UnivaPay\Models\SubscriptionTerminateWithStatus;
-use UnivaPay\ApiHelper;
 
-$subscriptionUpdateNextPayment = SubscriptionUpdateNextPaymentBuilder::init()
-    ->dueDate(DateTimeHelper::fromSimpleDate('2016-03-13'))
-    ->amount(120)
-    ->terminateWithStatus(SubscriptionTerminateWithStatus::SUSPENDED)
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
-    ->build();
+$subscriptionUpdateNextPayment = SubscriptionUpdateNextPaymentBuilder::init()->build();
 ```
 

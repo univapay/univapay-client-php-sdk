@@ -24,7 +24,6 @@ Subscription feature configuration.
 
 ```php
 use UnivaPay\Models\Builders\MerchantWebhookSubscriptionConfigurationBuilder;
-use UnivaPay\ApiHelper;
 
 $merchantWebhookSubscriptionConfiguration = MerchantWebhookSubscriptionConfigurationBuilder::init()
     ->enabled(true)
@@ -32,7 +31,6 @@ $merchantWebhookSubscriptionConfiguration = MerchantWebhookSubscriptionConfigura
     ->suspendOnCancel(true)
     ->allowMerchantAmountPatch(false)
     ->allowMerchantDueDatePatch(false)
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

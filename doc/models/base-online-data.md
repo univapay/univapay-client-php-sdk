@@ -24,19 +24,7 @@ Base Online Data schema.
 
 ```php
 use UnivaPay\Models\Builders\BaseOnlineDataBuilder;
-use UnivaPay\Models\BaseOnlineDataBrand;
-use UnivaPay\Models\BaseOnlineDataCallMethod;
-use UnivaPay\Models\BaseOnlineDataOsType;
-use UnivaPay\Models\BaseOnlineDataUserIdentifierSource;
-use UnivaPay\ApiHelper;
 
-$baseOnlineData = BaseOnlineDataBuilder::init()
-    ->brand(BaseOnlineDataBrand::PAY_PAY_ONLINE)
-    ->callMethod(BaseOnlineDataCallMethod::WEB)
-    ->osType(BaseOnlineDataOsType::ANDROID)
-    ->userIdentifier('user_identifier4')
-    ->userIdentifierSource(BaseOnlineDataUserIdentifierSource::PROVIDED)
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
-    ->build();
+$baseOnlineData = BaseOnlineDataBuilder::init()->build();
 ```
 

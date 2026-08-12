@@ -36,18 +36,14 @@ Card payment settings.
 
 ```php
 use UnivaPay\Models\Builders\MerchantWebhookCardConfigurationBuilder;
-use UnivaPay\ApiHelper;
 
 $merchantWebhookCardConfiguration = MerchantWebhookCardConfigurationBuilder::init()
     ->enabled(true)
     ->debitEnabled(true)
     ->prepaidEnabled(false)
-    ->debitAuthorizationEnabled(false)
-    ->prepaidAuthorizationEnabled(false)
     ->foreignCardsAllowed(false)
     ->threeDsRequired(true)
     ->allowDirectTokenCreation(false)
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

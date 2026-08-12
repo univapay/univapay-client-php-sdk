@@ -40,6 +40,7 @@ The Subscription object represents a recurring payment schedule.
 use UnivaPay\Models\Builders\SubscriptionBuilder;
 use UnivaPay\Utils\DateTimeHelper;
 use UnivaPay\Models\Builders\SubscriptionScheduleSettingsBuilder;
+use UnivaPay\Models\SubscriptionTerminationMode;
 use UnivaPay\ApiHelper;
 use UnivaPay\Models\SubscriptionStatus;
 use UnivaPay\Models\Builders\GenericMetadataBuilder;
@@ -55,7 +56,14 @@ $subscription = SubscriptionBuilder::init()
     ->currency('USD')
     ->amountFormatted(12.5)
     ->scheduleSettings(
-        SubscriptionScheduleSettingsBuilder::init()->build()
+        SubscriptionScheduleSettingsBuilder::init()
+            ->startOn(DateTimeHelper::fromSimpleDate('2016-03-13'))
+            ->zoneId('zone_id8')
+            ->preserveEndOfMonth(false)
+            ->retryInterval('retry_interval2')
+            ->terminationMode(SubscriptionTerminationMode::IMMEDIATE)
+            ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
+            ->build()
     )
     ->onlyDirectCurrency(false)
     ->firstChargeAuthorizationOnly(false)
@@ -63,13 +71,23 @@ $subscription = SubscriptionBuilder::init()
     ->metadata(
         GenericMetadataBuilder::init()
             ->orderId('12345')
+            ->univapayName('univapay-name8')
+            ->univapayPhoneNumber('univapay-phone-number2')
+            ->additionalProperty('exampleAdditionalProperty', 'String4')
             ->build()
     )
     ->mode(ChargeMode::LIVE)
     ->createdOn(DateTimeHelper::fromRfc3339DateTime('2024-06-26T01:51:28.627023Z'))
     ->period(SubscriptionPeriod::MONTHLY)
     ->nextPayment(
-        SubscriptionNextPaymentBuilder::init()->build()
+        SubscriptionNextPaymentBuilder::init()
+            ->id('00000110-0000-0000-0000-000000000000')
+            ->dueDate(DateTimeHelper::fromSimpleDate('2016-03-13'))
+            ->zoneId('zone_id8')
+            ->amount(126)
+            ->currency('currency8')
+            ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
+            ->build()
     )
     ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();

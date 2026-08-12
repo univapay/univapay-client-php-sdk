@@ -26,7 +26,6 @@ Token Response Card Data Three Ds schema.
 ```php
 use UnivaPay\Models\Builders\TokenResponseCardDataThreeDsBuilder;
 use UnivaPay\Models\TokenResponseCardDataThreeDsStatus;
-use UnivaPay\ApiHelper;
 
 $tokenResponseCardDataThreeDs = TokenResponseCardDataThreeDsBuilder::init()
     ->enabled(true)
@@ -37,7 +36,6 @@ $tokenResponseCardDataThreeDs = TokenResponseCardDataThreeDsBuilder::init()
     ->error(
         null
     )
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

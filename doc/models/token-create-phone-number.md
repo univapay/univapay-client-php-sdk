@@ -21,13 +21,10 @@ Token Create Phone Number schema.
 
 ```php
 use UnivaPay\Models\Builders\TokenCreatePhoneNumberBuilder;
-use UnivaPay\ApiHelper;
 
 $tokenCreatePhoneNumber = TokenCreatePhoneNumberBuilder::init(
     '81',
     '08012341234'
-)
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
-    ->build();
+)->build();
 ```
 

@@ -25,7 +25,6 @@ Token Response Card Data schema.
 ```php
 use UnivaPay\Models\Builders\TokenResponseCardDataBuilder;
 use UnivaPay\Models\Builders\TokenResponseCardDataCardBuilder;
-use UnivaPay\ApiHelper;
 use UnivaPay\Models\Builders\TokenResponseCardDataBillingBuilder;
 use UnivaPay\Models\Builders\TokenResponsePhoneNumberBuilder;
 use UnivaPay\Models\Builders\TokenResponseCardDataCvvAuthorizeBuilder;
@@ -48,7 +47,6 @@ $tokenResponseCardData = TokenResponseCardDataBuilder::init()
             ->category('standard')
             ->issuer(null)
             ->subBrand('none')
-            ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
             ->build()
     )
     ->billing(
@@ -65,7 +63,6 @@ $tokenResponseCardData = TokenResponseCardDataBuilder::init()
                     ->localNumber('08012341234')
                     ->build()
             )
-            ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
             ->build()
     )
     ->cvvAuthorize(
@@ -75,7 +72,6 @@ $tokenResponseCardData = TokenResponseCardDataBuilder::init()
             ->chargeId(null)
             ->credentialsId(null)
             ->currency('JPY')
-            ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
             ->build()
     )
     ->cvvAuthorizeCheck(
@@ -83,7 +79,6 @@ $tokenResponseCardData = TokenResponseCardDataBuilder::init()
             ->status('successful')
             ->chargeId(null)
             ->date(DateTimeHelper::fromRfc3339DateTime('2026-04-09T07:35:50Z'))
-            ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
             ->build()
     )
     ->threeDs(
@@ -96,10 +91,8 @@ $tokenResponseCardData = TokenResponseCardDataBuilder::init()
             ->error(
                 null
             )
-            ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
             ->build()
     )
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

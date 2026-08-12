@@ -22,7 +22,6 @@ Customer-management defaults.
 
 ```php
 use UnivaPay\Models\Builders\MerchantWebhookCustomerManagementConfigurationBuilder;
-use UnivaPay\ApiHelper;
 
 $merchantWebhookCustomerManagementConfiguration = MerchantWebhookCustomerManagementConfigurationBuilder::init()
     ->enabled(true)
@@ -32,7 +31,6 @@ $merchantWebhookCustomerManagementConfiguration = MerchantWebhookCustomerManagem
         ]
     )
     ->defaultMode('live')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

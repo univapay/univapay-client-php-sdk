@@ -24,29 +24,22 @@ Request payload for updating a transaction token.
 use UnivaPay\Models\Builders\TransactionTokenUpdateRequestBuilder;
 use UnivaPay\Models\Builders\GenericMetadataBuilder;
 use UnivaPay\Models\Builders\TransactionTokenUpdateRequestDataBuilder;
-use UnivaPay\ApiHelper;
 
 $transactionTokenUpdateRequest = TransactionTokenUpdateRequestBuilder::init()
     ->email('new_email@test.com')
     ->metadata(
         GenericMetadataBuilder::init()
             ->orderId('12345')
-            ->univapayName('univapay-name8')
-            ->univapayPhoneNumber('univapay-phone-number2')
-            ->additionalProperty('exampleAdditionalProperty', 'String4')
             ->build()
     )
     ->data(
         TransactionTokenUpdateRequestDataBuilder::init()
             ->cvv('123')
             ->cardholder('TARO YAMADA')
-            ->cardNumber('card_number6')
             ->expMonth(12)
             ->expYear(2028)
-            ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
             ->build()
     )
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

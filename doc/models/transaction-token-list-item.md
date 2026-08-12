@@ -33,7 +33,6 @@ Transaction token entry returned in list responses.
 use UnivaPay\Models\Builders\TransactionTokenListItemBuilder;
 use UnivaPay\Utils\DateTimeHelper;
 use UnivaPay\Models\Builders\TransactionTokenListItemUserDataBuilder;
-use UnivaPay\ApiHelper;
 
 $transactionTokenListItem = TransactionTokenListItemBuilder::init()
     ->id('2fe23e45-f95d-4c95-9963-739070096443')
@@ -54,7 +53,6 @@ $transactionTokenListItem = TransactionTokenListItemBuilder::init()
             ->brand('visa')
             ->build()
     )
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

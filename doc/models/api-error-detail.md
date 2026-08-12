@@ -21,12 +21,10 @@ Structured detail entry describing a single API validation or business error.
 
 ```php
 use UnivaPay\Models\Builders\ApiErrorDetailBuilder;
-use UnivaPay\ApiHelper;
 
 $apiErrorDetail = ApiErrorDetailBuilder::init()
     ->field('card_number')
     ->reason('INVALID_CARD_NUMBER')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

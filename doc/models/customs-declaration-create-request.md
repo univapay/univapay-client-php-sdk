@@ -23,15 +23,12 @@ Request body for creating a customs declaration. Backend currently accepts this 
 
 ```php
 use UnivaPay\Models\Builders\CustomsDeclarationCreateRequestBuilder;
-use UnivaPay\ApiHelper;
 
 $customsDeclarationCreateRequest = CustomsDeclarationCreateRequestBuilder::init(
     'TOKYO',
     '1234567890',
     'AB1234567',
     'TARO YAMADA'
-)
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
-    ->build();
+)->build();
 ```
 

@@ -49,7 +49,6 @@ Merchant configuration object serialized by gyron-payments-api.
 ```php
 use UnivaPay\Models\Builders\MerchantWebhookConfigurationBuilder;
 use UnivaPay\Models\Builders\MerchantWebhookMoneyAmountBuilder;
-use UnivaPay\ApiHelper;
 use UnivaPay\Models\Builders\MerchantWebhookTransferScheduleConfigurationBuilder;
 use UnivaPay\Models\Builders\MerchantWebhookUserTransactionsConfigurationBuilder;
 use UnivaPay\Models\Builders\MerchantWebhookRecurringTokenConfigurationBuilder;
@@ -80,11 +79,9 @@ $merchantWebhookConfiguration = MerchantWebhookConfigurationBuilder::init()
             MerchantWebhookMoneyAmountBuilder::init()
                 ->amount(100)
                 ->currency('JPY')
-                ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
                 ->build()
         ]
     )
-    ->logoUrl('logo_url4')
     ->country('JP')
     ->language('ja')
     ->displayTimeZone('Asia/Tokyo')
@@ -306,7 +303,6 @@ $merchantWebhookConfiguration = MerchantWebhookConfigurationBuilder::init()
     )
     ->platformCredentialsEnabled(true)
     ->taggedPlatformCredentialsEnabled(false)
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

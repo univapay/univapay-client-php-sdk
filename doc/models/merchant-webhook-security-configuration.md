@@ -31,20 +31,16 @@ Merchant-level fraud and refund safety settings.
 ```php
 use UnivaPay\Models\Builders\MerchantWebhookSecurityConfigurationBuilder;
 use UnivaPay\Models\Builders\RestrictIpAfterFailedChargeConfigBuilder;
-use UnivaPay\ApiHelper;
 use UnivaPay\Models\Builders\MerchantWebhookLimitRefundBySalesConfigurationBuilder;
 
 $merchantWebhookSecurityConfiguration = MerchantWebhookSecurityConfigurationBuilder::init()
     ->cardChargeCooldown('PT5M')
     ->subscriptionCooldown('PT10M')
-    ->idempotentCardChargeCooldown('idempotent_card_charge_cooldown2')
-    ->idempotentSubscriptionCooldown('idempotent_subscription_cooldown6')
     ->restrictIpAfterFailedCharge(
         RestrictIpAfterFailedChargeConfigBuilder::init()
             ->enabled(true)
             ->count(5)
             ->cooldown('PT1H')
-            ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
             ->build()
     )
     ->refundPercentLimit(100)
@@ -57,7 +53,6 @@ $merchantWebhookSecurityConfiguration = MerchantWebhookSecurityConfigurationBuil
             ->rollingWindow(true)
             ->build()
     )
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

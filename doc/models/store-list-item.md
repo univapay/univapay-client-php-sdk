@@ -24,14 +24,12 @@ Store row returned by store list queries.
 ```php
 use UnivaPay\Models\Builders\StoreListItemBuilder;
 use UnivaPay\Utils\DateTimeHelper;
-use UnivaPay\ApiHelper;
 
 $storeListItem = StoreListItemBuilder::init()
     ->id('11ef0000-0000-4000-8000-000000000022')
     ->name('Tokyo Store')
     ->merchantName('Example Merchant')
     ->createdOn(DateTimeHelper::fromRfc3339DateTime('2026-04-09T07:35:50.000000Z'))
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

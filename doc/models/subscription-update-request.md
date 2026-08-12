@@ -26,31 +26,21 @@ Request payload for updating a subscription.
 ```php
 use UnivaPay\Models\Builders\SubscriptionUpdateRequestBuilder;
 use UnivaPay\Models\Builders\GenericMetadataBuilder;
-use UnivaPay\Models\SubscriptionUpdateStatus;
 use UnivaPay\Models\Builders\SubscriptionUpdateScheduleSettingsBuilder;
 use UnivaPay\Models\SubscriptionTerminationMode;
 use UnivaPay\Utils\DateTimeHelper;
-use UnivaPay\ApiHelper;
 use UnivaPay\Models\Builders\SubscriptionUpdateNextPaymentBuilder;
 
 $subscriptionUpdateRequest = SubscriptionUpdateRequestBuilder::init()
     ->transactionTokenId('11ef3362-3700-c54a-9baa-6f7e6527c9d9')
-    ->amount(230)
     ->metadata(
         GenericMetadataBuilder::init()
             ->orderId('12345')
-            ->univapayName('univapay-name8')
-            ->univapayPhoneNumber('univapay-phone-number2')
-            ->additionalProperty('exampleAdditionalProperty', 'String4')
             ->build()
     )
-    ->status(SubscriptionUpdateStatus::SUSPENDED)
     ->scheduleSettings(
         SubscriptionUpdateScheduleSettingsBuilder::init()
             ->terminationMode(SubscriptionTerminationMode::ON_NEXT_PAYMENT)
-            ->startOn(DateTimeHelper::fromRfc3339DateTime('2016-03-13T12:52:32.123Z'))
-            ->retryInterval('retry_interval2')
-            ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
             ->build()
     )
     ->nextPayment(
@@ -58,7 +48,6 @@ $subscriptionUpdateRequest = SubscriptionUpdateRequestBuilder::init()
             ->dueDate(DateTimeHelper::fromSimpleDate('2030-01-01'))
             ->build()
     )
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

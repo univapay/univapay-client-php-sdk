@@ -26,7 +26,6 @@ Installment plan configuration.
 ```php
 use UnivaPay\Models\Builders\MerchantWebhookInstallmentPlanConfigurationBuilder;
 use UnivaPay\Models\Builders\CardProcessorInstallmentConfigBuilder;
-use UnivaPay\ApiHelper;
 use UnivaPay\Models\Builders\MerchantWebhookMoneyAmountBuilder;
 
 $merchantWebhookInstallmentPlanConfiguration = MerchantWebhookInstallmentPlanConfigurationBuilder::init()
@@ -35,7 +34,6 @@ $merchantWebhookInstallmentPlanConfiguration = MerchantWebhookInstallmentPlanCon
         CardProcessorInstallmentConfigBuilder::init()
             ->revolving(true)
             ->fixedCycle(true)
-            ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
             ->build()
     )
     ->supportedPaymentTypes(
@@ -47,12 +45,10 @@ $merchantWebhookInstallmentPlanConfiguration = MerchantWebhookInstallmentPlanCon
         MerchantWebhookMoneyAmountBuilder::init()
             ->amount(3000)
             ->currency('JPY')
-            ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
             ->build()
     )
     ->maxPayoutPeriod('P12M')
     ->onlyWithProcessor(true)
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

@@ -32,7 +32,6 @@ Transaction Token Update Request Data schema.
 ```php
 use UnivaPay\Models\Builders\TransactionTokenUpdateRequestDataBuilder;
 use UnivaPay\Models\Builders\TransactionTokenUpdateRequestDataPhoneNumberBuilder;
-use UnivaPay\ApiHelper;
 
 $transactionTokenUpdateRequestData = TransactionTokenUpdateRequestDataBuilder::init()
     ->cvv('123')
@@ -52,7 +51,6 @@ $transactionTokenUpdateRequestData = TransactionTokenUpdateRequestDataBuilder::i
             ->localNumber('08012341234')
             ->build()
     )
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

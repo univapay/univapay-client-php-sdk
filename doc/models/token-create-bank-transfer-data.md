@@ -23,7 +23,6 @@ Token Create Bank Transfer Data schema.
 
 ```php
 use UnivaPay\Models\Builders\TokenCreateBankTransferDataBuilder;
-use UnivaPay\ApiHelper;
 
 $tokenCreateBankTransferData = TokenCreateBankTransferDataBuilder::init(
     'aozora_bank'
@@ -31,7 +30,6 @@ $tokenCreateBankTransferData = TokenCreateBankTransferDataBuilder::init(
     ->expirationPeriod('PT168H')
     ->expirationTimeShift('23:59:59+09:00')
     ->name('Taro Yamada')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

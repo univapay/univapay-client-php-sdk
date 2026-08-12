@@ -23,13 +23,11 @@ Token Response Card Data Cvv Authorize Check schema.
 ```php
 use UnivaPay\Models\Builders\TokenResponseCardDataCvvAuthorizeCheckBuilder;
 use UnivaPay\Utils\DateTimeHelper;
-use UnivaPay\ApiHelper;
 
 $tokenResponseCardDataCvvAuthorizeCheck = TokenResponseCardDataCvvAuthorizeCheckBuilder::init()
     ->status('successful')
     ->chargeId(null)
     ->date(DateTimeHelper::fromRfc3339DateTime('2026-04-09T07:35:50Z'))
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

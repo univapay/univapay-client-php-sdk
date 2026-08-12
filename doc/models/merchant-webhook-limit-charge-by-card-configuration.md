@@ -21,12 +21,10 @@ Per-card velocity limit configuration.
 
 ```php
 use UnivaPay\Models\Builders\MerchantWebhookLimitChargeByCardConfigurationBuilder;
-use UnivaPay\ApiHelper;
 
 $merchantWebhookLimitChargeByCardConfiguration = MerchantWebhookLimitChargeByCardConfigurationBuilder::init()
     ->quantityOfCharges(5)
     ->durationWindow('PT24H')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

@@ -23,14 +23,7 @@ A dictionary containing necessary key-value pairs for sending the request.
 
 ```php
 use UnivaPay\Models\Builders\IssuerTokenPayloadBuilder;
-use UnivaPay\ApiHelper;
 
-$issuerTokenPayload = IssuerTokenPayloadBuilder::init()
-    ->requestData('request_data2')
-    ->sSpcd('sSpcd2')
-    ->sCptok('sCptok4')
-    ->sTerkn('sTerkn2')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
-    ->build();
+$issuerTokenPayload = IssuerTokenPayloadBuilder::init()->build();
 ```
 

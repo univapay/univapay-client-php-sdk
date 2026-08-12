@@ -28,17 +28,11 @@ Token Response Online Data schema.
 use UnivaPay\Models\Builders\TokenResponseOnlineDataBuilder;
 use UnivaPay\Models\BaseOnlineDataBrand;
 use UnivaPay\Models\BaseOnlineDataCallMethod;
-use UnivaPay\Models\BaseOnlineDataOsType;
-use UnivaPay\Models\BaseOnlineDataUserIdentifierSource;
-use UnivaPay\ApiHelper;
 
 $tokenResponseOnlineData = TokenResponseOnlineDataBuilder::init()
     ->brand(BaseOnlineDataBrand::WE_CHAT_ONLINE)
     ->callMethod(BaseOnlineDataCallMethod::WEB)
-    ->osType(BaseOnlineDataOsType::ANDROID)
     ->userIdentifier('wechat_open_id_12345')
-    ->userIdentifierSource(BaseOnlineDataUserIdentifierSource::PROVIDED)
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

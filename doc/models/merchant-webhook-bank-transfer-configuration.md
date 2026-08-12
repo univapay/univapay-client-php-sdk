@@ -36,7 +36,6 @@ Bank transfer payment settings.
 
 ```php
 use UnivaPay\Models\Builders\MerchantWebhookBankTransferConfigurationBuilder;
-use UnivaPay\ApiHelper;
 
 $merchantWebhookBankTransferConfiguration = MerchantWebhookBankTransferConfigurationBuilder::init()
     ->enabled(true)
@@ -51,7 +50,6 @@ $merchantWebhookBankTransferConfiguration = MerchantWebhookBankTransferConfigura
     ->depositReceivedNotificationEnabled(true)
     ->remindNotificationPeriod('P2D')
     ->remindNotificationEnabled(true)
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

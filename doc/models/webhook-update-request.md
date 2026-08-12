@@ -23,20 +23,9 @@ Request body for updating a webhook. All fields are optional. Omitted fields are
 
 ```php
 use UnivaPay\Models\Builders\WebhookUpdateRequestBuilder;
-use UnivaPay\Models\WebhookTrigger;
-use UnivaPay\ApiHelper;
 
 $webhookUpdateRequest = WebhookUpdateRequestBuilder::init()
-    ->triggers(
-        [
-            WebhookTrigger::SUBSCRIPTION_CREATED,
-            WebhookTrigger::BANK_TRANSFER_STATUS_UPDATED
-        ]
-    )
-    ->url('url6')
-    ->authToken('auth_token8')
     ->active(false)
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

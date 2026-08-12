@@ -23,7 +23,6 @@ use UnivaPay\Models\Builders\RefundWebhookCallbackExtensionBuilder;
 use UnivaPay\Models\Builders\RefundBuilder;
 use UnivaPay\Models\RefundStatus;
 use UnivaPay\Models\RefundReasonResponse;
-use UnivaPay\ApiHelper;
 use UnivaPay\Models\Builders\GenericMetadataBuilder;
 use UnivaPay\Models\ChargeMode;
 use UnivaPay\Utils\DateTimeHelper;
@@ -51,10 +50,8 @@ $refundWebhookCallbackExtension = RefundWebhookCallbackExtensionBuilder::init()
             ->mode(ChargeMode::LIVE)
             ->createdOn(DateTimeHelper::fromRfc3339DateTime('2026-04-09T07:35:50.000000Z'))
             ->updatedOn(DateTimeHelper::fromRfc3339DateTime('2026-04-09T07:36:00.000000Z'))
-            ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
             ->build()
     )
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

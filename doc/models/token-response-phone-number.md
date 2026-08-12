@@ -21,12 +21,10 @@ Token Response Phone Number schema.
 
 ```php
 use UnivaPay\Models\Builders\TokenResponsePhoneNumberBuilder;
-use UnivaPay\ApiHelper;
 
 $tokenResponsePhoneNumber = TokenResponsePhoneNumberBuilder::init()
     ->countryCode(81)
     ->localNumber('08012341234')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

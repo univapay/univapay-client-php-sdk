@@ -20,11 +20,9 @@ Checkout feature toggle.
 
 ```php
 use UnivaPay\Models\Builders\MerchantWebhookCheckoutToggleBuilder;
-use UnivaPay\ApiHelper;
 
 $merchantWebhookCheckoutToggle = MerchantWebhookCheckoutToggleBuilder::init()
     ->enabled(true)
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

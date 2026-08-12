@@ -22,13 +22,11 @@ Transaction Token List Item User Data schema.
 
 ```php
 use UnivaPay\Models\Builders\TransactionTokenListItemUserDataBuilder;
-use UnivaPay\ApiHelper;
 
 $transactionTokenListItemUserData = TransactionTokenListItemUserDataBuilder::init()
     ->cardholderName('TARO YAMADA')
     ->email('user@example.com')
     ->brand('visa')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

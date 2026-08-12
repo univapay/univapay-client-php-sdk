@@ -21,12 +21,7 @@ Charge Three Ds schema.
 
 ```php
 use UnivaPay\Models\Builders\ChargeThreeDsBuilder;
-use UnivaPay\ApiHelper;
 
-$chargeThreeDs = ChargeThreeDsBuilder::init()
-    ->redirectEndpoint('redirect_endpoint0')
-    ->mode('mode6')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
-    ->build();
+$chargeThreeDs = ChargeThreeDsBuilder::init()->build();
 ```
 

@@ -29,24 +29,11 @@ Request payload for creating a charge.
 
 ```php
 use UnivaPay\Models\Builders\ChargeCreateRequestBuilder;
-use UnivaPay\Utils\DateTimeHelper;
-use UnivaPay\ApiHelper;
 
 $chargeCreateRequest = ChargeCreateRequestBuilder::init(
     'af834c88-7a8f-47ac-aee9-0386a0f98b0d',
     1000,
     'JPY'
-)
-    ->capture(false)
-    ->captureAt(DateTimeHelper::fromRfc3339DateTime('2016-03-13T12:52:32.123Z'))
-    ->merchantTransactionId('merchant_transaction_id0')
-    ->metadata(
-        null
-    )
-    ->clientMetadata(
-        null
-    )
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
-    ->build();
+)->build();
 ```
 

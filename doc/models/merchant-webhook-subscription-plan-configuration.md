@@ -26,7 +26,6 @@ Subscription plan configuration.
 ```php
 use UnivaPay\Models\Builders\MerchantWebhookSubscriptionPlanConfigurationBuilder;
 use UnivaPay\Models\Builders\MerchantWebhookMoneyAmountBuilder;
-use UnivaPay\ApiHelper;
 
 $merchantWebhookSubscriptionPlanConfiguration = MerchantWebhookSubscriptionPlanConfigurationBuilder::init()
     ->enabled(true)
@@ -41,11 +40,9 @@ $merchantWebhookSubscriptionPlanConfiguration = MerchantWebhookSubscriptionPlanC
         MerchantWebhookMoneyAmountBuilder::init()
             ->amount(3000)
             ->currency('JPY')
-            ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
             ->build()
     )
     ->maxPayoutPeriod('P12M')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

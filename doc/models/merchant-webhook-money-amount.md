@@ -21,12 +21,10 @@ Monetary amount object serialized by backend config models.
 
 ```php
 use UnivaPay\Models\Builders\MerchantWebhookMoneyAmountBuilder;
-use UnivaPay\ApiHelper;
 
 $merchantWebhookMoneyAmount = MerchantWebhookMoneyAmountBuilder::init()
     ->amount(1000)
     ->currency('JPY')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

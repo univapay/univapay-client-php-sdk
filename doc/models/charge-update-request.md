@@ -21,18 +21,13 @@ Request payload for updating charge metadata.
 ```php
 use UnivaPay\Models\Builders\ChargeUpdateRequestBuilder;
 use UnivaPay\Models\Builders\GenericMetadataBuilder;
-use UnivaPay\ApiHelper;
 
 $chargeUpdateRequest = ChargeUpdateRequestBuilder::init()
     ->metadata(
         GenericMetadataBuilder::init()
             ->orderId('12347')
-            ->univapayName('univapay-name8')
-            ->univapayPhoneNumber('univapay-phone-number2')
-            ->additionalProperty('exampleAdditionalProperty', 'String4')
             ->build()
     )
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

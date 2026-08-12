@@ -27,16 +27,7 @@ Represents a single delivery attempt of a webhook event, including the payload s
 
 ```php
 use UnivaPay\Models\Builders\WebhookEventBuilder;
-use UnivaPay\Models\WebhookTrigger;
-use UnivaPay\ApiHelper;
 
-$webhookEvent = WebhookEventBuilder::init()
-    ->id('000000b4-0000-0000-0000-000000000000')
-    ->webhookId('00002482-0000-0000-0000-000000000000')
-    ->event(WebhookTrigger::TOKEN_CVV_AUTH_UPDATED)
-    ->data(ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
-    ->successful(false)
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
-    ->build();
+$webhookEvent = WebhookEventBuilder::init()->build();
 ```
 

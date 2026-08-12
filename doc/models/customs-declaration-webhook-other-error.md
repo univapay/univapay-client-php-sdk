@@ -23,19 +23,10 @@ Nested customs-processing error entry returned in `others`.
 
 ```php
 use UnivaPay\Models\Builders\CustomsDeclarationWebhookOtherErrorBuilder;
-use UnivaPay\ApiHelper;
 
 $customsDeclarationWebhookOtherError = CustomsDeclarationWebhookOtherErrorBuilder::init()
     ->type('related_item')
-    ->credentialsId('00000b8c-0000-0000-0000-000000000000')
-    ->message(
-        [
-            'message4',
-            'message3'
-        ]
-    )
     ->itemName('charge')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

@@ -31,16 +31,7 @@ Next scheduled payment details for a subscription.
 
 ```php
 use UnivaPay\Models\Builders\SubscriptionNextPaymentBuilder;
-use UnivaPay\Utils\DateTimeHelper;
-use UnivaPay\ApiHelper;
 
-$subscriptionNextPayment = SubscriptionNextPaymentBuilder::init()
-    ->id('00000e0e-0000-0000-0000-000000000000')
-    ->dueDate(DateTimeHelper::fromSimpleDate('2016-03-13'))
-    ->zoneId('zone_id4')
-    ->amount(176)
-    ->currency('currency8')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
-    ->build();
+$subscriptionNextPayment = SubscriptionNextPaymentBuilder::init()->build();
 ```
 

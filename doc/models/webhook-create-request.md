@@ -23,7 +23,6 @@ Request body to create a new store-level webhook subscription.
 ```php
 use UnivaPay\Models\Builders\WebhookCreateRequestBuilder;
 use UnivaPay\Models\WebhookTrigger;
-use UnivaPay\ApiHelper;
 
 $webhookCreateRequest = WebhookCreateRequestBuilder::init(
     [
@@ -32,7 +31,6 @@ $webhookCreateRequest = WebhookCreateRequestBuilder::init(
     'https://example.com/webhooks/payments'
 )
     ->authToken('my-secret-token')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

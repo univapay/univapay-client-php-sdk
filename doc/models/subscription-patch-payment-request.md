@@ -24,14 +24,12 @@ Request body for updating a scheduled payment. All fields are optional. Omitted 
 ```php
 use UnivaPay\Models\Builders\SubscriptionPatchPaymentRequestBuilder;
 use UnivaPay\Utils\DateTimeHelper;
-use UnivaPay\ApiHelper;
 
 $subscriptionPatchPaymentRequest = SubscriptionPatchPaymentRequestBuilder::init()
     ->dueDate(DateTimeHelper::fromSimpleDate('2026-09-01'))
     ->isPaid(false)
     ->terminateWithStatus(null)
     ->retryInterval('P3D')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

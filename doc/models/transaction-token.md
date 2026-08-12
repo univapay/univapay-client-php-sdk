@@ -37,6 +37,8 @@ use UnivaPay\Models\TransactionTokenPaymentType;
 use UnivaPay\Models\TransactionTokenMode;
 use UnivaPay\Models\TransactionTokenType;
 use UnivaPay\Utils\DateTimeHelper;
+use UnivaPay\Models\Builders\TokenResponseCardDataBuilder;
+use UnivaPay\Models\Builders\TokenResponseCardDataCardBuilder;
 use UnivaPay\ApiHelper;
 
 $transactionToken = TransactionTokenBuilder::init()
@@ -51,14 +53,39 @@ $transactionToken = TransactionTokenBuilder::init()
     ->confirmed(true)
     ->metadata(
         [
-            'customer_id' => 
+            'customer_id' => 'cust_12345'
         ]
     )
     ->createdOn(DateTimeHelper::fromRfc3339DateTime('2026-04-09T07:35:50Z'))
     ->updatedOn(DateTimeHelper::fromRfc3339DateTime('2026-04-09T07:35:50Z'))
     ->lastUsedOn(DateTimeHelper::fromRfc3339DateTime('2026-04-09T07:35:50.000000Z'))
     ->data(
-        
+        TokenResponseCardDataBuilder::init()
+            ->card(
+                TokenResponseCardDataCardBuilder::init()
+                    ->cardholder('TARO YAMADA')
+                    ->expMonth(12)
+                    ->expYear(2026)
+                    ->cardBin('card_bin0')
+                    ->lastFour('4242')
+                    ->brand('visa')
+                    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
+                    ->build()
+            )
+            ->billing(
+                null
+            )
+            ->cvvAuthorize(
+                null
+            )
+            ->cvvAuthorizeCheck(
+                null
+            )
+            ->threeDs(
+                null
+            )
+            ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
+            ->build()
     )
     ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();

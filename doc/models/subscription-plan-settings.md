@@ -22,14 +22,7 @@ Configuration for limited-cycle subscriptions (Univapay side).
 
 ```php
 use UnivaPay\Models\Builders\SubscriptionPlanSettingsBuilder;
-use UnivaPay\Models\PlanSettingsType;
-use UnivaPay\ApiHelper;
 
-$subscriptionPlanSettings = SubscriptionPlanSettingsBuilder::init()
-    ->planType(PlanSettingsType::FIXED_CYCLES)
-    ->fixedCycles(240)
-    ->fixedCycleAmount(50)
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
-    ->build();
+$subscriptionPlanSettings = SubscriptionPlanSettingsBuilder::init()->build();
 ```
 

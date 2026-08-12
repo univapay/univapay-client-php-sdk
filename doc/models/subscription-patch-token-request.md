@@ -20,12 +20,9 @@ Request body for updating the payment method (transaction token) of a subscripti
 
 ```php
 use UnivaPay\Models\Builders\SubscriptionPatchTokenRequestBuilder;
-use UnivaPay\ApiHelper;
 
 $subscriptionPatchTokenRequest = SubscriptionPatchTokenRequestBuilder::init(
     '11ef3362-3700-c54a-9baa-6f7e6527c9d9'
-)
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
-    ->build();
+)->build();
 ```
 

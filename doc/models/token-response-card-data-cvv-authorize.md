@@ -24,7 +24,6 @@ Token Response Card Data Cvv Authorize schema.
 
 ```php
 use UnivaPay\Models\Builders\TokenResponseCardDataCvvAuthorizeBuilder;
-use UnivaPay\ApiHelper;
 
 $tokenResponseCardDataCvvAuthorize = TokenResponseCardDataCvvAuthorizeBuilder::init()
     ->enabled(true)
@@ -32,7 +31,6 @@ $tokenResponseCardDataCvvAuthorize = TokenResponseCardDataCvvAuthorizeBuilder::i
     ->chargeId(null)
     ->credentialsId(null)
     ->currency('JPY')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

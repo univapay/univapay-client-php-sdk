@@ -37,18 +37,14 @@ Merchant transaction notification settings.
 
 ```php
 use UnivaPay\Models\Builders\MerchantWebhookUserTransactionsConfigurationBuilder;
-use UnivaPay\ApiHelper;
 
 $merchantWebhookUserTransactionsConfiguration = MerchantWebhookUserTransactionsConfigurationBuilder::init()
     ->enabled(true)
     ->notifyCustomer(true)
     ->notifyOnTest(false)
-    ->notifyOnRecurringTokenCreation(false)
-    ->notifyOnRecurringTokenCvvFailed(false)
     ->notifyOnWebhookFailure(true)
     ->notifyOnWebhookDisabled(true)
     ->notifyOnSubscriptions(true)
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

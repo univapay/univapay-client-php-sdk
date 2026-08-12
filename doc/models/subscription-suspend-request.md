@@ -22,16 +22,13 @@ Request body for suspending a subscription. The `schedule_settings.termination_m
 use UnivaPay\Models\Builders\SubscriptionSuspendRequestBuilder;
 use UnivaPay\Models\Builders\SuspendScheduleSettingsBuilder;
 use UnivaPay\Models\SubscriptionTerminationMode;
-use UnivaPay\ApiHelper;
 
 $subscriptionSuspendRequest = SubscriptionSuspendRequestBuilder::init()
     ->scheduleSettings(
         SuspendScheduleSettingsBuilder::init()
             ->terminationMode(SubscriptionTerminationMode::ON_NEXT_PAYMENT)
-            ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
             ->build()
     )
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

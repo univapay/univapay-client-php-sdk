@@ -24,7 +24,6 @@ use UnivaPay\Models\Builders\BankTransferStatusDataBuilder;
 use UnivaPay\Models\BankTransferPaymentStatus;
 use UnivaPay\Utils\DateTimeHelper;
 use UnivaPay\Models\Builders\GenericMetadataBuilder;
-use UnivaPay\ApiHelper;
 
 $bankTransferStatusWebhookCallbackExtension = BankTransferStatusWebhookCallbackExtensionBuilder::init()
     ->data(
@@ -49,10 +48,8 @@ $bankTransferStatusWebhookCallbackExtension = BankTransferStatusWebhookCallbackE
                     ->orderId('order_12345')
                     ->build()
             )
-            ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
             ->build()
     )
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

@@ -28,7 +28,6 @@ use UnivaPay\Utils\DateTimeHelper;
 use UnivaPay\Models\Builders\ChargeBuilder;
 use UnivaPay\Models\ChargeTransactionTokenType;
 use UnivaPay\Models\ChargeStatus;
-use UnivaPay\ApiHelper;
 use UnivaPay\Models\ChargeMode;
 
 $chargeWebhookEvent = ChargeWebhookEventBuilder::init(
@@ -56,10 +55,8 @@ $chargeWebhookEvent = ChargeWebhookEventBuilder::init(
             )
             ->mode(ChargeMode::TEST)
             ->createdOn(DateTimeHelper::fromRfc3339DateTime('2024-06-26T01:51:30.000000Z'))
-            ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
             ->build()
     )
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

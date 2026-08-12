@@ -26,7 +26,6 @@ Token Response Konbini Data schema.
 use UnivaPay\Models\Builders\TokenResponseKonbiniDataBuilder;
 use UnivaPay\Models\BaseKonbiniDataConvenienceStore;
 use UnivaPay\Models\Builders\TokenResponsePhoneNumberBuilder;
-use UnivaPay\ApiHelper;
 
 $tokenResponseKonbiniData = TokenResponseKonbiniDataBuilder::init()
     ->customerName('Taro Yamada')
@@ -37,10 +36,8 @@ $tokenResponseKonbiniData = TokenResponseKonbiniDataBuilder::init()
         TokenResponsePhoneNumberBuilder::init()
             ->countryCode(81)
             ->localNumber('08012341234')
-            ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
             ->build()
     )
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

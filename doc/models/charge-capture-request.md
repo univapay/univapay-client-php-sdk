@@ -21,13 +21,10 @@ Request payload for capturing an authorized charge.
 
 ```php
 use UnivaPay\Models\Builders\ChargeCaptureRequestBuilder;
-use UnivaPay\ApiHelper;
 
 $chargeCaptureRequest = ChargeCaptureRequestBuilder::init(
     1000,
     'JPY'
-)
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
-    ->build();
+)->build();
 ```
 

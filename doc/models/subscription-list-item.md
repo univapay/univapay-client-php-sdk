@@ -44,7 +44,6 @@ Subscription entry returned in list responses.
 ```php
 use UnivaPay\Models\Builders\SubscriptionListItemBuilder;
 use UnivaPay\Utils\DateTimeHelper;
-use UnivaPay\ApiHelper;
 use UnivaPay\Models\SubscriptionStatus;
 use UnivaPay\Models\Builders\SubscriptionUserDataBuilder;
 
@@ -68,7 +67,6 @@ $subscriptionListItem = SubscriptionListItemBuilder::init()
             ->brand('visa')
             ->build()
     )
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

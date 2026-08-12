@@ -21,18 +21,13 @@ Request body to create a cancel for a charge. Only `metadata` is accepted; all o
 ```php
 use UnivaPay\Models\Builders\CancelCreateRequestBuilder;
 use UnivaPay\Models\Builders\GenericMetadataBuilder;
-use UnivaPay\ApiHelper;
 
 $cancelCreateRequest = CancelCreateRequestBuilder::init()
     ->metadata(
         GenericMetadataBuilder::init()
             ->orderId('ORD-987')
-            ->univapayName('univapay-name8')
-            ->univapayPhoneNumber('univapay-phone-number2')
-            ->additionalProperty('exampleAdditionalProperty', 'String4')
             ->build()
     )
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

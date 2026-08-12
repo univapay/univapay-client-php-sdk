@@ -23,14 +23,12 @@ Result payload returned by the customs declaration formatter.
 
 ```php
 use UnivaPay\Models\Builders\CustomsDeclarationWebhookResultBuilder;
-use UnivaPay\ApiHelper;
 
 $customsDeclarationWebhookResult = CustomsDeclarationWebhookResultBuilder::init()
     ->approvingAuthority('TOKYO')
     ->tradeId('wx_trade_12345')
     ->transactionId('wx_txn_12345')
     ->chargeTransactionId('wx_charge_12345')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

@@ -25,9 +25,6 @@ use UnivaPay\Models\Builders\GenericMetadataBuilder;
 
 $genericMetadata = GenericMetadataBuilder::init()
     ->orderId('12345')
-    ->univapayName('univapay-name4')
-    ->univapayPhoneNumber('univapay-phone-number8')
-    ->additionalProperty('exampleAdditionalProperty', 'String4')
     ->build();
 ```
 

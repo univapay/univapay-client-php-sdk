@@ -22,13 +22,11 @@ IP restriction policy applied after repeated failed charges.
 
 ```php
 use UnivaPay\Models\Builders\RestrictIpAfterFailedChargeConfigBuilder;
-use UnivaPay\ApiHelper;
 
 $restrictIpAfterFailedChargeConfig = RestrictIpAfterFailedChargeConfigBuilder::init()
     ->enabled(true)
     ->count(5)
     ->cooldown('PT1H')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

@@ -20,11 +20,9 @@ QR merchant payment settings.
 
 ```php
 use UnivaPay\Models\Builders\MerchantWebhookQrMerchantConfigurationBuilder;
-use UnivaPay\ApiHelper;
 
 $merchantWebhookQrMerchantConfiguration = MerchantWebhookQrMerchantConfigurationBuilder::init()
     ->enabled(false)
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

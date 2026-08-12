@@ -23,7 +23,6 @@ Recurring token configuration inherited by the merchant.
 ```php
 use UnivaPay\Models\Builders\MerchantWebhookRecurringTokenConfigurationBuilder;
 use UnivaPay\Models\Builders\MerchantWebhookRecurringCvvConfirmationConfigBuilder;
-use UnivaPay\ApiHelper;
 
 $merchantWebhookRecurringTokenConfiguration = MerchantWebhookRecurringTokenConfigurationBuilder::init()
     ->recurringType('infinite')
@@ -31,15 +30,8 @@ $merchantWebhookRecurringTokenConfiguration = MerchantWebhookRecurringTokenConfi
     ->cardChargeCvvConfirmation(
         MerchantWebhookRecurringCvvConfirmationConfigBuilder::init()
             ->enabled(false)
-            ->threshold(
-                [
-                    null
-                ]
-            )
-            ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
             ->build()
     )
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

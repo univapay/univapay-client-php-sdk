@@ -27,9 +27,6 @@ use UnivaPay\Models\Builders\TransactionTokenCreateRequestMetadataBuilder;
 $transactionTokenCreateRequestMetadata = TransactionTokenCreateRequestMetadataBuilder::init()
     ->univapayReferenceId('ref-998877')
     ->univapayCustomerId('0fd29949-07d5-4a91-8eaf-fbce0897d944')
-    ->univapayName('univapay-name2')
-    ->univapayPhoneNumber('univapay-phone-number6')
-    ->additionalProperty('exampleAdditionalProperty', 'String8')
     ->build();
 ```
 

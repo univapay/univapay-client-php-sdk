@@ -23,14 +23,12 @@ WeChat customs declaration payload returned by the backend formatter.
 
 ```php
 use UnivaPay\Models\Builders\CustomsDeclarationWebhookDeclarationBuilder;
-use UnivaPay\ApiHelper;
 
 $customsDeclarationWebhookDeclaration = CustomsDeclarationWebhookDeclarationBuilder::init()
     ->customs('TOKYO')
     ->merchantCustomsNo('1234567890')
     ->certificateId('AB1234567')
     ->certificateName('TARO YAMADA')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

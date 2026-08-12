@@ -20,11 +20,9 @@ Charge Create Request Client Metadata schema.
 
 ```php
 use UnivaPay\Models\Builders\ChargeCreateRequestClientMetadataBuilder;
-use UnivaPay\ApiHelper;
 
 $chargeCreateRequestClientMetadata = ChargeCreateRequestClientMetadataBuilder::init()
     ->ipAddress('198.51.100.14')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

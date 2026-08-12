@@ -21,13 +21,7 @@ Charge Create Request Three Ds schema.
 
 ```php
 use UnivaPay\Models\Builders\ChargeCreateRequestThreeDsBuilder;
-use UnivaPay\Models\ChargeCreateRequestThreeDsMode;
-use UnivaPay\ApiHelper;
 
-$chargeCreateRequestThreeDs = ChargeCreateRequestThreeDsBuilder::init()
-    ->redirectEndpoint('redirect_endpoint8')
-    ->mode(ChargeCreateRequestThreeDsMode::NORMAL)
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
-    ->build();
+$chargeCreateRequestThreeDs = ChargeCreateRequestThreeDsBuilder::init()->build();
 ```
 

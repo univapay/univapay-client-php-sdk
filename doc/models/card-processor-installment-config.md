@@ -21,12 +21,10 @@ Card-processor capabilities available for installment payments.
 
 ```php
 use UnivaPay\Models\Builders\CardProcessorInstallmentConfigBuilder;
-use UnivaPay\ApiHelper;
 
 $cardProcessorInstallmentConfig = CardProcessorInstallmentConfigBuilder::init()
     ->revolving(true)
     ->fixedCycle(true)
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

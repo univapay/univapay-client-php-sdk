@@ -21,19 +21,9 @@ CVV confirmation rules for recurring token charges.
 
 ```php
 use UnivaPay\Models\Builders\MerchantWebhookRecurringCvvConfirmationConfigBuilder;
-use UnivaPay\Models\Builders\MerchantWebhookMoneyAmountBuilder;
-use UnivaPay\ApiHelper;
 
 $merchantWebhookRecurringCvvConfirmationConfig = MerchantWebhookRecurringCvvConfirmationConfigBuilder::init()
     ->enabled(false)
-    ->threshold(
-        [
-            null,
-            MerchantWebhookMoneyAmountBuilder::init()->build(),
-            MerchantWebhookMoneyAmountBuilder::init()->build()
-        ]
-    )
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

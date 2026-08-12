@@ -28,7 +28,6 @@ Token Response Bank Transfer Data schema.
 
 ```php
 use UnivaPay\Models\Builders\TokenResponseBankTransferDataBuilder;
-use UnivaPay\ApiHelper;
 
 $tokenResponseBankTransferData = TokenResponseBankTransferDataBuilder::init()
     ->brand('aozora_bank')
@@ -40,7 +39,6 @@ $tokenResponseBankTransferData = TokenResponseBankTransferDataBuilder::init()
     ->branchName('Test Branch')
     ->accountNumber('1234567')
     ->accountHolderName('TARO YAMADA')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

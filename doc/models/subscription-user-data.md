@@ -25,15 +25,7 @@ Customer-facing payment method summary data.
 
 ```php
 use UnivaPay\Models\Builders\SubscriptionUserDataBuilder;
-use UnivaPay\ApiHelper;
 
-$subscriptionUserData = SubscriptionUserDataBuilder::init()
-    ->type('type8')
-    ->cardholderName('cardholder_name2')
-    ->email('email4')
-    ->brand('brand6')
-    ->gateway('gateway2')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
-    ->build();
+$subscriptionUserData = SubscriptionUserDataBuilder::init()->build();
 ```
 

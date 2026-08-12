@@ -22,13 +22,11 @@ Refund-limiting configuration based on sales history.
 
 ```php
 use UnivaPay\Models\Builders\MerchantWebhookLimitRefundBySalesConfigurationBuilder;
-use UnivaPay\ApiHelper;
 
 $merchantWebhookLimitRefundBySalesConfiguration = MerchantWebhookLimitRefundBySalesConfigurationBuilder::init()
     ->enabled(true)
     ->period('monthly')
     ->rollingWindow(true)
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

@@ -20,11 +20,7 @@ Charge Create Request Redirect schema.
 
 ```php
 use UnivaPay\Models\Builders\ChargeCreateRequestRedirectBuilder;
-use UnivaPay\ApiHelper;
 
-$chargeCreateRequestRedirect = ChargeCreateRequestRedirectBuilder::init()
-    ->endpoint('endpoint8')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
-    ->build();
+$chargeCreateRequestRedirect = ChargeCreateRequestRedirectBuilder::init()->build();
 ```
 

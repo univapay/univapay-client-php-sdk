@@ -21,12 +21,10 @@ Transaction Token Update Request Data Phone Number schema.
 
 ```php
 use UnivaPay\Models\Builders\TransactionTokenUpdateRequestDataPhoneNumberBuilder;
-use UnivaPay\ApiHelper;
 
 $transactionTokenUpdateRequestDataPhoneNumber = TransactionTokenUpdateRequestDataPhoneNumberBuilder::init()
     ->countryCode('81')
     ->localNumber('08012341234')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

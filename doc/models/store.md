@@ -26,7 +26,6 @@ use UnivaPay\Models\Builders\StoreBuilder;
 use UnivaPay\Utils\DateTimeHelper;
 use UnivaPay\Models\Builders\MerchantWebhookConfigurationBuilder;
 use UnivaPay\Models\Builders\MerchantWebhookMoneyAmountBuilder;
-use UnivaPay\ApiHelper;
 use UnivaPay\Models\Builders\MerchantWebhookUserTransactionsConfigurationBuilder;
 use UnivaPay\Models\Builders\MerchantWebhookCardConfigurationBuilder;
 use UnivaPay\Models\Builders\MerchantWebhookOnlineConfigurationBuilder;
@@ -39,12 +38,6 @@ $store = StoreBuilder::init()
     ->configuration(
         MerchantWebhookConfigurationBuilder::init()
             ->percentFee(3.6)
-            ->flatFees(
-                [
-                    null
-                ]
-            )
-            ->logoUrl('logo_url4')
             ->country('JP')
             ->language('ja')
             ->minimumChargeAmounts(
@@ -90,10 +83,8 @@ $store = StoreBuilder::init()
                     ->expiration('P7D')
                     ->build()
             )
-            ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
             ->build()
     )
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

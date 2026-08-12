@@ -21,12 +21,10 @@ Convenience-store payment settings.
 
 ```php
 use UnivaPay\Models\Builders\MerchantWebhookConvenienceConfigurationBuilder;
-use UnivaPay\ApiHelper;
 
 $merchantWebhookConvenienceConfiguration = MerchantWebhookConvenienceConfigurationBuilder::init()
     ->enabled(true)
     ->expiration('P3D')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

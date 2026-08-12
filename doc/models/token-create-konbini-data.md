@@ -26,7 +26,6 @@ Token Create Konbini Data schema.
 use UnivaPay\Models\Builders\TokenCreateKonbiniDataBuilder;
 use UnivaPay\Models\BaseKonbiniDataConvenienceStore;
 use UnivaPay\Models\Builders\TokenCreatePhoneNumberBuilder;
-use UnivaPay\ApiHelper;
 
 $tokenCreateKonbiniData = TokenCreateKonbiniDataBuilder::init(
     'Taro Yamada',
@@ -34,13 +33,10 @@ $tokenCreateKonbiniData = TokenCreateKonbiniDataBuilder::init(
     TokenCreatePhoneNumberBuilder::init(
         '81',
         '08012341234'
-    )
-        ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
-        ->build()
+    )->build()
 )
     ->expirationPeriod('P7D')
     ->expirationTimeShift('23:59:59+09:00')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

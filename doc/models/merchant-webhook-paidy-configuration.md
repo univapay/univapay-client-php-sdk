@@ -20,11 +20,9 @@ Paidy payment settings.
 
 ```php
 use UnivaPay\Models\Builders\MerchantWebhookPaidyConfigurationBuilder;
-use UnivaPay\ApiHelper;
 
 $merchantWebhookPaidyConfiguration = MerchantWebhookPaidyConfigurationBuilder::init()
     ->enabled(false)
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

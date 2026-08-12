@@ -21,12 +21,7 @@ Token Create Card Data Three Ds schema.
 
 ```php
 use UnivaPay\Models\Builders\TokenCreateCardDataThreeDsBuilder;
-use UnivaPay\ApiHelper;
 
-$tokenCreateCardDataThreeDs = TokenCreateCardDataThreeDsBuilder::init()
-    ->enabled(false)
-    ->redirectEndpoint('redirect_endpoint0')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
-    ->build();
+$tokenCreateCardDataThreeDs = TokenCreateCardDataThreeDsBuilder::init()->build();
 ```
 

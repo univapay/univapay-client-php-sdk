@@ -30,7 +30,6 @@ Token Response Card Data Card schema.
 
 ```php
 use UnivaPay\Models\Builders\TokenResponseCardDataCardBuilder;
-use UnivaPay\ApiHelper;
 
 $tokenResponseCardDataCard = TokenResponseCardDataCardBuilder::init()
     ->cardholder('TARO YAMADA')
@@ -44,7 +43,6 @@ $tokenResponseCardDataCard = TokenResponseCardDataCardBuilder::init()
     ->category('standard')
     ->issuer(null)
     ->subBrand('none')
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

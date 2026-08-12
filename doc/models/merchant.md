@@ -30,7 +30,6 @@ Merchant resource returned by the backend `FullMerchantWithGroupRoles` formatter
 use UnivaPay\Models\Builders\MerchantBuilder;
 use UnivaPay\Models\Builders\MerchantWebhookConfigurationBuilder;
 use UnivaPay\Models\Builders\MerchantWebhookMoneyAmountBuilder;
-use UnivaPay\ApiHelper;
 use UnivaPay\Models\Builders\MerchantWebhookUserTransactionsConfigurationBuilder;
 use UnivaPay\Models\Builders\MerchantWebhookCardConfigurationBuilder;
 use UnivaPay\Models\Builders\MerchantWebhookOnlineConfigurationBuilder;
@@ -96,7 +95,6 @@ $merchant = MerchantBuilder::init()
             ->build()
     )
     ->createdOn(DateTimeHelper::fromRfc3339DateTime('2026-04-09T07:35:50.000000Z'))
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

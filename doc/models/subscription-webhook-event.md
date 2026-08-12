@@ -28,7 +28,6 @@ use UnivaPay\Utils\DateTimeHelper;
 use UnivaPay\Models\Builders\SubscriptionBuilder;
 use UnivaPay\Models\Builders\SubscriptionScheduleSettingsBuilder;
 use UnivaPay\Models\SubscriptionTerminationMode;
-use UnivaPay\ApiHelper;
 use UnivaPay\Models\SubscriptionStatus;
 use UnivaPay\Models\Builders\GenericMetadataBuilder;
 use UnivaPay\Models\ChargeMode;
@@ -67,10 +66,8 @@ $subscriptionWebhookEvent = SubscriptionWebhookEventBuilder::init(
             ->mode(ChargeMode::TEST)
             ->createdOn(DateTimeHelper::fromRfc3339DateTime('2024-06-26T01:51:28.627023Z'))
             ->period(SubscriptionPeriod::MONTHLY)
-            ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
             ->build()
     )
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

@@ -29,7 +29,6 @@ use UnivaPay\Models\Builders\TransactionTokenBuilder;
 use UnivaPay\Models\TransactionTokenPaymentType;
 use UnivaPay\Models\TransactionTokenMode;
 use UnivaPay\Models\TransactionTokenType;
-use UnivaPay\ApiHelper;
 
 $tokenWebhookEvent = TokenWebhookEventBuilder::init(
     '11ef0000-0000-4000-8000-000000000001',
@@ -48,15 +47,13 @@ $tokenWebhookEvent = TokenWebhookEventBuilder::init(
             ->confirmed(true)
             ->metadata(
                 [
-                    'customer_id' => 
+                    'customer_id' => 'cust_12345'
                 ]
             )
             ->createdOn(DateTimeHelper::fromRfc3339DateTime('2026-04-09T07:35:50.000000Z'))
             ->updatedOn(DateTimeHelper::fromRfc3339DateTime('2026-04-09T07:35:50.000000Z'))
-            ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
             ->build()
     )
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

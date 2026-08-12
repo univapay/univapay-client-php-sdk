@@ -27,7 +27,6 @@ use UnivaPay\Utils\DateTimeHelper;
 use UnivaPay\Models\CustomsDeclarationEvent;
 use UnivaPay\Models\Builders\CustomsDeclarationWebhookDataBuilder;
 use UnivaPay\Models\Builders\CustomsDeclarationWebhookDeclarationBuilder;
-use UnivaPay\ApiHelper;
 use UnivaPay\Models\Builders\CustomsDeclarationWebhookResultBuilder;
 use UnivaPay\Models\CustomsDeclarationWebhookStatus;
 
@@ -42,7 +41,6 @@ $customsDeclarationWebhookCallback = CustomsDeclarationWebhookCallbackBuilder::i
             ->chargeId('11ef0000-0000-4000-8000-000000000001')
             ->merchantId('11ef0000-0000-4000-8000-000000000020')
             ->storeId('11ef0000-0000-4000-8000-000000000022')
-            ->platformId('00000550-0000-0000-0000-000000000000')
             ->mode('test')
             ->gateway('wechat_online')
             ->declaration(
@@ -63,10 +61,8 @@ $customsDeclarationWebhookCallback = CustomsDeclarationWebhookCallbackBuilder::i
             )
             ->status(CustomsDeclarationWebhookStatus::SUCCESSFUL)
             ->createdOn(DateTimeHelper::fromRfc3339DateTime('2026-04-09T07:35:50.000000Z'))
-            ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
             ->build()
     )
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

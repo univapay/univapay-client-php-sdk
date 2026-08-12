@@ -25,7 +25,6 @@ Request body for creating a refund against a successful charge. Konbini and bank
 ```php
 use UnivaPay\Models\Builders\RefundCreateRequestBuilder;
 use UnivaPay\Models\RefundReasonRequest;
-use UnivaPay\ApiHelper;
 
 $refundCreateRequest = RefundCreateRequestBuilder::init(
     1000,
@@ -33,10 +32,6 @@ $refundCreateRequest = RefundCreateRequestBuilder::init(
 )
     ->reason(RefundReasonRequest::CUSTOMER_REQUEST)
     ->message('Customer returned item')
-    ->metadata(
-        null
-    )
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

@@ -24,7 +24,6 @@ Error payload returned when customs declaration processing fails.
 ```php
 use UnivaPay\Models\Builders\CustomsDeclarationWebhookErrorBuilder;
 use UnivaPay\Models\Builders\CustomsDeclarationWebhookOtherErrorBuilder;
-use UnivaPay\ApiHelper;
 
 $customsDeclarationWebhookError = CustomsDeclarationWebhookErrorBuilder::init()
     ->code(601)
@@ -34,20 +33,10 @@ $customsDeclarationWebhookError = CustomsDeclarationWebhookErrorBuilder::init()
         [
             CustomsDeclarationWebhookOtherErrorBuilder::init()
                 ->type('related_item')
-                ->credentialsId('000013b6-0000-0000-0000-000000000000')
-                ->message(
-                    [
-                        'message4',
-                        'message5',
-                        'message6'
-                    ]
-                )
                 ->itemName('charge')
-                ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
                 ->build()
         ]
     )
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

@@ -20,11 +20,9 @@ Online payment settings.
 
 ```php
 use UnivaPay\Models\Builders\MerchantWebhookOnlineConfigurationBuilder;
-use UnivaPay\ApiHelper;
 
 $merchantWebhookOnlineConfiguration = MerchantWebhookOnlineConfigurationBuilder::init()
     ->enabled(true)
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

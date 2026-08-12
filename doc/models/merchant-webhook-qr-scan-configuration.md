@@ -21,7 +21,6 @@ QR scan payment settings.
 
 ```php
 use UnivaPay\Models\Builders\MerchantWebhookQrScanConfigurationBuilder;
-use UnivaPay\ApiHelper;
 
 $merchantWebhookQrScanConfiguration = MerchantWebhookQrScanConfigurationBuilder::init()
     ->enabled(true)
@@ -30,7 +29,6 @@ $merchantWebhookQrScanConfiguration = MerchantWebhookQrScanConfigurationBuilder:
             'wechat'
         ]
     )
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 

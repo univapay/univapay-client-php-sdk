@@ -23,21 +23,14 @@ Request body for updating a refund. All fields are optional. Omitted fields are 
 ```php
 use UnivaPay\Models\Builders\RefundUpdateRequestBuilder;
 use UnivaPay\Models\Builders\GenericMetadataBuilder;
-use UnivaPay\Models\RefundReasonRequest;
-use UnivaPay\ApiHelper;
 
 $refundUpdateRequest = RefundUpdateRequestBuilder::init()
     ->metadata(
         GenericMetadataBuilder::init()
             ->orderId('12345')
-            ->univapayName('univapay-name8')
-            ->univapayPhoneNumber('univapay-phone-number2')
-            ->additionalProperty('exampleAdditionalProperty', 'String4')
             ->build()
     )
     ->message('Updated reason note')
-    ->reason(RefundReasonRequest::DUPLICATE)
-    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```
 
