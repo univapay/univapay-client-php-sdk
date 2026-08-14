@@ -116,6 +116,12 @@ class UnivapayClientSdkClientBuilder
         return $this;
     }
 
+    public function directDebitBaseUrl(string $directDebitBaseUrl): self
+    {
+        $this->config['directDebitBaseUrl'] = $directDebitBaseUrl;
+        return $this;
+    }
+
     public function bearerAuthCredentials(BearerAuthCredentialsBuilder $bearerAuth): self
     {
         $this->config = array_merge($this->config, $bearerAuth->getConfiguration());

@@ -6,6 +6,7 @@ The following parameters are configurable for the API Client:
 | Parameter | Type | Description |
 |  --- | --- | --- |
 | baseUrl | `string` | Base URL for the API<br>*Default*: `'https://api.univapay.com'` |
+| directDebitBaseUrl | `string` | Base URL for the Direct Debit API<br>*Default*: `'https://direct-debit.gopay-services.com'` |
 | environment | [`Environment`](../README.md#environments) | The API environment. <br> **Default: `Environment.PRODUCTION`** |
 | timeout | `int` | Timeout for API calls in seconds.<br>*Default*: `30` |
 | enableRetries | `bool` | Whether to enable retries and backoff feature.<br>*Default*: `false` |
@@ -39,6 +40,7 @@ $client = UnivapayClientSdkClientBuilder::init()
     )
     ->environment(Environment::PRODUCTION)
     ->baseUrl('https://api.univapay.com')
+    ->directDebitBaseUrl('https://direct-debit.gopay-services.com')
     ->loggingConfiguration(
         LoggingConfigurationBuilder::init()
             ->level(LogLevel::INFO)
@@ -64,4 +66,5 @@ The gateway for the SDK. This class acts as a factory for the Apis and also hold
 | getMerchantsApi() | Gets MerchantsApi |
 | getStoresApi() | Gets StoresApi |
 | getWebhooksApi() | Gets WebhooksApi |
+| getDirectDebitApi() | Gets DirectDebitApi |
 

@@ -13,6 +13,10 @@ namespace UnivaPay\Models;
 use stdClass;
 use UnivaPay\ApiHelper;
 
+/**
+ * Request payload for creating a transaction token, which represents a payment method to charge
+ * against.
+ */
 class TransactionTokenCreateRequest implements \JsonSerializable
 {
     /**

@@ -18,842 +18,42 @@ use Core\Response\Types\ErrorType;
 use CoreInterfaces\Core\Request\RequestMethod;
 use UnivaPay\Exceptions\ApiErrorException;
 use UnivaPay\Http\ApiResponse;
-use UnivaPay\Models\BankTransferLedgerList;
-use UnivaPay\Models\Charge;
-use UnivaPay\Models\ChargeCaptureRequest;
-use UnivaPay\Models\ChargeCreateRequest;
-use UnivaPay\Models\ChargeList;
-use UnivaPay\Models\ChargeUpdateRequest;
 use UnivaPay\Models\CursorDirectionQuery;
-use UnivaPay\Models\CustomsDeclarationCreateRequest;
-use UnivaPay\Models\CustomsDeclarationPatchRequest;
-use UnivaPay\Models\CustomsDeclarationWebhookData;
-use UnivaPay\Models\IssuerToken;
-use UnivaPay\Models\ModeQuery;
-use UnivaPay\Models\ThreeDsIssuerToken;
-use UnivaPay\Models\ChargeStatus;
+use UnivaPay\Models\DirectDebitBankAccount;
+use UnivaPay\Models\DirectDebitBankAccountCreateRequest;
+use UnivaPay\Models\DirectDebitBankAccountList;
+use UnivaPay\Models\DirectDebitBankAccountStatus;
+use UnivaPay\Models\DirectDebitBankAccountType;
+use UnivaPay\Models\DirectDebitBankAccountUpdateRequest;
+use UnivaPay\Models\DirectDebitBankTransfer;
+use UnivaPay\Models\DirectDebitBankTransferCreateRequest;
+use UnivaPay\Models\DirectDebitBankTransferList;
+use UnivaPay\Models\DirectDebitBankTransferLock;
+use UnivaPay\Models\DirectDebitBankTransferPatchRequest;
+use UnivaPay\Models\DirectDebitBankTransferStatus;
+use UnivaPay\Models\DirectDebitDebitDate;
+use UnivaPay\Models\DirectDebitMerchantConfiguration;
+use UnivaPay\Models\DirectDebitNotificationConfiguration;
+use UnivaPay\Models\DirectDebitRegistrationOrigin;
+use UnivaPay\Models\DirectDebitSchedule;
+use UnivaPay\Server;
 
-class ChargesApi extends BaseApi
+class DirectDebitApi extends BaseApi
 {
     /**
-     * Creates a charge on a payment instrument (e.g. transaction token).
+     * Retrieves the merchant's direct debit configuration — whether direct debit is enabled and which
+     * monthly debit cycle applies.
      *
-     * @param string|null $idempotencyKey An optional idempotency key to prevent double charges and
-     *        duplicate operations. We recommend a randomly generated UUID (v4).
-     * @param ChargeCreateRequest|null $body Request payload for creating a charge.
+     * @param string $merchantId The unique identifier of the merchant.
      *
      * @return ApiResponse Response from the API call
      */
-    public function createCharge(?string $idempotencyKey = null, ?ChargeCreateRequest $body = null): ApiResponse
+    public function getDirectDebitConfiguration(string $merchantId): ApiResponse
     {
-        $_reqBuilder = $this->requestBuilder(RequestMethod::POST, '/charges')
+        $_reqBuilder = $this->requestBuilder(RequestMethod::GET, '/merchants/{merchantId}/configuration')
+            ->server(Server::DIRECTDEBIT)
             ->auth('JWT_TOKEN')
-            ->parameters(
-                HeaderParam::init('Content-Type', 'application/json'),
-                HeaderParam::init('Idempotency-Key', $idempotencyKey),
-                BodyParam::init($body)
-            );
-
-        $_resHandler = $this->responseHandler()
-            ->throwErrorOn(
-                '400',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 400 Bad Request: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '401',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 401 Unauthorized: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '403',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 403 Forbidden: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '429',
-                ErrorType::initWithErrorTemplate('HTTP 429 Rate Limited: {$response.body#/code}')
-            )
-            ->throwErrorOn('404', ErrorType::initWithErrorTemplate('HTTP 404 Not Found: {$response.body#/code}'))
-            ->throwErrorOn('409', ErrorType::initWithErrorTemplate('HTTP 409 Conflict: {$response.body#/code}'))
-            ->throwErrorOn(
-                '500',
-                ErrorType::initWithErrorTemplate('HTTP 500 Server Error: {$response.body#/code}')
-            )
-            ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
-            ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
-            ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
-            ->type(Charge::class)
-            ->returnApiResponse();
-
-        return $this->execute($_reqBuilder, $_resHandler);
-    }
-
-    /**
-     * Lists all charges across all stores for the authenticated user.
-     *
-     * @param int|null $limit Maximum number of resources to return in one page.
-     * @param string|null $cursor Cursor pointing to the resource after which pagination should
-     *        continue.
-     * @param string|null $cursorDirection Pagination direction relative to the supplied cursor.
-     * @param string|null $lastFour Filter by the last 4 digits of the card. **Note:** If specified,
-     *        `name`, `exp_month`, and `exp_year` must also be included.
-     * @param string|null $name Filter by cardholder name. **Note:** If specified, `last_four`,
-     *        `exp_month`, and `exp_year` must also be included.
-     * @param int|null $expMonth Filter by expiration month. **Note:** If specified, `last_four`,
-     *        `name`, and `exp_year` must also be included.
-     * @param int|null $expYear Filter by expiration year. **Note:** If specified, `last_four`,
-     *        `name`, and `exp_month` must also be included.
-     * @param string|null $from Show charges created on or after this date (ISO-8601).
-     * @param string|null $to Show charges created before this date (ISO-8601).
-     * @param string|null $email Filter by email address.
-     * @param string|null $phone Filter by phone number.
-     * @param int|null $amountFrom Show charges with an amount greater than or equal to this value.
-     * @param int|null $amountTo Show charges with an amount strictly less than this value.
-     * @param string|null $currency Filter by currency (ISO-4217).
-     * @param string|null $mode Filter by environment mode.
-     * @param string|null $metadata Filter by metadata.
-     * @param string|null $transactionTokenId Filter by transaction token ID.
-     *
-     * @return ApiResponse Response from the API call
-     */
-    public function listAllCharges(
-        ?int $limit = 10,
-        ?string $cursor = null,
-        ?string $cursorDirection = CursorDirectionQuery::DESC,
-        ?string $lastFour = null,
-        ?string $name = null,
-        ?int $expMonth = null,
-        ?int $expYear = null,
-        ?string $from = null,
-        ?string $to = null,
-        ?string $email = null,
-        ?string $phone = null,
-        ?int $amountFrom = null,
-        ?int $amountTo = null,
-        ?string $currency = null,
-        ?string $mode = null,
-        ?string $metadata = null,
-        ?string $transactionTokenId = null
-    ): ApiResponse {
-        $_reqBuilder = $this->requestBuilder(RequestMethod::GET, '/charges')
-            ->auth('JWT_TOKEN')
-            ->parameters(
-                QueryParam::init('limit', $limit)->unIndexed(),
-                QueryParam::init('cursor', $cursor)->unIndexed(),
-                QueryParam::init('cursor_direction', $cursorDirection)
-                    ->unIndexed()
-                    ->serializeBy([CursorDirectionQuery::class, 'checkValue']),
-                QueryParam::init('last_four', $lastFour)->unIndexed(),
-                QueryParam::init('name', $name)->unIndexed(),
-                QueryParam::init('exp_month', $expMonth)->unIndexed(),
-                QueryParam::init('exp_year', $expYear)->unIndexed(),
-                QueryParam::init('from', $from)->unIndexed(),
-                QueryParam::init('to', $to)->unIndexed(),
-                QueryParam::init('email', $email)->unIndexed(),
-                QueryParam::init('phone', $phone)->unIndexed(),
-                QueryParam::init('amount_from', $amountFrom)->unIndexed(),
-                QueryParam::init('amount_to', $amountTo)->unIndexed(),
-                QueryParam::init('currency', $currency)->unIndexed(),
-                QueryParam::init('mode', $mode)->unIndexed()->serializeBy([ModeQuery::class, 'checkValue']),
-                QueryParam::init('metadata', $metadata)->unIndexed(),
-                QueryParam::init('transaction_token_id', $transactionTokenId)->unIndexed()
-            );
-
-        $_resHandler = $this->responseHandler()
-            ->throwErrorOn(
-                '400',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 400 Bad Request: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '401',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 401 Unauthorized: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '403',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 403 Forbidden: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '429',
-                ErrorType::initWithErrorTemplate('HTTP 429 Rate Limited: {$response.body#/code}')
-            )
-            ->throwErrorOn('404', ErrorType::initWithErrorTemplate('HTTP 404 Not Found: {$response.body#/code}'))
-            ->throwErrorOn('409', ErrorType::initWithErrorTemplate('HTTP 409 Conflict: {$response.body#/code}'))
-            ->throwErrorOn(
-                '500',
-                ErrorType::initWithErrorTemplate('HTTP 500 Server Error: {$response.body#/code}')
-            )
-            ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
-            ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
-            ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
-            ->type(ChargeList::class)
-            ->returnApiResponse();
-
-        return $this->execute($_reqBuilder, $_resHandler);
-    }
-
-    /**
-     * Lists all charges for a specific store.
-     *
-     * @param string $storeId The unique identifier of the store.
-     * @param int|null $limit Maximum number of resources to return in one page.
-     * @param string|null $cursor Cursor pointing to the resource after which pagination should
-     *        continue.
-     * @param string|null $cursorDirection Pagination direction relative to the supplied cursor.
-     * @param string|null $lastFour Filter by the last 4 digits of the card. **Note:** If specified,
-     *        `name`, `exp_month`, and `exp_year` must also be included.
-     * @param string|null $name Filter by cardholder name. **Note:** If specified, `last_four`,
-     *        `exp_month`, and `exp_year` must also be included.
-     * @param int|null $expMonth Filter by expiration month. **Note:** If specified, `last_four`,
-     *        `name`, and `exp_year` must also be included.
-     * @param int|null $expYear Filter by expiration year. **Note:** If specified, `last_four`,
-     *        `name`, and `exp_month` must also be included.
-     * @param string|null $from Show charges created on or after this date (ISO-8601).
-     * @param string|null $to Show charges created before this date (ISO-8601).
-     * @param string|null $email Filter by email address.
-     * @param string|null $phone Filter by phone number.
-     * @param int|null $amountFrom Show charges with an amount greater than or equal to this value.
-     * @param int|null $amountTo Show charges with an amount strictly less than this value.
-     * @param string|null $currency Filter by currency (ISO-4217).
-     * @param string|null $mode Filter by environment mode.
-     * @param string|null $metadata Filter by metadata.
-     * @param string|null $transactionTokenId Filter by transaction token ID.
-     *
-     * @return ApiResponse Response from the API call
-     */
-    public function listStoreCharges(
-        string $storeId,
-        ?int $limit = 10,
-        ?string $cursor = null,
-        ?string $cursorDirection = CursorDirectionQuery::DESC,
-        ?string $lastFour = null,
-        ?string $name = null,
-        ?int $expMonth = null,
-        ?int $expYear = null,
-        ?string $from = null,
-        ?string $to = null,
-        ?string $email = null,
-        ?string $phone = null,
-        ?int $amountFrom = null,
-        ?int $amountTo = null,
-        ?string $currency = null,
-        ?string $mode = null,
-        ?string $metadata = null,
-        ?string $transactionTokenId = null
-    ): ApiResponse {
-        $_reqBuilder = $this->requestBuilder(RequestMethod::GET, '/stores/{storeId}/charges')
-            ->auth('JWT_TOKEN')
-            ->parameters(
-                TemplateParam::init('storeId', $storeId)->required(),
-                QueryParam::init('limit', $limit)->unIndexed(),
-                QueryParam::init('cursor', $cursor)->unIndexed(),
-                QueryParam::init('cursor_direction', $cursorDirection)
-                    ->unIndexed()
-                    ->serializeBy([CursorDirectionQuery::class, 'checkValue']),
-                QueryParam::init('last_four', $lastFour)->unIndexed(),
-                QueryParam::init('name', $name)->unIndexed(),
-                QueryParam::init('exp_month', $expMonth)->unIndexed(),
-                QueryParam::init('exp_year', $expYear)->unIndexed(),
-                QueryParam::init('from', $from)->unIndexed(),
-                QueryParam::init('to', $to)->unIndexed(),
-                QueryParam::init('email', $email)->unIndexed(),
-                QueryParam::init('phone', $phone)->unIndexed(),
-                QueryParam::init('amount_from', $amountFrom)->unIndexed(),
-                QueryParam::init('amount_to', $amountTo)->unIndexed(),
-                QueryParam::init('currency', $currency)->unIndexed(),
-                QueryParam::init('mode', $mode)->unIndexed()->serializeBy([ModeQuery::class, 'checkValue']),
-                QueryParam::init('metadata', $metadata)->unIndexed(),
-                QueryParam::init('transaction_token_id', $transactionTokenId)->unIndexed()
-            );
-
-        $_resHandler = $this->responseHandler()
-            ->throwErrorOn(
-                '400',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 400 Bad Request: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '401',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 401 Unauthorized: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '403',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 403 Forbidden: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '429',
-                ErrorType::initWithErrorTemplate('HTTP 429 Rate Limited: {$response.body#/code}')
-            )
-            ->throwErrorOn('404', ErrorType::initWithErrorTemplate('HTTP 404 Not Found: {$response.body#/code}'))
-            ->throwErrorOn('409', ErrorType::initWithErrorTemplate('HTTP 409 Conflict: {$response.body#/code}'))
-            ->throwErrorOn(
-                '500',
-                ErrorType::initWithErrorTemplate('HTTP 500 Server Error: {$response.body#/code}')
-            )
-            ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
-            ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
-            ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
-            ->type(ChargeList::class)
-            ->returnApiResponse();
-
-        return $this->execute($_reqBuilder, $_resHandler);
-    }
-
-    /**
-     * Retrieves the details of an existing charge.
-     *
-     * @param string $storeId The unique identifier of the store.
-     * @param string $id The unique identifier of the resource.
-     * @param bool|null $polling If set to true, instructs the API to internally poll the charge
-     *        status  until it changes from 'pending' (the initial status) to another status.
-     *
-     * @return ApiResponse Response from the API call
-     */
-    public function getCharge(string $storeId, string $id, ?bool $polling = null): ApiResponse
-    {
-        $_reqBuilder = $this->requestBuilder(RequestMethod::GET, '/stores/{storeId}/charges/{id}')
-            ->auth('JWT_TOKEN')
-            ->parameters(
-                TemplateParam::init('storeId', $storeId)->required(),
-                TemplateParam::init('id', $id)->required(),
-                QueryParam::init('polling', $polling)->unIndexed()
-            );
-
-        $_resHandler = $this->responseHandler()
-            ->throwErrorOn(
-                '400',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 400 Bad Request: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '401',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 401 Unauthorized: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '403',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 403 Forbidden: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '404',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 404 Not Found: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '429',
-                ErrorType::initWithErrorTemplate('HTTP 429 Rate Limited: {$response.body#/code}')
-            )
-            ->throwErrorOn('409', ErrorType::initWithErrorTemplate('HTTP 409 Conflict: {$response.body#/code}'))
-            ->throwErrorOn(
-                '500',
-                ErrorType::initWithErrorTemplate('HTTP 500 Server Error: {$response.body#/code}')
-            )
-            ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
-            ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
-            ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
-            ->type(Charge::class)
-            ->returnApiResponse();
-
-        return $this->execute($_reqBuilder, $_resHandler);
-    }
-
-    /**
-     * Use this request to add or modify arbitrary metadata on an existing charge.
-     *
-     * @param string $storeId The unique identifier of the store.
-     * @param string $id The unique identifier of the resource.
-     * @param string|null $idempotencyKey An optional idempotency key to prevent double charges and
-     *        duplicate operations. We recommend a randomly generated UUID (v4).
-     * @param ChargeUpdateRequest|null $body Request payload for updating charge metadata.
-     *
-     * @return ApiResponse Response from the API call
-     */
-    public function updateCharge(
-        string $storeId,
-        string $id,
-        ?string $idempotencyKey = null,
-        ?ChargeUpdateRequest $body = null
-    ): ApiResponse {
-        $_reqBuilder = $this->requestBuilder(RequestMethod::PATCH, '/stores/{storeId}/charges/{id}')
-            ->auth('JWT_TOKEN')
-            ->parameters(
-                TemplateParam::init('storeId', $storeId)->required(),
-                TemplateParam::init('id', $id)->required(),
-                HeaderParam::init('Content-Type', 'application/json'),
-                HeaderParam::init('Idempotency-Key', $idempotencyKey),
-                BodyParam::init($body)
-            );
-
-        $_resHandler = $this->responseHandler()
-            ->throwErrorOn(
-                '400',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 400 Bad Request: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '401',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 401 Unauthorized: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '403',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 403 Forbidden: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '404',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 404 Not Found: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '429',
-                ErrorType::initWithErrorTemplate('HTTP 429 Rate Limited: {$response.body#/code}')
-            )
-            ->throwErrorOn('409', ErrorType::initWithErrorTemplate('HTTP 409 Conflict: {$response.body#/code}'))
-            ->throwErrorOn(
-                '500',
-                ErrorType::initWithErrorTemplate('HTTP 500 Server Error: {$response.body#/code}')
-            )
-            ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
-            ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
-            ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
-            ->type(Charge::class)
-            ->returnApiResponse();
-
-        return $this->execute($_reqBuilder, $_resHandler);
-    }
-
-    /**
-     * Captures a previously authorized charge (where `capture` was set to false during creation).  The
-     * capture amount must be less than or equal to the authorized amount, and the currency must match.
-     *
-     * @param string $storeId The unique identifier of the store.
-     * @param string $id The unique identifier of the resource.
-     * @param ChargeCaptureRequest $body Request payload for capturing an authorized charge.
-     * @param string|null $idempotencyKey An optional idempotency key to prevent double charges and
-     *        duplicate operations. We recommend a randomly generated UUID (v4).
-     *
-     * @return ApiResponse Response from the API call
-     */
-    public function captureCharge(
-        string $storeId,
-        string $id,
-        ChargeCaptureRequest $body,
-        ?string $idempotencyKey = null
-    ): ApiResponse {
-        $_reqBuilder = $this->requestBuilder(RequestMethod::POST, '/stores/{storeId}/charges/{id}/capture')
-            ->auth('JWT_TOKEN')
-            ->parameters(
-                TemplateParam::init('storeId', $storeId)->required(),
-                TemplateParam::init('id', $id)->required(),
-                HeaderParam::init('Content-Type', 'application/json'),
-                BodyParam::init($body)->required(),
-                HeaderParam::init('Idempotency-Key', $idempotencyKey)
-            );
-
-        $_resHandler = $this->responseHandler()
-            ->throwErrorOn(
-                '400',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 400 Bad Request: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '401',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 401 Unauthorized: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '403',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 403 Forbidden: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '404',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 404 Not Found: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '429',
-                ErrorType::initWithErrorTemplate('HTTP 429 Rate Limited: {$response.body#/code}')
-            )
-            ->throwErrorOn('409', ErrorType::initWithErrorTemplate('HTTP 409 Conflict: {$response.body#/code}'))
-            ->throwErrorOn(
-                '500',
-                ErrorType::initWithErrorTemplate('HTTP 500 Server Error: {$response.body#/code}')
-            )
-            ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
-            ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
-            ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
-            ->returnApiResponse();
-
-        return $this->execute($_reqBuilder, $_resHandler);
-    }
-
-    /**
-     * Retrieves the necessary payment execution URL (for online payments) or bank account details (for
-     * bank transfers).
-     * **⚠️ Prerequisite:** The charge `status` must be `awaiting` before requesting the issuer token.  If
-     * requested while the charge is in any other status, an error will be returned.
-     *
-     * @param string $storeId The unique identifier of the store.
-     * @param string $id The unique identifier of the resource.
-     *
-     * @return ApiResponse Response from the API call
-     */
-    public function getChargeIssuerToken(string $storeId, string $id): ApiResponse
-    {
-        $_reqBuilder = $this->requestBuilder(RequestMethod::GET, '/stores/{storeId}/charges/{id}/issuer_token')
-            ->auth('JWT_TOKEN')
-            ->parameters(
-                TemplateParam::init('storeId', $storeId)->required(),
-                TemplateParam::init('id', $id)->required()
-            );
-
-        $_resHandler = $this->responseHandler()
-            ->throwErrorOn(
-                '400',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 400 Bad Request: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '401',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 401 Unauthorized: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '403',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 403 Forbidden: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '404',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 404 Not Found: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '429',
-                ErrorType::initWithErrorTemplate('HTTP 429 Rate Limited: {$response.body#/code}')
-            )
-            ->throwErrorOn('409', ErrorType::initWithErrorTemplate('HTTP 409 Conflict: {$response.body#/code}'))
-            ->throwErrorOn(
-                '500',
-                ErrorType::initWithErrorTemplate('HTTP 500 Server Error: {$response.body#/code}')
-            )
-            ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
-            ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
-            ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
-            ->type(IssuerToken::class)
-            ->returnApiResponse();
-
-        return $this->execute($_reqBuilder, $_resHandler);
-    }
-
-    /**
-     * Retrieves the 3-D Secure issuer token details required to authenticate a card charge.
-     * **⚠️ Prerequisites:** 1. The charge must be created with `three_ds.mode` set to `normal` or `force`.
-     * 2. You must poll the charge until its `status` becomes `awaiting` before making this request.
-     * **Execution Flow:** Once retrieved, the client (browser) must execute an `http_post` request to the
-     * `issuer_token` URL.  The `payload` object must be formatted according to the `content_type` (e.g.,
-     * URL-encoded) and sent in the body. You can execute this via a redirect or inside an iframe. If using
-     * an iframe, continue polling the charge status  in the background until it reaches `successful`,
-     * `failed`, or `error`.
-     *
-     * @param string $storeId The unique identifier of the store.
-     * @param string $id The unique identifier of the resource.
-     *
-     * @return ApiResponse Response from the API call
-     */
-    public function getChargeThreeDsIssuerToken(string $storeId, string $id): ApiResponse
-    {
-        $_reqBuilder = $this->requestBuilder(
-            RequestMethod::GET,
-            '/stores/{storeId}/charges/{id}/three_ds/issuer_token'
-        )
-            ->auth('JWT_TOKEN')
-            ->parameters(
-                TemplateParam::init('storeId', $storeId)->required(),
-                TemplateParam::init('id', $id)->required()
-            );
-
-        $_resHandler = $this->responseHandler()
-            ->throwErrorOn(
-                '400',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 400 Bad Request: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '401',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 401 Unauthorized: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '403',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 403 Forbidden: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '404',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 404 Not Found: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '429',
-                ErrorType::initWithErrorTemplate('HTTP 429 Rate Limited: {$response.body#/code}')
-            )
-            ->throwErrorOn('409', ErrorType::initWithErrorTemplate('HTTP 409 Conflict: {$response.body#/code}'))
-            ->throwErrorOn(
-                '500',
-                ErrorType::initWithErrorTemplate('HTTP 500 Server Error: {$response.body#/code}')
-            )
-            ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
-            ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
-            ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
-            ->type(ThreeDsIssuerToken::class)
-            ->returnApiResponse();
-
-        return $this->execute($_reqBuilder, $_resHandler);
-    }
-
-    /**
-     * Retrieves bank transfer ledger entries associated with a charge. This is an optional reconciliation
-     * endpoint — not part of the required create-charge-and-poll flow.
-     * **⚠️ Requires a merchant-level application token**, unlike the rest of the bank transfer flow. A
-     * store application token (`Bearer {secret}.{jwt}` scoped to a `store_id`) is not sufficient here,
-     * even though the path is store-scoped.
-     *
-     * @param string $storeId The unique identifier of the store.
-     * @param string $id The unique identifier of the resource.
-     *
-     * @return ApiResponse Response from the API call
-     */
-    public function listBankTransferLedgers(string $storeId, string $id): ApiResponse
-    {
-        $_reqBuilder = $this->requestBuilder(
-            RequestMethod::GET,
-            '/stores/{storeId}/charges/{id}/bank_transfer_ledgers'
-        )
-            ->auth('JWT_TOKEN')
-            ->parameters(
-                TemplateParam::init('storeId', $storeId)->required(),
-                TemplateParam::init('id', $id)->required()
-            );
-
-        $_resHandler = $this->responseHandler()
-            ->throwErrorOn(
-                '400',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 400 Bad Request: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '401',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 401 Unauthorized: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '403',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 403 Forbidden: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '404',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 404 Not Found: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '429',
-                ErrorType::initWithErrorTemplate('HTTP 429 Rate Limited: {$response.body#/code}')
-            )
-            ->throwErrorOn('409', ErrorType::initWithErrorTemplate('HTTP 409 Conflict: {$response.body#/code}'))
-            ->throwErrorOn(
-                '500',
-                ErrorType::initWithErrorTemplate('HTTP 500 Server Error: {$response.body#/code}')
-            )
-            ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
-            ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
-            ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
-            ->type(BankTransferLedgerList::class)
-            ->returnApiResponse();
-
-        return $this->execute($_reqBuilder, $_resHandler);
-    }
-
-    /**
-     * Creates a customs declaration for a successful charge. Backend only accepts this request for WeChat
-     * Online and WeChat MPM charges. If a declaration already exists and is no longer pending, the backend
-     * updates its identity fields and restarts processing instead of creating a new record.
-     *
-     * @param string $storeId The unique identifier of the store.
-     * @param string $chargeId The unique identifier of the charge.
-     * @param CustomsDeclarationCreateRequest $body Request payload for creating a customs
-     *        declaration.
-     * @param string|null $idempotencyKey An optional idempotency key to prevent double charges and
-     *        duplicate operations. We recommend a randomly generated UUID (v4).
-     *
-     * @return ApiResponse Response from the API call
-     */
-    public function createCustomsDeclaration(
-        string $storeId,
-        string $chargeId,
-        CustomsDeclarationCreateRequest $body,
-        ?string $idempotencyKey = null
-    ): ApiResponse {
-        $_reqBuilder = $this->requestBuilder(RequestMethod::POST, '/stores/{storeId}/charges/{chargeId}/customs')
-            ->auth('JWT_TOKEN')
-            ->parameters(
-                TemplateParam::init('storeId', $storeId)->required(),
-                TemplateParam::init('chargeId', $chargeId)->required(),
-                HeaderParam::init('Content-Type', 'application/json'),
-                BodyParam::init($body)->required(),
-                HeaderParam::init('Idempotency-Key', $idempotencyKey)
-            );
-
-        $_resHandler = $this->responseHandler()
-            ->throwErrorOn(
-                '400',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 400 Bad Request: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '401',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 401 Unauthorized: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '403',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 403 Forbidden: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '404',
-                ErrorType::initWithErrorTemplate(
-                    'HTTP 404 Not Found: {$response.body#/code}',
-                    ApiErrorException::class
-                )
-            )
-            ->throwErrorOn(
-                '429',
-                ErrorType::initWithErrorTemplate('HTTP 429 Rate Limited: {$response.body#/code}')
-            )
-            ->throwErrorOn('409', ErrorType::initWithErrorTemplate('HTTP 409 Conflict: {$response.body#/code}'))
-            ->throwErrorOn(
-                '500',
-                ErrorType::initWithErrorTemplate('HTTP 500 Server Error: {$response.body#/code}')
-            )
-            ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
-            ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
-            ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
-            ->type(CustomsDeclarationWebhookData::class)
-            ->returnApiResponse();
-
-        return $this->execute($_reqBuilder, $_resHandler);
-    }
-
-    /**
-     * Retrieves a customs declaration for a charge. Supports long polling when `polling=true`, returning
-     * once the declaration leaves its current state or the polling timeout is reached.
-     *
-     * @param string $storeId The unique identifier of the store.
-     * @param string $chargeId The unique identifier of the charge.
-     * @param string $id The unique identifier of the customs declaration.
-     * @param bool|null $polling Hold the request open while waiting for a status change.
-     *
-     * @return ApiResponse Response from the API call
-     */
-    public function getCustomsDeclaration(
-        string $storeId,
-        string $chargeId,
-        string $id,
-        ?bool $polling = false
-    ): ApiResponse {
-        $_reqBuilder = $this->requestBuilder(
-            RequestMethod::GET,
-            '/stores/{storeId}/charges/{chargeId}/customs/{id}'
-        )
-            ->auth('JWT_TOKEN')
-            ->parameters(
-                TemplateParam::init('storeId', $storeId)->required(),
-                TemplateParam::init('chargeId', $chargeId)->required(),
-                TemplateParam::init('id', $id)->required(),
-                QueryParam::init('polling', $polling)->unIndexed()
-            );
+            ->parameters(TemplateParam::init('merchantId', $merchantId)->required());
 
         $_resHandler = $this->responseHandler()
             ->throwErrorOn(
@@ -876,13 +76,71 @@ class ChargesApi extends BaseApi
                     'HTTP 404 Not Found: {$response.body#/code}',
                     ApiErrorException::class
                 )
+            )
+            ->throwErrorOn(
+                '429',
+                ErrorType::initWithErrorTemplate('HTTP 429 Rate Limited: {$response.body#/code}')
             )
             ->throwErrorOn('400', ErrorType::initWithErrorTemplate('HTTP 400 Bad Request: {$response.body#/code}'))
             ->throwErrorOn('409', ErrorType::initWithErrorTemplate('HTTP 409 Conflict: {$response.body#/code}'))
             ->throwErrorOn(
+                '500',
+                ErrorType::initWithErrorTemplate('HTTP 500 Server Error: {$response.body#/code}')
+            )
+            ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
+            ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
+            ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
+            ->type(DirectDebitMerchantConfiguration::class)
+            ->returnApiResponse();
+
+        return $this->execute($_reqBuilder, $_resHandler);
+    }
+
+    /**
+     * Retrieves which direct debit email notifications the merchant has opted into.
+     *
+     * @param string $merchantId The unique identifier of the merchant.
+     *
+     * @return ApiResponse Response from the API call
+     */
+    public function getDirectDebitNotificationConfiguration(string $merchantId): ApiResponse
+    {
+        $_reqBuilder = $this->requestBuilder(
+            RequestMethod::GET,
+            '/merchants/{merchantId}/notification-configuration'
+        )
+            ->server(Server::DIRECTDEBIT)
+            ->auth('JWT_TOKEN')
+            ->parameters(TemplateParam::init('merchantId', $merchantId)->required());
+
+        $_resHandler = $this->responseHandler()
+            ->throwErrorOn(
+                '401',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 401 Unauthorized: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '403',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 403 Forbidden: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '404',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 404 Not Found: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
                 '429',
                 ErrorType::initWithErrorTemplate('HTTP 429 Rate Limited: {$response.body#/code}')
             )
+            ->throwErrorOn('400', ErrorType::initWithErrorTemplate('HTTP 400 Bad Request: {$response.body#/code}'))
+            ->throwErrorOn('409', ErrorType::initWithErrorTemplate('HTTP 409 Conflict: {$response.body#/code}'))
             ->throwErrorOn(
                 '500',
                 ErrorType::initWithErrorTemplate('HTTP 500 Server Error: {$response.body#/code}')
@@ -890,43 +148,343 @@ class ChargesApi extends BaseApi
             ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
             ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
             ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
-            ->type(CustomsDeclarationWebhookData::class)
+            ->type(DirectDebitNotificationConfiguration::class)
             ->returnApiResponse();
 
         return $this->execute($_reqBuilder, $_resHandler);
     }
 
     /**
-     * Updates a customs declaration and requeues processing. Backend patching preserves the original
-     * `customs`, `certificate_id`, and `certificate_name` values and only accepts a new
-     * `merchant_customs_no`. Pending declarations cannot be patched.
+     * Retrieves the key dates for the debit cycle currently in progress, based on the merchant's
+     * configured cycle. Compare `merchant_bank_transfer_upload_deadline` against today to decide whether
+     * transfers can still be registered or edited this month.
      *
-     * @param string $storeId The unique identifier of the store.
-     * @param string $chargeId The unique identifier of the charge.
-     * @param string $id The unique identifier of the customs declaration.
-     * @param CustomsDeclarationPatchRequest $body Request payload for patching a customs
-     *        declaration.
+     * @param string $merchantId The unique identifier of the merchant.
+     *
+     * @return ApiResponse Response from the API call
+     */
+    public function getDirectDebitCurrentSchedule(string $merchantId): ApiResponse
+    {
+        $_reqBuilder = $this->requestBuilder(RequestMethod::GET, '/merchants/{merchantId}/schedules/current')
+            ->server(Server::DIRECTDEBIT)
+            ->auth('JWT_TOKEN')
+            ->parameters(TemplateParam::init('merchantId', $merchantId)->required());
+
+        $_resHandler = $this->responseHandler()
+            ->throwErrorOn(
+                '401',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 401 Unauthorized: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '403',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 403 Forbidden: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '404',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 404 Not Found: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '429',
+                ErrorType::initWithErrorTemplate('HTTP 429 Rate Limited: {$response.body#/code}')
+            )
+            ->throwErrorOn('400', ErrorType::initWithErrorTemplate('HTTP 400 Bad Request: {$response.body#/code}'))
+            ->throwErrorOn('409', ErrorType::initWithErrorTemplate('HTTP 409 Conflict: {$response.body#/code}'))
+            ->throwErrorOn(
+                '500',
+                ErrorType::initWithErrorTemplate('HTTP 500 Server Error: {$response.body#/code}')
+            )
+            ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
+            ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
+            ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
+            ->type(DirectDebitSchedule::class)
+            ->returnApiResponse();
+
+        return $this->execute($_reqBuilder, $_resHandler);
+    }
+
+    /**
+     * Lists the consumer bank accounts registered for direct debit under this merchant.
+     *
+     * @param string $merchantId The unique identifier of the merchant.
+     * @param int|null $limit Maximum number of resources to return in one page.
+     * @param string|null $cursor Cursor pointing to the resource after which pagination should
+     *        continue.
+     * @param string|null $cursorDirection Pagination direction relative to the supplied cursor.
+     * @param string|null $userNumber Filter by the merchant's own membership number for the
+     *        consumer (会員番号).
+     * @param string|null $bankAccountId Filter by a single bank account ID.
+     * @param string|null $bankCode Filter by the 4-digit bank code (銀行コード).
+     * @param string|null $bankName Filter by bank name in half-width katakana (銀行名).
+     * @param string|null $branchCode Filter by the 3-digit branch code (支店コード).
+     * @param string|null $bankAccountType Filter by deposit account type (預金種類).
+     * @param string|null $bankAccountNumber Filter by the 7-digit account number (口座番号).
+     * @param string|null $bankAccountName Filter by account holder name in half-width katakana
+     *        (口座名義).
+     * @param string|null $registrationOrigin Filter by where the bank account was registered from.
+     * @param string|null $bankAccountStatus Filter by bank account status. Omit to return every
+     *        status.
+     * @param string|null $from Show bank accounts created on or after this date (ISO-8601).
+     * @param string|null $to Show bank accounts created before this date (ISO-8601).
+     *
+     * @return ApiResponse Response from the API call
+     */
+    public function listDirectDebitBankAccounts(
+        string $merchantId,
+        ?int $limit = 10,
+        ?string $cursor = null,
+        ?string $cursorDirection = CursorDirectionQuery::DESC,
+        ?string $userNumber = null,
+        ?string $bankAccountId = null,
+        ?string $bankCode = null,
+        ?string $bankName = null,
+        ?string $branchCode = null,
+        ?string $bankAccountType = null,
+        ?string $bankAccountNumber = null,
+        ?string $bankAccountName = null,
+        ?string $registrationOrigin = null,
+        ?string $bankAccountStatus = null,
+        ?string $from = null,
+        ?string $to = null
+    ): ApiResponse {
+        $_reqBuilder = $this->requestBuilder(RequestMethod::GET, '/merchants/{merchantId}/bank-accounts')
+            ->server(Server::DIRECTDEBIT)
+            ->auth('JWT_TOKEN')
+            ->parameters(
+                TemplateParam::init('merchantId', $merchantId)->required(),
+                QueryParam::init('limit', $limit)->unIndexed(),
+                QueryParam::init('cursor', $cursor)->unIndexed(),
+                QueryParam::init('cursor_direction', $cursorDirection)
+                    ->unIndexed()
+                    ->serializeBy([CursorDirectionQuery::class, 'checkValue']),
+                QueryParam::init('user_number', $userNumber)->unIndexed(),
+                QueryParam::init('bank_account_id', $bankAccountId)->unIndexed(),
+                QueryParam::init('bank_code', $bankCode)->unIndexed(),
+                QueryParam::init('bank_name', $bankName)->unIndexed(),
+                QueryParam::init('branch_code', $branchCode)->unIndexed(),
+                QueryParam::init('bank_account_type', $bankAccountType)
+                    ->unIndexed()
+                    ->serializeBy([DirectDebitBankAccountType::class, 'checkValue']),
+                QueryParam::init('bank_account_number', $bankAccountNumber)->unIndexed(),
+                QueryParam::init('bank_account_name', $bankAccountName)->unIndexed(),
+                QueryParam::init('registration_origin', $registrationOrigin)
+                    ->unIndexed()
+                    ->serializeBy([DirectDebitRegistrationOrigin::class, 'checkValue']),
+                QueryParam::init('bank_account_status', $bankAccountStatus)
+                    ->unIndexed()
+                    ->serializeBy([DirectDebitBankAccountStatus::class, 'checkValue']),
+                QueryParam::init('from', $from)->unIndexed(),
+                QueryParam::init('to', $to)->unIndexed()
+            );
+
+        $_resHandler = $this->responseHandler()
+            ->throwErrorOn(
+                '400',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 400 Bad Request: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '401',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 401 Unauthorized: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '403',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 403 Forbidden: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '429',
+                ErrorType::initWithErrorTemplate('HTTP 429 Rate Limited: {$response.body#/code}')
+            )
+            ->throwErrorOn('404', ErrorType::initWithErrorTemplate('HTTP 404 Not Found: {$response.body#/code}'))
+            ->throwErrorOn('409', ErrorType::initWithErrorTemplate('HTTP 409 Conflict: {$response.body#/code}'))
+            ->throwErrorOn(
+                '500',
+                ErrorType::initWithErrorTemplate('HTTP 500 Server Error: {$response.body#/code}')
+            )
+            ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
+            ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
+            ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
+            ->type(DirectDebitBankAccountList::class)
+            ->returnApiResponse();
+
+        return $this->execute($_reqBuilder, $_resHandler);
+    }
+
+    /**
+     * Registers a consumer bank account for direct debit. The account is created and then verified against
+     * the bank, so it starts out unusable — poll its `status` until it becomes `active` (or
+     * `registration_failed`) before scheduling transfers against it.
+     *
+     * @param string $merchantId The unique identifier of the merchant.
+     * @param DirectDebitBankAccountCreateRequest $body Request payload for registering a consumer
+     *        bank account.
      * @param string|null $idempotencyKey An optional idempotency key to prevent double charges and
      *        duplicate operations. We recommend a randomly generated UUID (v4).
      *
      * @return ApiResponse Response from the API call
      */
-    public function patchCustomsDeclaration(
-        string $storeId,
-        string $chargeId,
-        string $id,
-        CustomsDeclarationPatchRequest $body,
+    public function createDirectDebitBankAccount(
+        string $merchantId,
+        DirectDebitBankAccountCreateRequest $body,
+        ?string $idempotencyKey = null
+    ): ApiResponse {
+        $_reqBuilder = $this->requestBuilder(RequestMethod::POST, '/merchants/{merchantId}/bank-accounts')
+            ->server(Server::DIRECTDEBIT)
+            ->auth('JWT_TOKEN')
+            ->parameters(
+                TemplateParam::init('merchantId', $merchantId)->required(),
+                HeaderParam::init('Content-Type', 'application/json'),
+                BodyParam::init($body)->required(),
+                HeaderParam::init('Idempotency-Key', $idempotencyKey)
+            );
+
+        $_resHandler = $this->responseHandler()
+            ->throwErrorOn(
+                '400',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 400 Bad Request: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '401',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 401 Unauthorized: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '403',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 403 Forbidden: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '429',
+                ErrorType::initWithErrorTemplate('HTTP 429 Rate Limited: {$response.body#/code}')
+            )
+            ->throwErrorOn('404', ErrorType::initWithErrorTemplate('HTTP 404 Not Found: {$response.body#/code}'))
+            ->throwErrorOn('409', ErrorType::initWithErrorTemplate('HTTP 409 Conflict: {$response.body#/code}'))
+            ->throwErrorOn(
+                '500',
+                ErrorType::initWithErrorTemplate('HTTP 500 Server Error: {$response.body#/code}')
+            )
+            ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
+            ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
+            ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
+            ->type(DirectDebitBankAccount::class)
+            ->returnApiResponse();
+
+        return $this->execute($_reqBuilder, $_resHandler);
+    }
+
+    /**
+     * Retrieves a single registered bank account, including its current verification status.
+     *
+     * @param string $merchantId The unique identifier of the merchant.
+     * @param string $bankAccountId The unique identifier of the direct debit bank account.
+     *
+     * @return ApiResponse Response from the API call
+     */
+    public function getDirectDebitBankAccount(string $merchantId, string $bankAccountId): ApiResponse
+    {
+        $_reqBuilder = $this->requestBuilder(
+            RequestMethod::GET,
+            '/merchants/{merchantId}/bank-accounts/{bankAccountId}'
+        )
+            ->server(Server::DIRECTDEBIT)
+            ->auth('JWT_TOKEN')
+            ->parameters(
+                TemplateParam::init('merchantId', $merchantId)->required(),
+                TemplateParam::init('bankAccountId', $bankAccountId)->required()
+            );
+
+        $_resHandler = $this->responseHandler()
+            ->throwErrorOn(
+                '401',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 401 Unauthorized: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '403',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 403 Forbidden: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '404',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 404 Not Found: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '429',
+                ErrorType::initWithErrorTemplate('HTTP 429 Rate Limited: {$response.body#/code}')
+            )
+            ->throwErrorOn('400', ErrorType::initWithErrorTemplate('HTTP 400 Bad Request: {$response.body#/code}'))
+            ->throwErrorOn('409', ErrorType::initWithErrorTemplate('HTTP 409 Conflict: {$response.body#/code}'))
+            ->throwErrorOn(
+                '500',
+                ErrorType::initWithErrorTemplate('HTTP 500 Server Error: {$response.body#/code}')
+            )
+            ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
+            ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
+            ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
+            ->type(DirectDebitBankAccount::class)
+            ->returnApiResponse();
+
+        return $this->execute($_reqBuilder, $_resHandler);
+    }
+
+    /**
+     * Updates a registered bank account. Changing bank details re-triggers verification with the bank.
+     * Transfers already registered keep the details they were created with.
+     *
+     * @param string $merchantId The unique identifier of the merchant.
+     * @param string $bankAccountId The unique identifier of the direct debit bank account.
+     * @param DirectDebitBankAccountUpdateRequest $body Request payload for updating a registered
+     *        bank account.
+     * @param string|null $idempotencyKey An optional idempotency key to prevent double charges and
+     *        duplicate operations. We recommend a randomly generated UUID (v4).
+     *
+     * @return ApiResponse Response from the API call
+     */
+    public function updateDirectDebitBankAccount(
+        string $merchantId,
+        string $bankAccountId,
+        DirectDebitBankAccountUpdateRequest $body,
         ?string $idempotencyKey = null
     ): ApiResponse {
         $_reqBuilder = $this->requestBuilder(
             RequestMethod::PATCH,
-            '/stores/{storeId}/charges/{chargeId}/customs/{id}'
+            '/merchants/{merchantId}/bank-accounts/{bankAccountId}'
         )
+            ->server(Server::DIRECTDEBIT)
             ->auth('JWT_TOKEN')
             ->parameters(
-                TemplateParam::init('storeId', $storeId)->required(),
-                TemplateParam::init('chargeId', $chargeId)->required(),
-                TemplateParam::init('id', $id)->required(),
+                TemplateParam::init('merchantId', $merchantId)->required(),
+                TemplateParam::init('bankAccountId', $bankAccountId)->required(),
                 HeaderParam::init('Content-Type', 'application/json'),
                 BodyParam::init($body)->required(),
                 HeaderParam::init('Idempotency-Key', $idempotencyKey)
@@ -973,75 +531,547 @@ class ChargesApi extends BaseApi
             ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
             ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
             ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
-            ->type(CustomsDeclarationWebhookData::class)
+            ->type(DirectDebitBankAccount::class)
             ->returnApiResponse();
 
         return $this->execute($_reqBuilder, $_resHandler);
     }
 
-    // ── Hand-authored customization (kept at end of class to minimize regen conflicts) ──
+    /**
+     * Deactivates a bank account so no further transfers can be registered against it. The record is
+     * retained (status becomes `inactive`) rather than deleted, and can be re-enabled later.
+     *
+     * @param string $merchantId The unique identifier of the merchant.
+     * @param string $bankAccountId The unique identifier of the direct debit bank account.
+     *
+     * @return ApiResponse Response from the API call
+     */
+    public function deactivateDirectDebitBankAccount(string $merchantId, string $bankAccountId): ApiResponse
+    {
+        $_reqBuilder = $this->requestBuilder(
+            RequestMethod::DELETE,
+            '/merchants/{merchantId}/bank-accounts/{bankAccountId}'
+        )
+            ->server(Server::DIRECTDEBIT)
+            ->auth('JWT_TOKEN')
+            ->parameters(
+                TemplateParam::init('merchantId', $merchantId)->required(),
+                TemplateParam::init('bankAccountId', $bankAccountId)->required()
+            );
+
+        $_resHandler = $this->responseHandler()
+            ->throwErrorOn(
+                '401',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 401 Unauthorized: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '403',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 403 Forbidden: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '404',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 404 Not Found: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '429',
+                ErrorType::initWithErrorTemplate('HTTP 429 Rate Limited: {$response.body#/code}')
+            )
+            ->throwErrorOn('400', ErrorType::initWithErrorTemplate('HTTP 400 Bad Request: {$response.body#/code}'))
+            ->throwErrorOn('409', ErrorType::initWithErrorTemplate('HTTP 409 Conflict: {$response.body#/code}'))
+            ->throwErrorOn(
+                '500',
+                ErrorType::initWithErrorTemplate('HTTP 500 Server Error: {$response.body#/code}')
+            )
+            ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
+            ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
+            ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
+            ->type(DirectDebitBankAccount::class)
+            ->returnApiResponse();
+
+        return $this->execute($_reqBuilder, $_resHandler);
+    }
 
     /**
-     * Polls the charge status using `getCharge` with `polling=true` until it transitions out of its
-     * current status. Transition-aware: polling a `pending` charge stops on any other status, polling
-     * an `awaiting` charge (e.g. after a 3DS redirect) waits for `authorized`/`successful`/`failed`/
-     * `error`/`canceled`, and polling an `authorized` charge waits for its capture outcome. A charge
-     * already in a final status is returned immediately.
+     * Returns a deactivated bank account to `active` so transfers can be registered against it again. The
+     * account must currently be `inactive`.
      *
-     * @param string $storeId     The unique identifier of the store.
-     * @param string $id          The unique identifier of the resource.
-     * @param int    $maxAttempts The maximum number of held polling requests. Default is 10.
+     * @param string $merchantId The unique identifier of the merchant.
+     * @param string $bankAccountId The unique identifier of the direct debit bank account.
+     * @param string|null $idempotencyKey An optional idempotency key to prevent double charges and
+     *        duplicate operations. We recommend a randomly generated UUID (v4).
      *
-     * @return ApiResponse Response from the API call containing the transitioned state (or latest state if timed out)
+     * @return ApiResponse Response from the API call
      */
-    public function pollCharge(string $storeId, string $id, int $maxAttempts = 10): ApiResponse
+    public function reenableDirectDebitBankAccount(
+        string $merchantId,
+        string $bankAccountId,
+        ?string $idempotencyKey = null
+    ): ApiResponse {
+        $_reqBuilder = $this->requestBuilder(
+            RequestMethod::POST,
+            '/merchants/{merchantId}/bank-accounts/{bankAccountId}/re-enable'
+        )
+            ->server(Server::DIRECTDEBIT)
+            ->auth('JWT_TOKEN')
+            ->parameters(
+                TemplateParam::init('merchantId', $merchantId)->required(),
+                TemplateParam::init('bankAccountId', $bankAccountId)->required(),
+                HeaderParam::init('Idempotency-Key', $idempotencyKey)
+            );
+
+        $_resHandler = $this->responseHandler()
+            ->throwErrorOn(
+                '400',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 400 Bad Request: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '401',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 401 Unauthorized: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '403',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 403 Forbidden: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '404',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 404 Not Found: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '429',
+                ErrorType::initWithErrorTemplate('HTTP 429 Rate Limited: {$response.body#/code}')
+            )
+            ->throwErrorOn('409', ErrorType::initWithErrorTemplate('HTTP 409 Conflict: {$response.body#/code}'))
+            ->throwErrorOn(
+                '500',
+                ErrorType::initWithErrorTemplate('HTTP 500 Server Error: {$response.body#/code}')
+            )
+            ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
+            ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
+            ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
+            ->type(DirectDebitBankAccount::class)
+            ->returnApiResponse();
+
+        return $this->execute($_reqBuilder, $_resHandler);
+    }
+
+    /**
+     * Schedules a pull of funds from an active bank account. The transfer is queued for the merchant's
+     * next debit cycle and stays editable until that cycle's upload deadline passes.
+     *
+     * @param string $merchantId The unique identifier of the merchant.
+     * @param string $bankAccountId The unique identifier of the direct debit bank account.
+     * @param DirectDebitBankTransferCreateRequest $body Request payload for scheduling a transfer,
+     *        in JPY.
+     * @param string|null $idempotencyKey An optional idempotency key to prevent double charges and
+     *        duplicate operations. We recommend a randomly generated UUID (v4).
+     *
+     * @return ApiResponse Response from the API call
+     */
+    public function createDirectDebitBankTransfer(
+        string $merchantId,
+        string $bankAccountId,
+        DirectDebitBankTransferCreateRequest $body,
+        ?string $idempotencyKey = null
+    ): ApiResponse {
+        $_reqBuilder = $this->requestBuilder(
+            RequestMethod::POST,
+            '/merchants/{merchantId}/bank-accounts/{bankAccountId}/bank-transfers'
+        )
+            ->server(Server::DIRECTDEBIT)
+            ->auth('JWT_TOKEN')
+            ->parameters(
+                TemplateParam::init('merchantId', $merchantId)->required(),
+                TemplateParam::init('bankAccountId', $bankAccountId)->required(),
+                HeaderParam::init('Content-Type', 'application/json'),
+                BodyParam::init($body)->required(),
+                HeaderParam::init('Idempotency-Key', $idempotencyKey)
+            );
+
+        $_resHandler = $this->responseHandler()
+            ->throwErrorOn(
+                '400',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 400 Bad Request: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '401',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 401 Unauthorized: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '403',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 403 Forbidden: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '404',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 404 Not Found: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '429',
+                ErrorType::initWithErrorTemplate('HTTP 429 Rate Limited: {$response.body#/code}')
+            )
+            ->throwErrorOn('409', ErrorType::initWithErrorTemplate('HTTP 409 Conflict: {$response.body#/code}'))
+            ->throwErrorOn(
+                '500',
+                ErrorType::initWithErrorTemplate('HTTP 500 Server Error: {$response.body#/code}')
+            )
+            ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
+            ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
+            ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
+            ->type(DirectDebitBankTransfer::class)
+            ->returnApiResponse();
+
+        return $this->execute($_reqBuilder, $_resHandler);
+    }
+
+    /**
+     * Lists the direct debit transfers registered under this merchant, across all bank accounts.
+     *
+     * @param string $merchantId The unique identifier of the merchant.
+     * @param int|null $limit Maximum number of resources to return in one page.
+     * @param string|null $cursor Cursor pointing to the resource after which pagination should
+     *        continue.
+     * @param string|null $cursorDirection Pagination direction relative to the supplied cursor.
+     * @param string|null $bankTransferId Filter by a single bank transfer ID.
+     * @param string|null $bankTransferStart Start of the year-month range in which the transfer is
+     *        scheduled to occur.
+     * @param string|null $bankTransferEnd End of the year-month range in which the transfer is
+     *        scheduled to occur.
+     * @param string|null $debitDate Filter by monthly debit cycle.
+     * @param string|null $userNumber Filter by the merchant's own membership number for the
+     *        consumer (会員番号).
+     * @param string|null $bankAccountNumber Filter by the 7-digit account number (口座番号).
+     * @param string|null $bankAccountName Filter by account holder name in half-width katakana
+     *        (口座名義).
+     * @param string|null $lockStatus Filter by lock status. Omit to return both locked and unlocked
+     *        transfers.
+     * @param string|null $bankTransferStatus Filter by transfer status. Omit to return every
+     *        status.
+     *
+     * @return ApiResponse Response from the API call
+     */
+    public function listDirectDebitBankTransfers(
+        string $merchantId,
+        ?int $limit = 10,
+        ?string $cursor = null,
+        ?string $cursorDirection = CursorDirectionQuery::DESC,
+        ?string $bankTransferId = null,
+        ?string $bankTransferStart = null,
+        ?string $bankTransferEnd = null,
+        ?string $debitDate = null,
+        ?string $userNumber = null,
+        ?string $bankAccountNumber = null,
+        ?string $bankAccountName = null,
+        ?string $lockStatus = null,
+        ?string $bankTransferStatus = null
+    ): ApiResponse {
+        $_reqBuilder = $this->requestBuilder(RequestMethod::GET, '/merchants/{merchantId}/bank-transfers')
+            ->server(Server::DIRECTDEBIT)
+            ->auth('JWT_TOKEN')
+            ->parameters(
+                TemplateParam::init('merchantId', $merchantId)->required(),
+                QueryParam::init('limit', $limit)->unIndexed(),
+                QueryParam::init('cursor', $cursor)->unIndexed(),
+                QueryParam::init('cursor_direction', $cursorDirection)
+                    ->unIndexed()
+                    ->serializeBy([CursorDirectionQuery::class, 'checkValue']),
+                QueryParam::init('bank_transfer_id', $bankTransferId)->unIndexed(),
+                QueryParam::init('bank_transfer_start', $bankTransferStart)->unIndexed(),
+                QueryParam::init('bank_transfer_end', $bankTransferEnd)->unIndexed(),
+                QueryParam::init('debit_date', $debitDate)
+                    ->unIndexed()
+                    ->serializeBy([DirectDebitDebitDate::class, 'checkValue']),
+                QueryParam::init('user_number', $userNumber)->unIndexed(),
+                QueryParam::init('bank_account_number', $bankAccountNumber)->unIndexed(),
+                QueryParam::init('bank_account_name', $bankAccountName)->unIndexed(),
+                QueryParam::init('lock_status', $lockStatus)
+                    ->unIndexed()
+                    ->serializeBy([DirectDebitBankTransferLock::class, 'checkValue']),
+                QueryParam::init('bank_transfer_status', $bankTransferStatus)
+                    ->unIndexed()
+                    ->serializeBy([DirectDebitBankTransferStatus::class, 'checkValue'])
+            );
+
+        $_resHandler = $this->responseHandler()
+            ->throwErrorOn(
+                '400',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 400 Bad Request: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '401',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 401 Unauthorized: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '403',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 403 Forbidden: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '429',
+                ErrorType::initWithErrorTemplate('HTTP 429 Rate Limited: {$response.body#/code}')
+            )
+            ->throwErrorOn('404', ErrorType::initWithErrorTemplate('HTTP 404 Not Found: {$response.body#/code}'))
+            ->throwErrorOn('409', ErrorType::initWithErrorTemplate('HTTP 409 Conflict: {$response.body#/code}'))
+            ->throwErrorOn(
+                '500',
+                ErrorType::initWithErrorTemplate('HTTP 500 Server Error: {$response.body#/code}')
+            )
+            ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
+            ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
+            ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
+            ->type(DirectDebitBankTransferList::class)
+            ->returnApiResponse();
+
+        return $this->execute($_reqBuilder, $_resHandler);
+    }
+
+    /**
+     * Retrieves a single transfer. Poll this after the cycle's result registration date to pick up the
+     * outcome and, on failure, the bank's reason.
+     *
+     * @param string $merchantId The unique identifier of the merchant.
+     * @param string $bankTransferId The unique identifier of the direct debit bank transfer.
+     *
+     * @return ApiResponse Response from the API call
+     */
+    public function getDirectDebitBankTransfer(string $merchantId, string $bankTransferId): ApiResponse
     {
-        // Valid transitions out of each non-final status; polling stops only when the charge
-        // reaches a status reachable from where it started.
-        $transitions = [
-            ChargeStatus::PENDING => [
-                ChargeStatus::AWAITING,
-                ChargeStatus::AUTHORIZED,
-                ChargeStatus::SUCCESSFUL,
-                ChargeStatus::FAILED,
-                ChargeStatus::ERROR,
-                ChargeStatus::CANCELED
-            ],
-            ChargeStatus::AWAITING => [
-                ChargeStatus::AUTHORIZED,
-                ChargeStatus::SUCCESSFUL,
-                ChargeStatus::FAILED,
-                ChargeStatus::ERROR,
-                ChargeStatus::CANCELED
-            ],
-            ChargeStatus::AUTHORIZED => [
-                ChargeStatus::SUCCESSFUL,
-                ChargeStatus::FAILED,
-                ChargeStatus::ERROR,
-                ChargeStatus::CANCELED
-            ]
-        ];
-        // Instant read (no hold) to key the transition map off the charge's current status;
-        // a held first read could observe a transition and re-key the map one state too far.
-        $response = $this->getCharge($storeId, $id);
-        $status = $response->getResult() !== null ? $response->getResult()->getStatus() : null;
-        if ($status !== null && !array_key_exists($status, $transitions)) {
-            return $response;
-        }
-        $targets = $transitions[$status ?? ChargeStatus::PENDING];
-        $attempts = 0;
-        while ($attempts < $maxAttempts) {
-            $response = $this->getCharge($storeId, $id, true);
-            if (
-                $response !== null && $response->getResult() !== null
-                && in_array($response->getResult()->getStatus(), $targets, true)
-            ) {
-                return $response;
-            }
-            $attempts++;
-        }
-        // Attempts exhausted: a poll timeout, not a failure — the caller should fall
-        // back to the webhook rather than treating the charge as failed.
-        return $response;
+        $_reqBuilder = $this->requestBuilder(
+            RequestMethod::GET,
+            '/merchants/{merchantId}/bank-transfers/{bankTransferId}'
+        )
+            ->server(Server::DIRECTDEBIT)
+            ->auth('JWT_TOKEN')
+            ->parameters(
+                TemplateParam::init('merchantId', $merchantId)->required(),
+                TemplateParam::init('bankTransferId', $bankTransferId)->required()
+            );
+
+        $_resHandler = $this->responseHandler()
+            ->throwErrorOn(
+                '401',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 401 Unauthorized: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '403',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 403 Forbidden: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '404',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 404 Not Found: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '429',
+                ErrorType::initWithErrorTemplate('HTTP 429 Rate Limited: {$response.body#/code}')
+            )
+            ->throwErrorOn('400', ErrorType::initWithErrorTemplate('HTTP 400 Bad Request: {$response.body#/code}'))
+            ->throwErrorOn('409', ErrorType::initWithErrorTemplate('HTTP 409 Conflict: {$response.body#/code}'))
+            ->throwErrorOn(
+                '500',
+                ErrorType::initWithErrorTemplate('HTTP 500 Server Error: {$response.body#/code}')
+            )
+            ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
+            ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
+            ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
+            ->type(DirectDebitBankTransfer::class)
+            ->returnApiResponse();
+
+        return $this->execute($_reqBuilder, $_resHandler);
+    }
+
+    /**
+     * Changes a scheduled transfer's amount. Only permitted while the transfer is `unlocked` — once its
+     * cycle's upload deadline passes the amount is fixed.
+     *
+     * @param string $merchantId The unique identifier of the merchant.
+     * @param string $bankTransferId The unique identifier of the direct debit bank transfer.
+     * @param DirectDebitBankTransferPatchRequest $body Request payload for changing the transfer
+     *        amount.
+     * @param string|null $idempotencyKey An optional idempotency key to prevent double charges and
+     *        duplicate operations. We recommend a randomly generated UUID (v4).
+     *
+     * @return ApiResponse Response from the API call
+     */
+    public function updateDirectDebitBankTransfer(
+        string $merchantId,
+        string $bankTransferId,
+        DirectDebitBankTransferPatchRequest $body,
+        ?string $idempotencyKey = null
+    ): ApiResponse {
+        $_reqBuilder = $this->requestBuilder(
+            RequestMethod::PATCH,
+            '/merchants/{merchantId}/bank-transfers/{bankTransferId}'
+        )
+            ->server(Server::DIRECTDEBIT)
+            ->auth('JWT_TOKEN')
+            ->parameters(
+                TemplateParam::init('merchantId', $merchantId)->required(),
+                TemplateParam::init('bankTransferId', $bankTransferId)->required(),
+                HeaderParam::init('Content-Type', 'application/json'),
+                BodyParam::init($body)->required(),
+                HeaderParam::init('Idempotency-Key', $idempotencyKey)
+            );
+
+        $_resHandler = $this->responseHandler()
+            ->throwErrorOn(
+                '400',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 400 Bad Request: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '401',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 401 Unauthorized: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '403',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 403 Forbidden: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '404',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 404 Not Found: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '429',
+                ErrorType::initWithErrorTemplate('HTTP 429 Rate Limited: {$response.body#/code}')
+            )
+            ->throwErrorOn('409', ErrorType::initWithErrorTemplate('HTTP 409 Conflict: {$response.body#/code}'))
+            ->throwErrorOn(
+                '500',
+                ErrorType::initWithErrorTemplate('HTTP 500 Server Error: {$response.body#/code}')
+            )
+            ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
+            ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
+            ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
+            ->type(DirectDebitBankTransfer::class)
+            ->returnApiResponse();
+
+        return $this->execute($_reqBuilder, $_resHandler);
+    }
+
+    /**
+     * Cancels a scheduled transfer so it is not sent to the bank. Only permitted while the transfer is
+     * `unlocked`.
+     *
+     * @param string $merchantId The unique identifier of the merchant.
+     * @param string $bankTransferId The unique identifier of the direct debit bank transfer.
+     *
+     * @return ApiResponse Response from the API call
+     */
+    public function deleteDirectDebitBankTransfer(string $merchantId, string $bankTransferId): ApiResponse
+    {
+        $_reqBuilder = $this->requestBuilder(
+            RequestMethod::DELETE,
+            '/merchants/{merchantId}/bank-transfers/{bankTransferId}'
+        )
+            ->server(Server::DIRECTDEBIT)
+            ->auth('JWT_TOKEN')
+            ->parameters(
+                TemplateParam::init('merchantId', $merchantId)->required(),
+                TemplateParam::init('bankTransferId', $bankTransferId)->required()
+            );
+
+        $_resHandler = $this->responseHandler()
+            ->throwErrorOn(
+                '400',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 400 Bad Request: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '401',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 401 Unauthorized: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '403',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 403 Forbidden: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '404',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 404 Not Found: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '429',
+                ErrorType::initWithErrorTemplate('HTTP 429 Rate Limited: {$response.body#/code}')
+            )
+            ->throwErrorOn('409', ErrorType::initWithErrorTemplate('HTTP 409 Conflict: {$response.body#/code}'))
+            ->throwErrorOn(
+                '500',
+                ErrorType::initWithErrorTemplate('HTTP 500 Server Error: {$response.body#/code}')
+            )
+            ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
+            ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
+            ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
+            ->returnApiResponse();
+
+        return $this->execute($_reqBuilder, $_resHandler);
     }
 }

@@ -31,6 +31,11 @@ interface ConfigurationInterface extends HttpConfigurations
     public function getBaseUrl(): string;
 
     /**
+     * Get base URL for the Direct Debit API
+     */
+    public function getDirectDebitBaseUrl(): string;
+
+    /**
      * Get the credentials to use with BearerAuth
      */
     public function getBearerAuthCredentials(): BearerAuthCredentials;

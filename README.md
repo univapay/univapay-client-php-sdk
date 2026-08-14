@@ -36,19 +36,19 @@ We will assume that all requests are going to originate from a backend server th
 Run the following command to install the package and automatically add the dependency to your composer.json file:
 
 ```bash
-composer require "univapay/client-sdk:1.0.1"
+composer require "univapay/client-sdk:1.0.2"
 ```
 
 Or add it to the composer.json file manually as given below:
 
 ```json
 "require": {
-    "univapay/client-sdk": "1.0.1"
+    "univapay/client-sdk": "1.0.2"
 }
 ```
 
 You can also view the package at:
-https://packagist.org/packages/univapay/client-sdk#1.0.1
+https://packagist.org/packages/univapay/client-sdk#1.0.2
 
 ## Test the SDK
 
@@ -68,6 +68,7 @@ The following parameters are configurable for the API Client:
 | Parameter | Type | Description |
 |  --- | --- | --- |
 | baseUrl | `string` | Base URL for the API<br>*Default*: `'https://api.univapay.com'` |
+| directDebitBaseUrl | `string` | Base URL for the Direct Debit API<br>*Default*: `'https://direct-debit.gopay-services.com'` |
 | environment | [`Environment`](README.md#environments) | The API environment. <br> **Default: `Environment.PRODUCTION`** |
 | timeout | `int` | Timeout for API calls in seconds.<br>*Default*: `30` |
 | enableRetries | `bool` | Whether to enable retries and backoff feature.<br>*Default*: `false` |
@@ -101,6 +102,7 @@ $client = UnivapayClientSdkClientBuilder::init()
     )
     ->environment(Environment::PRODUCTION)
     ->baseUrl('https://api.univapay.com')
+    ->directDebitBaseUrl('https://direct-debit.gopay-services.com')
     ->loggingConfiguration(
         LoggingConfigurationBuilder::init()
             ->level(LogLevel::INFO)
@@ -129,6 +131,7 @@ This API uses the following authentication schemes.
 ## List of APIs
 
 * [Transaction Tokens](doc/controllers/transaction-tokens.md)
+* [Direct Debit](doc/controllers/direct-debit.md)
 * [Charges](doc/controllers/charges.md)
 * [Refunds](doc/controllers/refunds.md)
 * [Subscriptions](doc/controllers/subscriptions.md)

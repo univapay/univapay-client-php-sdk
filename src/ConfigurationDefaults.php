@@ -40,9 +40,9 @@ class ConfigurationDefaults
 
     public const BASE_URL = 'https://api.univapay.com';
 
-    public const SECRET_KEY = '';
+    public const DIRECT_DEBIT_BASE_URL = 'https://direct-debit.gopay-services.com';
 
-    public const JWT_TOKEN = '';
+    public const ACCESS_TOKEN = '';
 
     public const PROXY_CONFIGURATION = [
         'port' => 0,
@@ -93,9 +93,20 @@ class ConfigurationDefaults
         'httpMethodsToRetry' => self::HTTP_METHODS_TO_RETRY,
         'environment' => self::ENVIRONMENT,
         'baseUrl' => self::BASE_URL,
-        'secretKey' => self::SECRET_KEY,
-        'jwtToken' => self::JWT_TOKEN,
+        'directDebitBaseUrl' => self::DIRECT_DEBIT_BASE_URL,
+        'accessToken' => self::ACCESS_TOKEN,
         'loggingConfiguration' => null,
-        'proxyConfiguration' => self::PROXY_CONFIGURATION
+        'proxyConfiguration' => self::PROXY_CONFIGURATION,
+        // Hand-authored: this SDK authenticates with a secret key plus a JWT token
+        // rather than the single access token codegen assumes. Appended here rather
+        // than replacing the generated ACCESS_TOKEN entry above, because that entry
+        // sits directly beside the lines codegen rewrites whenever the server list
+        // changes — editing it conflicts on every regeneration.
+        'secretKey' => self::SECRET_KEY,
+        'jwtToken' => self::JWT_TOKEN
     ];
+
+    public const SECRET_KEY = '';
+
+    public const JWT_TOKEN = '';
 }

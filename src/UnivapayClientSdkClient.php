@@ -17,6 +17,7 @@ use Unirest\Configuration;
 use Unirest\HttpClient;
 use UnivaPay\Apis\CancelsApi;
 use UnivaPay\Apis\ChargesApi;
+use UnivaPay\Apis\DirectDebitApi;
 use UnivaPay\Apis\MerchantsApi;
 use UnivaPay\Apis\RefundsApi;
 use UnivaPay\Apis\StoresApi;
@@ -31,6 +32,11 @@ use UnivaPay\Logging\ResponseLoggingConfigurationBuilder;
 use UnivaPay\Proxy\ProxyConfigurationBuilder;
 use UnivaPay\Utils\CompatibilityConverter;
 
+/**
+ * Hand-authored customization — adds an Idempotency-Key header to mutating
+ * requests. Kept above the generated class, where codegen never edits, so it
+ * does not conflict on regeneration.
+ */
 class IdempotencyCallback extends \Core\Types\Sdk\CoreCallback
 {
     private $userCallback;
@@ -129,6 +135,8 @@ class UnivapayClientSdkClient implements ConfigurationInterface
 
     private $webhooks;
 
+    private $directDebit;
+
     private $bearerAuthManager;
 
     private $loggingConfigurationBuilder;
@@ -165,7 +173,7 @@ class UnivapayClientSdkClient implements ConfigurationInterface
             ->converter(new CompatibilityConverter())
             ->jsonHelper(ApiHelper::getJsonHelper())
             ->apiCallback($this->config['httpCallback'] ?? null)
-            ->userAgent('PHP-SDK/1.0.1 (OS: {os-info}, Engine: {engine}/{engine-version})')
+            ->userAgent('PHP-SDK/1.0.2 (OS: {os-info}, Engine: {engine}/{engine-version})')
             ->globalConfig($this->getGlobalConfiguration())
             ->serverUrls(self::ENVIRONMENT_MAP[$this->getEnvironment()], Server::DEFAULT_)
             ->authManagers(['JWT_TOKEN' => $this->bearerAuthManager])
@@ -192,6 +200,7 @@ class UnivapayClientSdkClient implements ConfigurationInterface
             ->httpMethodsToRetry($this->getHttpMethodsToRetry())
             ->environment($this->getEnvironment())
             ->baseUrl($this->getBaseUrl())
+            ->directDebitBaseUrl($this->getDirectDebitBaseUrl())
             ->httpCallback($this->config['httpCallback'] ?? null)
             ->proxyConfiguration($this->getProxyConfigurationBuilder());
 
@@ -259,6 +268,11 @@ class UnivapayClientSdkClient implements ConfigurationInterface
     public function getBaseUrl(): string
     {
         return $this->config['baseUrl'] ?? ConfigurationDefaults::BASE_URL;
+    }
+
+    public function getDirectDebitBaseUrl(): string
+    {
+        return $this->config['directDebitBaseUrl'] ?? ConfigurationDefaults::DIRECT_DEBIT_BASE_URL;
     }
 
     public function getBearerAuthCredentials(): BearerAuthCredentials
@@ -466,11 +480,25 @@ class UnivapayClientSdkClient implements ConfigurationInterface
     }
 
     /**
+     * Returns Direct Debit Api
+     */
+    public function getDirectDebitApi(): DirectDebitApi
+    {
+        if ($this->directDebit == null) {
+            $this->directDebit = new DirectDebitApi($this->client);
+        }
+        return $this->directDebit;
+    }
+
+    /**
      * Get the defined global configurations
      */
     private function getGlobalConfiguration(): array
     {
-        return [TemplateParam::init('baseUrl', $this->getBaseUrl())->dontEncode()];
+        return [
+            TemplateParam::init('baseUrl', $this->getBaseUrl())->dontEncode(),
+            TemplateParam::init('directDebitBaseUrl', $this->getDirectDebitBaseUrl())->dontEncode()
+        ];
     }
 
     /**
@@ -478,5 +506,11 @@ class UnivapayClientSdkClient implements ConfigurationInterface
      *
      * @var array
      */
-    private const ENVIRONMENT_MAP = [Environment::PRODUCTION => [Server::DEFAULT_ => '{baseUrl}']];
+    private const ENVIRONMENT_MAP =
+        [
+            Environment::PRODUCTION => [
+                Server::DEFAULT_ => '{baseUrl}',
+                Server::DIRECTDEBIT => '{directDebitBaseUrl}'
+            ]
+        ];
 }

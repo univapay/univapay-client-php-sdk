@@ -16,4 +16,6 @@ namespace UnivaPay;
 class Server
 {
     public const DEFAULT_ = 'default';
+
+    public const DIRECTDEBIT = 'directDebit';
 }
