@@ -17,11 +17,13 @@ use Unirest\Configuration;
 use Unirest\HttpClient;
 use UnivaPay\Apis\CancelsApi;
 use UnivaPay\Apis\ChargesApi;
+use UnivaPay\Apis\CheckoutApi;
 use UnivaPay\Apis\DirectDebitApi;
 use UnivaPay\Apis\MerchantsApi;
 use UnivaPay\Apis\RefundsApi;
 use UnivaPay\Apis\StoresApi;
 use UnivaPay\Apis\SubscriptionsApi;
+use UnivaPay\Apis\TransactionHistoryApi;
 use UnivaPay\Apis\TransactionTokensApi;
 use UnivaPay\Apis\WebhooksApi;
 use UnivaPay\Authentication\BearerAuthCredentialsBuilder;
@@ -137,6 +139,10 @@ class UnivapayClientSdkClient implements ConfigurationInterface
 
     private $directDebit;
 
+    private $checkout;
+
+    private $transactionHistory;
+
     private $bearerAuthManager;
 
     private $loggingConfigurationBuilder;
@@ -173,7 +179,7 @@ class UnivapayClientSdkClient implements ConfigurationInterface
             ->converter(new CompatibilityConverter())
             ->jsonHelper(ApiHelper::getJsonHelper())
             ->apiCallback($this->config['httpCallback'] ?? null)
-            ->userAgent('PHP-SDK/1.0.2 (OS: {os-info}, Engine: {engine}/{engine-version})')
+            ->userAgent('PHP-SDK/1.1.0 (OS: {os-info}, Engine: {engine}/{engine-version})')
             ->globalConfig($this->getGlobalConfiguration())
             ->serverUrls(self::ENVIRONMENT_MAP[$this->getEnvironment()], Server::DEFAULT_)
             ->authManagers(['JWT_TOKEN' => $this->bearerAuthManager])
@@ -488,6 +494,28 @@ class UnivapayClientSdkClient implements ConfigurationInterface
             $this->directDebit = new DirectDebitApi($this->client);
         }
         return $this->directDebit;
+    }
+
+    /**
+     * Returns Checkout Api
+     */
+    public function getCheckoutApi(): CheckoutApi
+    {
+        if ($this->checkout == null) {
+            $this->checkout = new CheckoutApi($this->client);
+        }
+        return $this->checkout;
+    }
+
+    /**
+     * Returns Transaction History Api
+     */
+    public function getTransactionHistoryApi(): TransactionHistoryApi
+    {
+        if ($this->transactionHistory == null) {
+            $this->transactionHistory = new TransactionHistoryApi($this->client);
+        }
+        return $this->transactionHistory;
     }
 
     /**

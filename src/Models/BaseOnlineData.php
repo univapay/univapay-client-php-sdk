@@ -45,7 +45,10 @@ class BaseOnlineData implements \JsonSerializable
 
     /**
      * Returns Brand.
-     * Base Online Data Brand schema.
+     * Base Online Data Brand schema. `alipay_china`, `alipay_hk`, `gcash`, `dana`, `truemoney`, `kakaopay`,
+     * `tng`, `rabbit_line_pay`, `bpi`, `boost`, `tinaba`, `naver_pay`, `toss_pay`, `maya`, `grab_sg`,
+     * `kredivo_id`, `k_plus`, and `kaspi_kz` are Alipay+ regional wallets routed through the
+     * `alipay_plus_online` gateway family.
      */
     public function getBrand(): ?string
     {
@@ -54,7 +57,10 @@ class BaseOnlineData implements \JsonSerializable
 
     /**
      * Sets Brand.
-     * Base Online Data Brand schema.
+     * Base Online Data Brand schema. `alipay_china`, `alipay_hk`, `gcash`, `dana`, `truemoney`, `kakaopay`,
+     * `tng`, `rabbit_line_pay`, `bpi`, `boost`, `tinaba`, `naver_pay`, `toss_pay`, `maya`, `grab_sg`,
+     * `kredivo_id`, `k_plus`, and `kaspi_kz` are Alipay+ regional wallets routed through the
+     * `alipay_plus_online` gateway family.
      *
      * @maps brand
      * @factory \UnivaPay\Models\BaseOnlineDataBrand::checkValue

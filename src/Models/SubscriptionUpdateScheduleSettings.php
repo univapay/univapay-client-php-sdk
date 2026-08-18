@@ -30,6 +30,11 @@ class SubscriptionUpdateScheduleSettings implements \JsonSerializable
     private $startOn;
 
     /**
+     * @var bool|null
+     */
+    private $preserveEndOfMonth;
+
+    /**
      * @var string|null
      */
     private $retryInterval;
@@ -57,8 +62,9 @@ class SubscriptionUpdateScheduleSettings implements \JsonSerializable
 
     /**
      * Returns Start On.
-     * Subscription start date. Used to change the first actual charge date  for subscriptions that
-     * initially only registered a payment method.
+     * Subscription start date (YYYY-MM-DD). Used to change the first actual charge date for subscriptions
+     * that initially only registered a payment method. Must be in the future; only available before the
+     * subscription has more than one paid payment.
      */
     public function getStartOn(): ?\DateTime
     {
@@ -67,15 +73,36 @@ class SubscriptionUpdateScheduleSettings implements \JsonSerializable
 
     /**
      * Sets Start On.
-     * Subscription start date. Used to change the first actual charge date  for subscriptions that
-     * initially only registered a payment method.
+     * Subscription start date (YYYY-MM-DD). Used to change the first actual charge date for subscriptions
+     * that initially only registered a payment method. Must be in the future; only available before the
+     * subscription has more than one paid payment.
      *
      * @maps start_on
-     * @factory \UnivaPay\Utils\DateTimeHelper::fromRfc3339DateTime
+     * @factory \UnivaPay\Utils\DateTimeHelper::fromSimpleDate
      */
     public function setStartOn(?\DateTime $startOn): void
     {
         $this->startOn = $startOn;
+    }
+
+    /**
+     * Returns Preserve End of Month.
+     * If true, subsequent charges will always occur on the last day of the month.
+     */
+    public function getPreserveEndOfMonth(): ?bool
+    {
+        return $this->preserveEndOfMonth;
+    }
+
+    /**
+     * Sets Preserve End of Month.
+     * If true, subsequent charges will always occur on the last day of the month.
+     *
+     * @maps preserve_end_of_month
+     */
+    public function setPreserveEndOfMonth(?bool $preserveEndOfMonth): void
+    {
+        $this->preserveEndOfMonth = $preserveEndOfMonth;
     }
 
     /**
@@ -110,13 +137,14 @@ class SubscriptionUpdateScheduleSettings implements \JsonSerializable
             [
                 'terminationMode' => $this->terminationMode,
                 'startOn' => $this->startOn,
+                'preserveEndOfMonth' => $this->preserveEndOfMonth,
                 'retryInterval' => $this->retryInterval,
                 'additionalProperties' => $this->additionalProperties
             ]
         );
     }
 
-    protected $propertyNames = ['termination_mode', 'start_on', 'retry_interval'];
+    protected $propertyNames = ['termination_mode', 'start_on', 'preserve_end_of_month', 'retry_interval'];
 
     private $additionalProperties = [];
 
@@ -165,13 +193,16 @@ class SubscriptionUpdateScheduleSettings implements \JsonSerializable
     {
         $json = [];
         if (isset($this->terminationMode)) {
-            $json['termination_mode'] = SubscriptionTerminationMode::checkValue($this->terminationMode);
+            $json['termination_mode']      = SubscriptionTerminationMode::checkValue($this->terminationMode);
         }
         if (isset($this->startOn)) {
-            $json['start_on']         = DateTimeHelper::toRfc3339DateTime($this->startOn);
+            $json['start_on']              = DateTimeHelper::toSimpleDate($this->startOn);
+        }
+        if (isset($this->preserveEndOfMonth)) {
+            $json['preserve_end_of_month'] = $this->preserveEndOfMonth;
         }
         if (isset($this->retryInterval)) {
-            $json['retry_interval']   = $this->retryInterval;
+            $json['retry_interval']        = $this->retryInterval;
         }
         $json = array_merge($json, $this->additionalProperties);
 

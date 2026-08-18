@@ -61,6 +61,17 @@ class SubscriptionUpdateScheduleSettingsBuilder
     }
 
     /**
+     * Sets preserve end of month field.
+     *
+     * @param bool|null $value
+     */
+    public function preserveEndOfMonth(?bool $value): self
+    {
+        $this->instance->setPreserveEndOfMonth($value);
+        return $this;
+    }
+
+    /**
      * Sets retry interval field.
      *
      * @param string|null $value

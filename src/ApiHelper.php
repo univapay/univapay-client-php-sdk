@@ -25,6 +25,18 @@ class ApiHelper
      * @var array
      */
     private const DISCRIMINATOR_SUBSTITUTIONS = [
+        'bankTransfer' => 'bank_transfer',
+        'qrScan' => 'qr_scan',
+        'qrMerchant' => 'qr_merchant',
+        'paymentType' => 'payment_type',
+        'card2' => 'card',
+        'konbini2' => 'konbini',
+        'online2' => 'online',
+        'bankTransfer2' => 'bank_transfer',
+        'paidy2' => 'paidy',
+        'qrScan2' => 'qr_scan',
+        'qrMerchant2' => 'qr_merchant',
+        'paymentType2' => 'payment_type',
         'chargeUpdated' => 'charge_updated',
         'chargeFinished' => 'charge_finished',
         'tokenCreated' => 'token_created',

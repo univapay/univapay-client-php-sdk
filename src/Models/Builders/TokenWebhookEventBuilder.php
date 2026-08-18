@@ -11,8 +11,14 @@ declare(strict_types=1);
 namespace UnivaPay\Models\Builders;
 
 use Core\Utils\CoreHelper;
+use UnivaPay\Models\BankTransferTransactionToken;
+use UnivaPay\Models\CardTransactionToken;
+use UnivaPay\Models\KonbiniTransactionToken;
+use UnivaPay\Models\OnlineTransactionToken;
+use UnivaPay\Models\PaidyTransactionToken;
+use UnivaPay\Models\QrMerchantTransactionToken;
+use UnivaPay\Models\QrScanTransactionToken;
 use UnivaPay\Models\TokenWebhookEvent;
-use UnivaPay\Models\TransactionToken;
 
 /**
  * Builder for model TokenWebhookEvent
@@ -46,9 +52,9 @@ class TokenWebhookEventBuilder
     /**
      * Sets data field.
      *
-     * @param TransactionToken|null $value
+     * @param CardTransactionToken|KonbiniTransactionToken|OnlineTransactionToken|BankTransferTransactionToken|PaidyTransactionToken|QrScanTransactionToken|QrMerchantTransactionToken|null $value
      */
-    public function data(?TransactionToken $value): self
+    public function data($value): self
     {
         $this->instance->setData($value);
         return $this;

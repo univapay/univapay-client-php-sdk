@@ -1,11 +1,11 @@
 
 # Generic Metadata Value
 
-Allowed values for metadata properties.
+Allowed values for metadata properties. Values may be a string, number, boolean, null, or an array of any of the above — but not a nested object; the server rejects metadata whose direct property values are JSON objects.
 
 ## Data Type
 
-`string|float|bool`
+`string|float|bool|array[]`
 
 ## Cases
 
@@ -14,6 +14,7 @@ Allowed values for metadata properties.
 | `string` |
 | `float` |
 | `bool` |
+| `array[]` |
 
 ## string
 
@@ -43,5 +44,18 @@ $value = 10;
 
 ```php
 $value = true;
+```
+
+## array[]
+
+### Initialization Code
+
+#### Example
+
+```php
+$value = [
+    ApiHelper::deserialize('"sale"'),
+    ApiHelper::deserialize('"promo"')
+];
 ```
 

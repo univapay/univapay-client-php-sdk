@@ -14,68 +14,61 @@ use stdClass;
 use UnivaPay\ApiHelper;
 
 /**
- * Request payload for capturing an authorized charge.
+ * Request payload for capturing an authorized charge. Both fields are optional; omit the entire body
+ * to capture the full outstanding amount.
  */
 class ChargeCaptureRequest implements \JsonSerializable
 {
     /**
-     * @var int
+     * @var int|null
      */
     private $amount;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $currency;
 
     /**
-     * @param int $amount
-     * @param string $currency
-     */
-    public function __construct(int $amount, string $currency)
-    {
-        $this->amount = $amount;
-        $this->currency = $currency;
-    }
-
-    /**
      * Returns Amount.
-     * The amount to capture. Must be less than or equal to the authorized amount.
+     * The amount to capture. Must be less than or equal to the authorized amount. If omitted, the full
+     * outstanding authorized amount is captured.
      */
-    public function getAmount(): int
+    public function getAmount(): ?int
     {
         return $this->amount;
     }
 
     /**
      * Sets Amount.
-     * The amount to capture. Must be less than or equal to the authorized amount.
+     * The amount to capture. Must be less than or equal to the authorized amount. If omitted, the full
+     * outstanding authorized amount is captured.
      *
-     * @required
      * @maps amount
      */
-    public function setAmount(int $amount): void
+    public function setAmount(?int $amount): void
     {
         $this->amount = $amount;
     }
 
     /**
      * Returns Currency.
-     * ISO-4217 currency code. Must exactly match the currency used during authorization.
+     * ISO-4217 currency code. Must exactly match the currency used during authorization. If omitted,
+     * defaults to the currency originally requested on the charge.
      */
-    public function getCurrency(): string
+    public function getCurrency(): ?string
     {
         return $this->currency;
     }
 
     /**
      * Sets Currency.
-     * ISO-4217 currency code. Must exactly match the currency used during authorization.
+     * ISO-4217 currency code. Must exactly match the currency used during authorization. If omitted,
+     * defaults to the currency originally requested on the charge.
      *
-     * @required
      * @maps currency
      */
-    public function setCurrency(string $currency): void
+    public function setCurrency(?string $currency): void
     {
         $this->currency = $currency;
     }
@@ -145,8 +138,12 @@ class ChargeCaptureRequest implements \JsonSerializable
     public function jsonSerialize(bool $asArrayWhenEmpty = false)
     {
         $json = [];
-        $json['amount']   = $this->amount;
-        $json['currency'] = $this->currency;
+        if (isset($this->amount)) {
+            $json['amount']   = $this->amount;
+        }
+        if (isset($this->currency)) {
+            $json['currency'] = $this->currency;
+        }
         $json = array_merge($json, $this->additionalProperties);
 
         return (!$asArrayWhenEmpty && empty($json)) ? new stdClass() : $json;

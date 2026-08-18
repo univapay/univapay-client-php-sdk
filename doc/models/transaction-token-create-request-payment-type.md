@@ -15,12 +15,15 @@ Transaction Token Create Request Payment Type schema.
 | `ONLINE` |
 | `KONBINI` |
 | `BANK_TRANSFER` |
+| `QR_SCAN` |
+| `QR_MERCHANT` |
+| `PAIDY` |
 
 ## Example
 
 ```php
 use UnivaPay\Models\TransactionTokenCreateRequestPaymentType;
 
-$transactionTokenCreateRequestPaymentType = TransactionTokenCreateRequestPaymentType::KONBINI;
+$transactionTokenCreateRequestPaymentType = TransactionTokenCreateRequestPaymentType::QR_SCAN;
 ```
 

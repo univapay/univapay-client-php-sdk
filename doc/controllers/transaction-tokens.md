@@ -16,6 +16,8 @@ $transactionTokensApi = $client->getTransactionTokensApi();
 * [Get Transaction Token](../../doc/controllers/transaction-tokens.md#get-transaction-token)
 * [Update Transaction Token](../../doc/controllers/transaction-tokens.md#update-transaction-token)
 * [Delete Transaction Token](../../doc/controllers/transaction-tokens.md#delete-transaction-token)
+* [Enable Token Three Ds](../../doc/controllers/transaction-tokens.md#enable-token-three-ds)
+* [Disable Token Three Ds](../../doc/controllers/transaction-tokens.md#disable-token-three-ds)
 * [Get Token Three Ds Issuer Token](../../doc/controllers/transaction-tokens.md#get-token-three-ds-issuer-token)
 
 
@@ -45,7 +47,7 @@ This endpoint requires [JWT_TOKEN](../../doc/auth/oauth-2-bearer-token.md)
 
 **201**: Token Created
 
-This method returns an [`ApiResponse`](../../doc/api-response.md) instance. The `getResult()` method on this instance returns the response data which is of type [`TransactionToken`](../../doc/models/transaction-token.md).
+This method returns an [`ApiResponse`](../../doc/api-response.md) instance. The `getResult()` method on this instance returns the response data which is of type `CardTransactionToken|KonbiniTransactionToken|OnlineTransactionToken|BankTransferTransactionToken|PaidyTransactionToken|QrScanTransactionToken|QrMerchantTransactionToken`.
 
 ## Example Usage
 
@@ -96,7 +98,7 @@ var_dump($apiResponse->getStatusCode());
 var_dump($apiResponse->getHeaders());
 
 if ($apiResponse->isSuccess()) {
-    echo 'TransactionToken:';
+    echo 'CardTransactionToken|KonbiniTransactionToken|OnlineTransactionToken|BankTransferTransactionToken|PaidyTransactionToken|QrScanTransactionToken|QrMerchantTransactionToken:';
     var_dump($apiResponse->getResult());
 } else {
     $error = $apiResponse->getResult();
@@ -104,9 +106,9 @@ if ($apiResponse->isSuccess()) {
 }
 ```
 
-## Example Response *(as JSON)*
+## Example Response
 
-```json
+```
 {
   "id": "11f11e85-e9e9-b198-b990-c3a715943241",
   "store_id": "11f0e274-1e3b-4752-9513-33d3e07ede13",
@@ -190,6 +192,11 @@ Lists all transaction tokens across all stores.
 
 ```php
 function listAllTransactionTokens(
+    ?string $search = null,
+    ?string $customerId = null,
+    ?string $type = null,
+    ?string $mode = null,
+    ?string $active = TransactionTokenActiveFilter::ACTIVE,
     ?int $limit = 10,
     ?string $cursor = null,
     ?string $cursorDirection = CursorDirectionQuery::DESC
@@ -204,6 +211,11 @@ This endpoint requires [JWT_TOKEN](../../doc/auth/oauth-2-bearer-token.md)
 
 | Parameter | Type | Tags | Description |
 |  --- | --- | --- | --- |
+| `search` | `?string` | Query, Optional | Case-insensitive free-text search. |
+| `customerId` | `?string` | Query, Optional | Filter by customer ID. |
+| `type` | [`?string(TransactionTokenListType)`](../../doc/models/transaction-token-list-type.md) | Query, Optional | Filter by token type. `one_time` tokens are excluded from listings and cannot be filtered on; filtering to `recurring` requires the App Token Secret. |
+| `mode` | [`?string(ModeQuery)`](../../doc/models/mode-query.md) | Query, Optional | Filter by environment mode. |
+| `active` | [`?string(TransactionTokenActiveFilter)`](../../doc/models/transaction-token-active-filter.md) | Query, Optional | Filter recurring tokens by whether they are still active.<br><br>**Default**: `TransactionTokenActiveFilter::ACTIVE` |
 | `limit` | `?int` | Query, Optional | Maximum number of resources to return in one page.<br><br>**Default**: `10`<br><br>**Constraints**: `<= 100` |
 | `cursor` | `?string` | Query, Optional | Cursor pointing to the resource after which pagination should continue. |
 | `cursorDirection` | [`?string(CursorDirectionQuery)`](../../doc/models/cursor-direction-query.md) | Query, Optional | Pagination direction relative to the supplied cursor.<br><br>**Default**: `CursorDirectionQuery::DESC` |
@@ -217,6 +229,16 @@ This method returns an [`ApiResponse`](../../doc/api-response.md) instance. The 
 ## Example Usage
 
 ```php
+$search = 'tokyo';
+
+$customerId = '8a3f1b8e-2c1a-4b7a-9c2e-6f6b6f6e2b10';
+
+$type = TransactionTokenListType::RECURRING;
+
+$mode = ModeQuery::LIVE;
+
+$active = TransactionTokenActiveFilter::ACTIVE;
+
 $limit = 10;
 
 $cursor = '3541d4fa-596d-428e-8a36-f274e1b3d505';
@@ -225,6 +247,11 @@ $cursorDirection = CursorDirectionQuery::ASC;
 
 $transactionTokensApi = $client->getTransactionTokensApi();
 $apiResponse = $transactionTokensApi->listAllTransactionTokens(
+    $search,
+    $customerId,
+    $type,
+    $mode,
+    $active,
     $limit,
     $cursor,
     $cursorDirection
@@ -323,6 +350,11 @@ Lists all transaction tokens for a specific store.
 ```php
 function listStoreTransactionTokens(
     string $storeId,
+    ?string $search = null,
+    ?string $customerId = null,
+    ?string $type = null,
+    ?string $mode = null,
+    ?string $active = TransactionTokenActiveFilter::ACTIVE,
     ?int $limit = 10,
     ?string $cursor = null,
     ?string $cursorDirection = CursorDirectionQuery::DESC
@@ -338,6 +370,11 @@ This endpoint requires [JWT_TOKEN](../../doc/auth/oauth-2-bearer-token.md)
 | Parameter | Type | Tags | Description |
 |  --- | --- | --- | --- |
 | `storeId` | `string` | Template, Required | The unique identifier of the store. |
+| `search` | `?string` | Query, Optional | Case-insensitive free-text search. |
+| `customerId` | `?string` | Query, Optional | Filter by customer ID. |
+| `type` | [`?string(TransactionTokenListType)`](../../doc/models/transaction-token-list-type.md) | Query, Optional | Filter by token type. `one_time` tokens are excluded from listings and cannot be filtered on; filtering to `recurring` requires the App Token Secret. |
+| `mode` | [`?string(ModeQuery)`](../../doc/models/mode-query.md) | Query, Optional | Filter by environment mode. |
+| `active` | [`?string(TransactionTokenActiveFilter)`](../../doc/models/transaction-token-active-filter.md) | Query, Optional | Filter recurring tokens by whether they are still active.<br><br>**Default**: `TransactionTokenActiveFilter::ACTIVE` |
 | `limit` | `?int` | Query, Optional | Maximum number of resources to return in one page.<br><br>**Default**: `10`<br><br>**Constraints**: `<= 100` |
 | `cursor` | `?string` | Query, Optional | Cursor pointing to the resource after which pagination should continue. |
 | `cursorDirection` | [`?string(CursorDirectionQuery)`](../../doc/models/cursor-direction-query.md) | Query, Optional | Pagination direction relative to the supplied cursor.<br><br>**Default**: `CursorDirectionQuery::DESC` |
@@ -353,6 +390,16 @@ This method returns an [`ApiResponse`](../../doc/api-response.md) instance. The 
 ```php
 $storeId = '0cab399b-5621-425b-993b-f8507eba1e78';
 
+$search = 'tokyo';
+
+$customerId = '8a3f1b8e-2c1a-4b7a-9c2e-6f6b6f6e2b10';
+
+$type = TransactionTokenListType::RECURRING;
+
+$mode = ModeQuery::LIVE;
+
+$active = TransactionTokenActiveFilter::ACTIVE;
+
 $limit = 10;
 
 $cursor = '3541d4fa-596d-428e-8a36-f274e1b3d505';
@@ -362,6 +409,11 @@ $cursorDirection = CursorDirectionQuery::ASC;
 $transactionTokensApi = $client->getTransactionTokensApi();
 $apiResponse = $transactionTokensApi->listStoreTransactionTokens(
     $storeId,
+    $search,
+    $customerId,
+    $type,
+    $mode,
+    $active,
     $limit,
     $cursor,
     $cursorDirection
@@ -458,7 +510,7 @@ if ($apiResponse->isSuccess()) {
 Retrieves the details of an existing transaction token.
 
 ```php
-function getTransactionToken(string $storeId, string $id): ApiResponse
+function getTransactionToken(string $storeId, string $id, ?bool $polling = null): ApiResponse
 ```
 
 ## Authentication
@@ -471,12 +523,13 @@ This endpoint requires [JWT_TOKEN](../../doc/auth/oauth-2-bearer-token.md)
 |  --- | --- | --- | --- |
 | `storeId` | `string` | Template, Required | The unique identifier of the store. |
 | `id` | `string` | Template, Required | The unique identifier of the resource. |
+| `polling` | `?bool` | Query, Optional | If set to true, instructs the API to internally poll the token's 3DS or CVV authorization sub-status until it transitions to another status, or until the ~3 second server-side timeout is reached. |
 
 ## Response Type
 
 **200**: Token Details
 
-This method returns an [`ApiResponse`](../../doc/api-response.md) instance. The `getResult()` method on this instance returns the response data which is of type [`TransactionToken`](../../doc/models/transaction-token.md).
+This method returns an [`ApiResponse`](../../doc/api-response.md) instance. The `getResult()` method on this instance returns the response data which is of type `CardTransactionToken|KonbiniTransactionToken|OnlineTransactionToken|BankTransferTransactionToken|PaidyTransactionToken|QrScanTransactionToken|QrMerchantTransactionToken`.
 
 ## Example Usage
 
@@ -485,10 +538,13 @@ $storeId = '0cab399b-5621-425b-993b-f8507eba1e78';
 
 $id = 'c4e87129-cad4-47fb-8ded-b4c0a4ae0dd4';
 
+$polling = true;
+
 $transactionTokensApi = $client->getTransactionTokensApi();
 $apiResponse = $transactionTokensApi->getTransactionToken(
     $storeId,
-    $id
+    $id,
+    $polling
 );
 
 // Extracting response status code
@@ -497,7 +553,7 @@ var_dump($apiResponse->getStatusCode());
 var_dump($apiResponse->getHeaders());
 
 if ($apiResponse->isSuccess()) {
-    echo 'TransactionToken:';
+    echo 'CardTransactionToken|KonbiniTransactionToken|OnlineTransactionToken|BankTransferTransactionToken|PaidyTransactionToken|QrScanTransactionToken|QrMerchantTransactionToken:';
     var_dump($apiResponse->getResult());
 } else {
     $error = $apiResponse->getResult();
@@ -505,9 +561,9 @@ if ($apiResponse->isSuccess()) {
 }
 ```
 
-## Example Response *(as JSON)*
+## Example Response
 
-```json
+```
 {
   "id": "11f11e85-e9e9-b198-b990-c3a715943241",
   "store_id": "11f0e274-1e3b-4752-9513-33d3e07ede13",
@@ -620,7 +676,7 @@ This endpoint requires [JWT_TOKEN](../../doc/auth/oauth-2-bearer-token.md)
 
 **200**: Token Updated Successfully
 
-This method returns an [`ApiResponse`](../../doc/api-response.md) instance. The `getResult()` method on this instance returns the response data which is of type [`TransactionToken`](../../doc/models/transaction-token.md).
+This method returns an [`ApiResponse`](../../doc/api-response.md) instance. The `getResult()` method on this instance returns the response data which is of type `CardTransactionToken|KonbiniTransactionToken|OnlineTransactionToken|BankTransferTransactionToken|PaidyTransactionToken|QrScanTransactionToken|QrMerchantTransactionToken`.
 
 ## Example Usage
 
@@ -668,7 +724,7 @@ var_dump($apiResponse->getStatusCode());
 var_dump($apiResponse->getHeaders());
 
 if ($apiResponse->isSuccess()) {
-    echo 'TransactionToken:';
+    echo 'CardTransactionToken|KonbiniTransactionToken|OnlineTransactionToken|BankTransferTransactionToken|PaidyTransactionToken|QrScanTransactionToken|QrMerchantTransactionToken:';
     var_dump($apiResponse->getResult());
 } else {
     $error = $apiResponse->getResult();
@@ -676,9 +732,9 @@ if ($apiResponse->isSuccess()) {
 }
 ```
 
-## Example Response *(as JSON)*
+## Example Response
 
-```json
+```
 {
   "id": "11f11e85-e9e9-b198-b990-c3a715943241",
   "store_id": "11f0e274-1e3b-4752-9513-33d3e07ede13",
@@ -808,6 +864,285 @@ if ($apiResponse->isSuccess()) {
 } else {
     $error = $apiResponse->getResult();
     var_dump($error);
+}
+```
+
+## Errors
+
+| HTTP Status Code | Error Description | Exception Class |
+|  --- | --- | --- |
+| 400 | Bad Request (400). The request was invalid or could not be processed.  Common codes: VALIDATION_ERROR, INVALID_TOKEN_TYPE, NOT_SUPPORTED_BY_PROCESSOR. | [`ApiErrorException`](../../doc/models/api-error-exception.md) |
+| 401 | Unauthorized (401). Authentication failed.  Common codes: AUTH_HEADER_MISSING, INVALID_APP_TOKEN, INVALID_CREDENTIALS. | [`ApiErrorException`](../../doc/models/api-error-exception.md) |
+| 403 | Forbidden (403). The request is understood, but access is refused.  This occurs if permissions are insufficient or if a security lock is triggered. | [`ApiErrorException`](../../doc/models/api-error-exception.md) |
+| 404 | Not Found (404). The requested resource (e.g., Store ID or Token ID) does not exist. | [`ApiErrorException`](../../doc/models/api-error-exception.md) |
+| 429 | Too Many Requests (429). Rate limit exceeded. Returns an empty JSON object in this spec. | `ApiException` |
+
+
+# Enable Token Three Ds
+
+Enables 3-D Secure on an existing `recurring` transaction token that was created without it. Only applies to `recurring` tokens; returns an error if 3DS is already enabled. After calling this endpoint, poll the token until `data.three_ds.status` becomes `awaiting`, then use the token 3DS issuer token endpoint to complete authentication.
+
+```php
+function enableTokenThreeDs(
+    string $storeId,
+    string $id,
+    ?string $idempotencyKey = null,
+    ?EnableTokenThreeDsRequest $body = null
+): ApiResponse
+```
+
+## Authentication
+
+This endpoint requires [JWT_TOKEN](../../doc/auth/oauth-2-bearer-token.md)
+
+## Parameters
+
+| Parameter | Type | Tags | Description |
+|  --- | --- | --- | --- |
+| `storeId` | `string` | Template, Required | The unique identifier of the store. |
+| `id` | `string` | Template, Required | The unique identifier of the resource. |
+| `idempotencyKey` | `?string` | Header, Optional | An optional idempotency key to prevent double charges and duplicate operations. We recommend a randomly generated UUID (v4). |
+| `body` | [`?EnableTokenThreeDsRequest`](../../doc/models/enable-token-three-ds-request.md) | Body, Optional | Optional request payload. Omit entirely, or omit `redirect_endpoint`, if no redirect is needed. |
+
+## Response Type
+
+**200**: 3DS enabled successfully. Returns the updated token.
+
+This method returns an [`ApiResponse`](../../doc/api-response.md) instance. The `getResult()` method on this instance returns the response data which is of type `CardTransactionToken|KonbiniTransactionToken|OnlineTransactionToken|BankTransferTransactionToken|PaidyTransactionToken|QrScanTransactionToken|QrMerchantTransactionToken`.
+
+## Example Usage
+
+```php
+$storeId = '0cab399b-5621-425b-993b-f8507eba1e78';
+
+$id = 'c4e87129-cad4-47fb-8ded-b4c0a4ae0dd4';
+
+$body = EnableTokenThreeDsRequestBuilder::init()
+    ->redirectEndpoint('https://univapay.com/3ds-redirect')
+    ->build();
+
+$transactionTokensApi = $client->getTransactionTokensApi();
+$apiResponse = $transactionTokensApi->enableTokenThreeDs(
+    $storeId,
+    $id,
+    null,
+    $body
+);
+
+// Extracting response status code
+var_dump($apiResponse->getStatusCode());
+// Extracting response headers
+var_dump($apiResponse->getHeaders());
+
+if ($apiResponse->isSuccess()) {
+    echo 'CardTransactionToken|KonbiniTransactionToken|OnlineTransactionToken|BankTransferTransactionToken|PaidyTransactionToken|QrScanTransactionToken|QrMerchantTransactionToken:';
+    var_dump($apiResponse->getResult());
+} else {
+    $error = $apiResponse->getResult();
+    var_dump($error);
+}
+```
+
+## Example Response
+
+```
+{
+  "id": "11f11e85-e9e9-b198-b990-c3a715943241",
+  "store_id": "11f0e274-1e3b-4752-9513-33d3e07ede13",
+  "email": "test@test.com",
+  "payment_type": "card",
+  "active": true,
+  "mode": "live",
+  "type": "recurring",
+  "usage_limit": null,
+  "confirmed": null,
+  "metadata": {
+    "univapay-link-id": "11f11e85-1b45-dace-bf3d-cbcae52f65fc",
+    "univapay-name": "test",
+    "univapay-phone-number": "+81 08012341234"
+  },
+  "created_on": "2026-03-13T02:39:52.908468Z",
+  "updated_on": "2026-03-13T02:39:52.908468Z",
+  "last_used_on": null,
+  "data": {
+    "card": {
+      "cardholder": "TEST TEST",
+      "exp_month": 9,
+      "exp_year": 2026,
+      "card_bin": "424242",
+      "last_four": "424242",
+      "brand": "visa",
+      "card_type": "credit",
+      "country": "JP",
+      "category": "standard",
+      "issuer": "issuer",
+      "sub_brand": "none"
+    },
+    "billing": {
+      "line1": null,
+      "line2": null,
+      "state": null,
+      "city": null,
+      "country": null,
+      "zip": null,
+      "phone_number": {
+        "country_code": 81,
+        "local_number": "08012341234"
+      }
+    },
+    "cvv_authorize": {
+      "enabled": false,
+      "status": null,
+      "charge_id": null,
+      "credentials_id": null,
+      "currency": null
+    },
+    "cvv_authorize_check": {
+      "status": null,
+      "charge_id": null,
+      "date": null
+    },
+    "three_ds": {
+      "enabled": true,
+      "status": "pending",
+      "redirect_endpoint": "https://univapay.com/redirect/index.html",
+      "error": null,
+      "exempted": false
+    }
+  }
+}
+```
+
+## Errors
+
+| HTTP Status Code | Error Description | Exception Class |
+|  --- | --- | --- |
+| 400 | Bad Request (400). The request was invalid or could not be processed.  Common codes: VALIDATION_ERROR, INVALID_TOKEN_TYPE, NOT_SUPPORTED_BY_PROCESSOR. | [`ApiErrorException`](../../doc/models/api-error-exception.md) |
+| 401 | Unauthorized (401). Authentication failed.  Common codes: AUTH_HEADER_MISSING, INVALID_APP_TOKEN, INVALID_CREDENTIALS. | [`ApiErrorException`](../../doc/models/api-error-exception.md) |
+| 403 | Forbidden (403). The request is understood, but access is refused.  This occurs if permissions are insufficient or if a security lock is triggered. | [`ApiErrorException`](../../doc/models/api-error-exception.md) |
+| 404 | Not Found (404). The requested resource (e.g., Store ID or Token ID) does not exist. | [`ApiErrorException`](../../doc/models/api-error-exception.md) |
+| 429 | Too Many Requests (429). Rate limit exceeded. Returns an empty JSON object in this spec. | `ApiException` |
+
+
+# Disable Token Three Ds
+
+Disables 3-D Secure on an existing `recurring` transaction token. Only applies to `recurring` tokens.
+
+```php
+function disableTokenThreeDs(string $storeId, string $id): ApiResponse
+```
+
+## Authentication
+
+This endpoint requires [JWT_TOKEN](../../doc/auth/oauth-2-bearer-token.md)
+
+## Parameters
+
+| Parameter | Type | Tags | Description |
+|  --- | --- | --- | --- |
+| `storeId` | `string` | Template, Required | The unique identifier of the store. |
+| `id` | `string` | Template, Required | The unique identifier of the resource. |
+
+## Response Type
+
+**200**: 3DS disabled successfully. Returns the updated token.
+
+This method returns an [`ApiResponse`](../../doc/api-response.md) instance. The `getResult()` method on this instance returns the response data which is of type `CardTransactionToken|KonbiniTransactionToken|OnlineTransactionToken|BankTransferTransactionToken|PaidyTransactionToken|QrScanTransactionToken|QrMerchantTransactionToken`.
+
+## Example Usage
+
+```php
+$storeId = '0cab399b-5621-425b-993b-f8507eba1e78';
+
+$id = 'c4e87129-cad4-47fb-8ded-b4c0a4ae0dd4';
+
+$transactionTokensApi = $client->getTransactionTokensApi();
+$apiResponse = $transactionTokensApi->disableTokenThreeDs(
+    $storeId,
+    $id
+);
+
+// Extracting response status code
+var_dump($apiResponse->getStatusCode());
+// Extracting response headers
+var_dump($apiResponse->getHeaders());
+
+if ($apiResponse->isSuccess()) {
+    echo 'CardTransactionToken|KonbiniTransactionToken|OnlineTransactionToken|BankTransferTransactionToken|PaidyTransactionToken|QrScanTransactionToken|QrMerchantTransactionToken:';
+    var_dump($apiResponse->getResult());
+} else {
+    $error = $apiResponse->getResult();
+    var_dump($error);
+}
+```
+
+## Example Response
+
+```
+{
+  "id": "11f11e85-e9e9-b198-b990-c3a715943241",
+  "store_id": "11f0e274-1e3b-4752-9513-33d3e07ede13",
+  "email": "test@test.com",
+  "payment_type": "card",
+  "active": true,
+  "mode": "live",
+  "type": "recurring",
+  "usage_limit": null,
+  "confirmed": null,
+  "metadata": {
+    "univapay-link-id": "11f11e85-1b45-dace-bf3d-cbcae52f65fc",
+    "univapay-name": "test",
+    "univapay-phone-number": "+81 08012341234"
+  },
+  "created_on": "2026-03-13T02:39:52.908468Z",
+  "updated_on": "2026-03-13T02:39:52.908468Z",
+  "last_used_on": null,
+  "data": {
+    "card": {
+      "cardholder": "TEST TEST",
+      "exp_month": 9,
+      "exp_year": 2026,
+      "card_bin": "424242",
+      "last_four": "424242",
+      "brand": "visa",
+      "card_type": "credit",
+      "country": "JP",
+      "category": "standard",
+      "issuer": "issuer",
+      "sub_brand": "none"
+    },
+    "billing": {
+      "line1": null,
+      "line2": null,
+      "state": null,
+      "city": null,
+      "country": null,
+      "zip": null,
+      "phone_number": {
+        "country_code": 81,
+        "local_number": "08012341234"
+      }
+    },
+    "cvv_authorize": {
+      "enabled": false,
+      "status": null,
+      "charge_id": null,
+      "credentials_id": null,
+      "currency": null
+    },
+    "cvv_authorize_check": {
+      "status": null,
+      "charge_id": null,
+      "date": null
+    },
+    "three_ds": {
+      "enabled": true,
+      "status": "pending",
+      "redirect_endpoint": "https://univapay.com/redirect/index.html",
+      "error": null,
+      "exempted": false
+    }
+  }
 }
 ```
 

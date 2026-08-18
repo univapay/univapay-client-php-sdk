@@ -118,10 +118,10 @@ class GenericMetadata implements \JsonSerializable
     /**
      * Add an additional property to this model.
      *
-     * @mapsBy anyOf(string,float,bool)
+     * @mapsBy anyOf(string,float,bool,array[])
      *
      * @param string $name Name of property.
-     * @param string|float|bool $value Value of property.
+     * @param string|float|bool|array[] $value Value of property.
      */
     public function addAdditionalProperty(string $name, $value)
     {
@@ -139,7 +139,7 @@ class GenericMetadata implements \JsonSerializable
      *
      * @param string $name Name of property.
      *
-     * @return string|float|bool|false Value of the property.
+     * @return string|float|bool|array[]|false Value of the property.
      */
     public function findAdditionalProperty(string $name)
     {
@@ -156,7 +156,7 @@ class GenericMetadata implements \JsonSerializable
     {
         return array_map(
             function ($value) {
-                return ApiHelper::getJsonHelper()->verifyTypes($value, 'anyOf(string,float,bool)');
+                return ApiHelper::getJsonHelper()->verifyTypes($value, 'anyOf(string,float,bool,array[])');
             },
             $this->additionalProperties
         );

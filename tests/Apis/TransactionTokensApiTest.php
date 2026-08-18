@@ -78,13 +78,27 @@ class TransactionTokensApiTest extends BaseTestController
     public function testListAllTransactionTokens()
     {
         // Parameters for the API call
+        $search = 'tokyo';
+        $customerId = '8a3f1b8e-2c1a-4b7a-9c2e-6f6b6f6e2b10';
+        $type = Models\TransactionTokenListType::RECURRING;
+        $mode = Models\ModeQuery::LIVE;
+        $active = Models\TransactionTokenActiveFilter::ACTIVE;
         $limit = 10;
         $cursor = '3541d4fa-596d-428e-8a36-f274e1b3d505';
         $cursorDirection =
             Models\CursorDirectionQuery::DESC;
 
         // Perform API call
-        $result = self::$controller->listAllTransactionTokens($limit, $cursor, $cursorDirection)->getResult();
+        $result = self::$controller->listAllTransactionTokens(
+            $search,
+            $customerId,
+            $type,
+            $mode,
+            $active,
+            $limit,
+            $cursor,
+            $cursorDirection
+        )->getResult();
 
         $headers = [];
         $headers['Content-Type'] = ['application/json', true];
@@ -119,14 +133,28 @@ class TransactionTokensApiTest extends BaseTestController
     {
         // Parameters for the API call
         $storeId = '0cab399b-5621-425b-993b-f8507eba1e78';
+        $search = 'tokyo';
+        $customerId = '8a3f1b8e-2c1a-4b7a-9c2e-6f6b6f6e2b10';
+        $type = Models\TransactionTokenListType::RECURRING;
+        $mode = Models\ModeQuery::LIVE;
+        $active = Models\TransactionTokenActiveFilter::ACTIVE;
         $limit = 10;
         $cursor = '3541d4fa-596d-428e-8a36-f274e1b3d505';
         $cursorDirection =
             Models\CursorDirectionQuery::DESC;
 
         // Perform API call
-        $result = self::$controller->listStoreTransactionTokens($storeId, $limit, $cursor, $cursorDirection)
-            ->getResult();
+        $result = self::$controller->listStoreTransactionTokens(
+            $storeId,
+            $search,
+            $customerId,
+            $type,
+            $mode,
+            $active,
+            $limit,
+            $cursor,
+            $cursorDirection
+        )->getResult();
 
         $headers = [];
         $headers['Content-Type'] = ['application/json', true];
@@ -162,9 +190,10 @@ class TransactionTokensApiTest extends BaseTestController
         // Parameters for the API call
         $storeId = '0cab399b-5621-425b-993b-f8507eba1e78';
         $id = 'c4e87129-cad4-47fb-8ded-b4c0a4ae0dd4';
+        $polling = true;
 
         // Perform API call
-        $result = self::$controller->getTransactionToken($storeId, $id)->getResult();
+        $result = self::$controller->getTransactionToken($storeId, $id, $polling)->getResult();
 
         $headers = [];
         $headers['Content-Type'] = ['application/json', true];
@@ -250,6 +279,85 @@ class TransactionTokensApiTest extends BaseTestController
 
         // Assert result with expected response
         $this->newTestCase(null)->expectStatus(204)->assert();
+    }
+
+    public function testEnableTokenThreeDs()
+    {
+        // Parameters for the API call
+        $storeId = '0cab399b-5621-425b-993b-f8507eba1e78';
+        $id = 'c4e87129-cad4-47fb-8ded-b4c0a4ae0dd4';
+        $idempotencyKey = 'f64be872-353d-4c3c-84cb-3dc617fe89f7';
+        $body = TestParam::object(
+            '{"redirect_endpoint":"https://univapay.com/3ds-redirect"}',
+            Models\EnableTokenThreeDsRequest::class
+        );
+
+        // Perform API call
+        $result = self::$controller->enableTokenThreeDs($storeId, $id, $idempotencyKey, $body)->getResult();
+
+        $headers = [];
+        $headers['Content-Type'] = ['application/json', true];
+
+        // Assert result with expected response
+        $this->newTestCase($result)
+            ->expectStatus(200)
+            ->allowExtraHeaders()
+            ->expectHeaders($headers)
+            ->bodyMatcher(KeysBodyMatcher::init(TestParam::object(
+                '{"id":"11f11e85-e9e9-b198-b990-c3a715943241","store_id":"11f0e274-1e3b-4752-95' .
+                '13-33d3e07ede13","email":"test@test.com","payment_type":"card","active":true,"m' .
+                'ode":"live","type":"recurring","usage_limit":null,"confirmed":null,"metadata":{' .
+                '"univapay-link-id":"11f11e85-1b45-dace-bf3d-cbcae52f65fc","univapay-name":"test' .
+                '","univapay-phone-number":"+81 08012341234"},"created_on":"2026-03-13T02:39:52.' .
+                '908468Z","updated_on":"2026-03-13T02:39:52.908468Z","last_used_on":null,"data":' .
+                '{"card":{"cardholder":"TEST TEST","exp_month":9,"exp_year":2026,"card_bin":"424' .
+                '242","last_four":"424242","brand":"visa","card_type":"credit","country":"JP","c' .
+                'ategory":"standard","issuer":"issuer","sub_brand":"none"},"billing":{"line1":nu' .
+                'll,"line2":null,"state":null,"city":null,"country":null,"zip":null,"phone_numbe' .
+                'r":{"country_code":81,"local_number":"08012341234"}},"cvv_authorize":{"enabled"' .
+                ':false,"status":null,"charge_id":null,"credentials_id":null,"currency":null},"c' .
+                'vv_authorize_check":{"status":null,"charge_id":null,"date":null},"three_ds":{"e' .
+                'nabled":true,"status":"pending","redirect_endpoint":"https://univapay.com/redir' .
+                'ect/index.html","error":null,"exempted":false}}}'
+            )))
+            ->assert();
+    }
+
+    public function testDisableTokenThreeDs()
+    {
+        // Parameters for the API call
+        $storeId = '0cab399b-5621-425b-993b-f8507eba1e78';
+        $id = 'c4e87129-cad4-47fb-8ded-b4c0a4ae0dd4';
+
+        // Perform API call
+        $result = self::$controller->disableTokenThreeDs($storeId, $id)->getResult();
+
+        $headers = [];
+        $headers['Content-Type'] = ['application/json', true];
+
+        // Assert result with expected response
+        $this->newTestCase($result)
+            ->expectStatus(200)
+            ->allowExtraHeaders()
+            ->expectHeaders($headers)
+            ->bodyMatcher(KeysBodyMatcher::init(TestParam::object(
+                '{"id":"11f11e85-e9e9-b198-b990-c3a715943241","store_id":"11f0e274-1e3b-4752-95' .
+                '13-33d3e07ede13","email":"test@test.com","payment_type":"card","active":true,"m' .
+                'ode":"live","type":"recurring","usage_limit":null,"confirmed":null,"metadata":{' .
+                '"univapay-link-id":"11f11e85-1b45-dace-bf3d-cbcae52f65fc","univapay-name":"test' .
+                '","univapay-phone-number":"+81 08012341234"},"created_on":"2026-03-13T02:39:52.' .
+                '908468Z","updated_on":"2026-03-13T02:39:52.908468Z","last_used_on":null,"data":' .
+                '{"card":{"cardholder":"TEST TEST","exp_month":9,"exp_year":2026,"card_bin":"424' .
+                '242","last_four":"424242","brand":"visa","card_type":"credit","country":"JP","c' .
+                'ategory":"standard","issuer":"issuer","sub_brand":"none"},"billing":{"line1":nu' .
+                'll,"line2":null,"state":null,"city":null,"country":null,"zip":null,"phone_numbe' .
+                'r":{"country_code":81,"local_number":"08012341234"}},"cvv_authorize":{"enabled"' .
+                ':false,"status":null,"charge_id":null,"credentials_id":null,"currency":null},"c' .
+                'vv_authorize_check":{"status":null,"charge_id":null,"date":null},"three_ds":{"e' .
+                'nabled":true,"status":"pending","redirect_endpoint":"https://univapay.com/redir' .
+                'ect/index.html","error":null,"exempted":false}}}'
+            )))
+            ->assert();
     }
 
     public function testGetTokenThreeDsIssuerToken()

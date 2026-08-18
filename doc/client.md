@@ -67,4 +67,6 @@ The gateway for the SDK. This class acts as a factory for the Apis and also hold
 | getStoresApi() | Gets StoresApi |
 | getWebhooksApi() | Gets WebhooksApi |
 | getDirectDebitApi() | Gets DirectDebitApi |
+| getCheckoutApi() | Gets CheckoutApi |
+| getTransactionHistoryApi() | Gets TransactionHistoryApi |
 

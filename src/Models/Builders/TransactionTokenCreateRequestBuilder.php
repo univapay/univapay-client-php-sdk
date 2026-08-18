@@ -15,6 +15,9 @@ use UnivaPay\Models\TokenCreateBankTransferData;
 use UnivaPay\Models\TokenCreateCardData;
 use UnivaPay\Models\TokenCreateKonbiniData;
 use UnivaPay\Models\TokenCreateOnlineData;
+use UnivaPay\Models\TokenCreatePaidyData;
+use UnivaPay\Models\TokenCreateQrMerchantData;
+use UnivaPay\Models\TokenCreateQrScanData;
 use UnivaPay\Models\TransactionTokenCreateRequest;
 use UnivaPay\Models\TransactionTokenCreateRequestMetadata;
 
@@ -40,7 +43,7 @@ class TransactionTokenCreateRequestBuilder
      *
      * @param string $paymentType
      * @param string $type
-     * @param TokenCreateCardData|TokenCreateKonbiniData|TokenCreateOnlineData|TokenCreateBankTransferData $data
+     * @param TokenCreateCardData|TokenCreateKonbiniData|TokenCreateOnlineData|TokenCreateBankTransferData|TokenCreatePaidyData|TokenCreateQrScanData|TokenCreateQrMerchantData $data
      */
     public static function init(string $paymentType, string $type, $data): self
     {

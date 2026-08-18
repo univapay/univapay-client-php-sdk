@@ -55,12 +55,14 @@ class SubscriptionsApiTest extends BaseTestController
                 '{"id":"11ef335e-9aa5-c54a-8313-7f9847da313a","store_id":"11edf541-c42d-653c-8c' .
                 '3d-dfe0a55f95c0","transaction_token_id":"11ef32a7-3a71-8662-803f-1bc27702eeec",' .
                 '"amount":1250,"currency":"USD","amount_formatted":12.5,"initial_amount":1000,"i' .
-                'nitial_amount_formatted":10.0,"subsequent_cycles_start":null,"only_direct_curre' .
-                'ncy":false,"first_charge_authorization_only":false,"status":"current","metadata' .
-                '":{"order_id":"ORD-987"},"mode":"live","created_on":"2024-06-26T01:51:28.627023' .
-                'Z","period":"monthly","next_payment":{"id":"11ef3360-1f9a-c54a-8313-7f9847da313' .
-                'b","due_date":"2024-07-26","zone_id":"Asia/Tokyo","amount":1250,"currency":"USD' .
-                '","amount_formatted":12.5,"is_paid":false}}'
+                'nitial_amount_formatted":10.0,"subsequent_cycles_start":null,"schedule_settings' .
+                '":{"start_on":"2024-06-26","zone_id":"Asia/Tokyo","preserve_end_of_month":false' .
+                ',"retry_interval":"P7D","termination_mode":"immediate"},"only_direct_currency":' .
+                'false,"first_charge_authorization_only":false,"status":"current","metadata":{"o' .
+                'rder_id":"ORD-987"},"mode":"live","created_on":"2024-06-26T01:51:28.627023Z","p' .
+                'eriod":"monthly","next_payment":{"id":"11ef3360-1f9a-c54a-8313-7f9847da313b","d' .
+                'ue_date":"2024-07-26","zone_id":"Asia/Tokyo","amount":1250,"currency":"USD","am' .
+                'ount_formatted":12.5,"is_paid":false}}'
             )))
             ->assert();
     }
@@ -68,13 +70,23 @@ class SubscriptionsApiTest extends BaseTestController
     public function testListAllSubscriptions()
     {
         // Parameters for the API call
+        $search = 'order_id:12345';
+        $status = Models\SubscriptionStatus::CURRENT;
+        $mode = Models\ChargeMode::LIVE;
         $limit = 10;
         $cursor = '3541d4fa-596d-428e-8a36-f274e1b3d505';
         $cursorDirection =
             Models\CursorDirectionQuery::DESC;
 
         // Perform API call
-        $result = self::$controller->listAllSubscriptions($limit, $cursor, $cursorDirection)->getResult();
+        $result = self::$controller->listAllSubscriptions(
+            $search,
+            $status,
+            $mode,
+            $limit,
+            $cursor,
+            $cursorDirection
+        )->getResult();
 
         $headers = [];
         $headers['Content-Type'] = ['application/json', true];
@@ -88,21 +100,59 @@ class SubscriptionsApiTest extends BaseTestController
                 '{"items":[{"id":"11ef3410-aaaa-4bcd-8e1f-1a2b3c4d5e60","store_id":"11edf541-c4' .
                 '2d-653c-8c3d-dfe0a55f95c0","transaction_token_id":"11ef3413-dddd-4ef0-b142-4d5e' .
                 '6f809193","amount":1250,"currency":"USD","amount_formatted":12.5,"status":"curr' .
-                'ent","merchant_name":"管理画面ガイド","store_name":"管理画面ガイド_TEST店舗","payment_type":"ca' .
-                'rd","next_payment_date":"2024-07-26","user_data":{"type":"charge","cardholder_n' .
-                'ame":"taro yamada","email":"taro@test.com","brand":"visa"}},{"id":"11ef3411-bbb' .
-                'b-4cde-9f20-2b3c4d5e6f71","store_id":"22af6520-d53e-764d-9d4e-ef01b66fa6d1","tr' .
-                'ansaction_token_id":"11ef3414-eeee-4f01-c253-5e6f80919204","amount":3000,"curre' .
-                'ncy":"JPY","amount_formatted":3000,"status":"current","merchant_name":"管理画面ガイド"' .
-                ',"store_name":"管理画面ガイド_Online店舗","payment_type":"card","next_payment_date":"202' .
-                '4-08-10","user_data":{"type":"charge","cardholder_name":"hanako suzuki","email"' .
-                ':"hanako@test.com","brand":"mastercard"}},{"id":"11ef3412-cccc-4def-a031-3c4d5e' .
-                '6f8082","store_id":"33af7631-e64f-875e-ae5f-f012c77fb7e2","transaction_token_id' .
-                '":"11ef3415-ffff-4012-d364-6f8091920315","amount":9800,"currency":"JPY","amount' .
-                '_formatted":9800,"status":"suspended","merchant_name":"管理画面ガイド","store_name":"管' .
+                'ent","mode":"live","created_on":"2024-06-26T01:51:28.627023Z","schedule_setting' .
+                's":{"zone_id":"Asia/Tokyo","retry_interval":"P7D","termination_mode":"immediate' .
+                '"},"merchant_name":"管理画面ガイド","store_name":"管理画面ガイド_TEST店舗","payment_type":"card' .
+                '","next_payment_date":"2024-07-26","user_data":{"type":"charge","cardholder_nam' .
+                'e":"taro yamada","email":"taro@test.com","brand":"visa"}},{"id":"11ef3411-bbbb-' .
+                '4cde-9f20-2b3c4d5e6f71","store_id":"22af6520-d53e-764d-9d4e-ef01b66fa6d1","tran' .
+                'saction_token_id":"11ef3414-eeee-4f01-c253-5e6f80919204","amount":3000,"currenc' .
+                'y":"JPY","amount_formatted":3000,"status":"current","mode":"live","created_on":' .
+                '"2024-07-11T09:20:00.627023Z","schedule_settings":{"zone_id":"Asia/Tokyo","retr' .
+                'y_interval":"P7D","termination_mode":"immediate"},"merchant_name":"管理画面ガイド","st' .
+                'ore_name":"管理画面ガイド_Online店舗","payment_type":"card","next_payment_date":"2024-08' .
+                '-10","user_data":{"type":"charge","cardholder_name":"hanako suzuki","email":"ha' .
+                'nako@test.com","brand":"mastercard"}},{"id":"11ef3412-cccc-4def-a031-3c4d5e6f80' .
+                '82","store_id":"33af7631-e64f-875e-ae5f-f012c77fb7e2","transaction_token_id":"1' .
+                '1ef3415-ffff-4012-d364-6f8091920315","amount":9800,"currency":"JPY","amount_for' .
+                'matted":9800,"status":"suspended","mode":"live","created_on":"2024-08-15T13:05:' .
+                '22.627023Z","schedule_settings":{"zone_id":"Asia/Tokyo","retry_interval":"P7D",' .
+                '"termination_mode":"on_next_payment"},"merchant_name":"管理画面ガイド","store_name":"管' .
                 '理画面ガイド_Osaka店舗","payment_type":"card","next_payment_date":"2024-09-15","user_da' .
                 'ta":{"type":"charge","cardholder_name":"jiro tanaka","email":"jiro@test.com","b' .
                 'rand":"jcb"}}],"has_more":false,"total_hits":3}'
+            )))
+            ->assert();
+    }
+
+    public function testSimulateSubscriptionPlan()
+    {
+        // Parameters for the API call
+        $idempotencyKey = 'f64be872-353d-4c3c-84cb-3dc617fe89f7';
+        $body = TestParam::object(
+            '{"amount":1000,"currency":"JPY","payment_type":"card","period":"monthly","schedule' .
+            '_settings":{"zone_id":"Asia/Tokyo"}}',
+            Models\SubscriptionSimulationRequest::class
+        );
+
+        // Perform API call
+        $result = self::$controller->simulateSubscriptionPlan($idempotencyKey, $body)->getResult();
+
+        $headers = [];
+        $headers['Content-Type'] = ['application/json', true];
+
+        // Assert result with expected response
+        $this->newTestCase($result)
+            ->expectStatus(200)
+            ->allowExtraHeaders()
+            ->expectHeaders($headers)
+            ->bodyMatcher(KeysBodyMatcher::init(TestParam::object(
+                '[{"due_date":"2026-09-01","zone_id":"Asia/Tokyo","amount":1000,"currency":"JPY' .
+                '","is_paid":false,"is_last_payment":false,"successful_payment_date":null,"termi' .
+                'nate_with_status":null,"retry_interval":null},{"due_date":"2026-10-01","zone_id' .
+                '":"Asia/Tokyo","amount":1000,"currency":"JPY","is_paid":false,"is_last_payment"' .
+                ':true,"successful_payment_date":null,"terminate_with_status":null,"retry_interv' .
+                'al":null}]'
             )))
             ->assert();
     }
@@ -142,21 +192,60 @@ class SubscriptionsApiTest extends BaseTestController
                 '{"items":[{"id":"11ef335e-9aa5-c54a-8313-7f9847da313a","store_id":"11edf541-c4' .
                 '2d-653c-8c3d-dfe0a55f95c0","transaction_token_id":"11ef32a7-3a71-8662-803f-1bc2' .
                 '7702eeec","amount":1250,"currency":"USD","amount_formatted":12.5,"status":"curr' .
-                'ent","merchant_name":"管理画面ガイド","store_name":"管理画面ガイド_TEST店舗","payment_type":"ca' .
-                'rd","next_payment_date":"2024-07-26","user_data":{"type":"charge","cardholder_n' .
-                'ame":"taro yamada","email":"test@test.com","brand":"visa"}},{"id":"11ef3401-1a2' .
-                'b-4c3d-8e4f-5a6b7c8d9e0f","store_id":"11edf541-c42d-653c-8c3d-dfe0a55f95c0","tr' .
-                'ansaction_token_id":"11ef3402-2b3c-4d5e-9f60-6b7c8d9e0f11","amount":5000,"curre' .
-                'ncy":"JPY","amount_formatted":5000,"status":"current","merchant_name":"管理画面ガイド"' .
-                ',"store_name":"管理画面ガイド_TEST店舗","payment_type":"card","next_payment_date":"2024-' .
-                '08-01","user_data":{"type":"charge","cardholder_name":"hanako suzuki","email":"' .
-                'hanako@test.com","brand":"mastercard"}},{"id":"11ef3403-3c4d-5e6f-a071-7c8d9e0f' .
-                '1122","store_id":"11edf541-c42d-653c-8c3d-dfe0a55f95c0","transaction_token_id":' .
-                '"11ef3404-4d5e-6f70-b182-8d9e0f112233","amount":9800,"currency":"JPY","amount_f' .
-                'ormatted":9800,"status":"suspended","merchant_name":"管理画面ガイド","store_name":"管理画' .
+                'ent","mode":"live","created_on":"2024-06-26T01:51:28.627023Z","schedule_setting' .
+                's":{"zone_id":"Asia/Tokyo","retry_interval":"P7D","termination_mode":"immediate' .
+                '"},"merchant_name":"管理画面ガイド","store_name":"管理画面ガイド_TEST店舗","payment_type":"card' .
+                '","next_payment_date":"2024-07-26","user_data":{"type":"charge","cardholder_nam' .
+                'e":"taro yamada","email":"test@test.com","brand":"visa"}},{"id":"11ef3401-1a2b-' .
+                '4c3d-8e4f-5a6b7c8d9e0f","store_id":"11edf541-c42d-653c-8c3d-dfe0a55f95c0","tran' .
+                'saction_token_id":"11ef3402-2b3c-4d5e-9f60-6b7c8d9e0f11","amount":5000,"currenc' .
+                'y":"JPY","amount_formatted":5000,"status":"current","mode":"live","created_on":' .
+                '"2024-07-01T10:00:00.627023Z","schedule_settings":{"zone_id":"Asia/Tokyo","retr' .
+                'y_interval":"P7D","termination_mode":"immediate"},"merchant_name":"管理画面ガイド","st' .
+                'ore_name":"管理画面ガイド_TEST店舗","payment_type":"card","next_payment_date":"2024-08-0' .
+                '1","user_data":{"type":"charge","cardholder_name":"hanako suzuki","email":"hana' .
+                'ko@test.com","brand":"mastercard"}},{"id":"11ef3403-3c4d-5e6f-a071-7c8d9e0f1122' .
+                '","store_id":"11edf541-c42d-653c-8c3d-dfe0a55f95c0","transaction_token_id":"11e' .
+                'f3404-4d5e-6f70-b182-8d9e0f112233","amount":9800,"currency":"JPY","amount_forma' .
+                'tted":9800,"status":"suspended","mode":"live","created_on":"2024-08-15T13:05:22' .
+                '.627023Z","schedule_settings":{"zone_id":"Asia/Tokyo","retry_interval":"P7D","t' .
+                'ermination_mode":"on_next_payment"},"merchant_name":"管理画面ガイド","store_name":"管理画' .
                 '面ガイド_TEST店舗","payment_type":"card","next_payment_date":"2024-09-15","user_data"' .
                 ':{"type":"charge","cardholder_name":"jiro tanaka","email":"jiro@test.com","bran' .
                 'd":"jcb"}}],"has_more":false,"total_hits":3}'
+            )))
+            ->assert();
+    }
+
+    public function testSimulateStoreSubscriptionPlan()
+    {
+        // Parameters for the API call
+        $storeId = '0cab399b-5621-425b-993b-f8507eba1e78';
+        $idempotencyKey = 'f64be872-353d-4c3c-84cb-3dc617fe89f7';
+        $body = TestParam::object(
+            '{"amount":1000,"currency":"JPY","payment_type":"card","period":"monthly","schedule' .
+            '_settings":{"zone_id":"Asia/Tokyo"}}',
+            Models\SubscriptionSimulationRequest::class
+        );
+
+        // Perform API call
+        $result = self::$controller->simulateStoreSubscriptionPlan($storeId, $idempotencyKey, $body)->getResult();
+
+        $headers = [];
+        $headers['Content-Type'] = ['application/json', true];
+
+        // Assert result with expected response
+        $this->newTestCase($result)
+            ->expectStatus(200)
+            ->allowExtraHeaders()
+            ->expectHeaders($headers)
+            ->bodyMatcher(KeysBodyMatcher::init(TestParam::object(
+                '[{"due_date":"2026-09-01","zone_id":"Asia/Tokyo","amount":1000,"currency":"JPY' .
+                '","is_paid":false,"is_last_payment":false,"successful_payment_date":null,"termi' .
+                'nate_with_status":null,"retry_interval":null},{"due_date":"2026-10-01","zone_id' .
+                '":"Asia/Tokyo","amount":1000,"currency":"JPY","is_paid":false,"is_last_payment"' .
+                ':true,"successful_payment_date":null,"terminate_with_status":null,"retry_interv' .
+                'al":null}]'
             )))
             ->assert();
     }
@@ -493,8 +582,10 @@ class SubscriptionsApiTest extends BaseTestController
             ->bodyMatcher(KeysBodyMatcher::init(TestParam::object(
                 '{"id":"11ef335e-9aa5-c54a-8313-7f9847da313a","store_id":"11edf541-c42d-653c-8c' .
                 '3d-dfe0a55f95c0","transaction_token_id":"11ef32a7-3a71-8662-803f-1bc27702eeec",' .
-                '"amount":1250,"currency":"USD","amount_formatted":12.5,"status":"suspended","mo' .
-                'de":"test","created_on":"2024-06-26T01:51:28.627023Z","period":"monthly"}'
+                '"amount":1250,"currency":"USD","amount_formatted":12.5,"schedule_settings":{"st' .
+                'art_on":"2024-07-01","zone_id":"Asia/Tokyo","preserve_end_of_month":false,"retr' .
+                'y_interval":"P7D","termination_mode":"on_next_payment"},"status":"suspended","m' .
+                'ode":"test","created_on":"2024-06-26T01:51:28.627023Z","period":"monthly"}'
             )))
             ->assert();
     }
@@ -520,8 +611,10 @@ class SubscriptionsApiTest extends BaseTestController
             ->bodyMatcher(KeysBodyMatcher::init(TestParam::object(
                 '{"id":"11ef335e-9aa5-c54a-8313-7f9847da313a","store_id":"11edf541-c42d-653c-8c' .
                 '3d-dfe0a55f95c0","transaction_token_id":"11ef32a7-3a71-8662-803f-1bc27702eeec",' .
-                '"amount":1250,"currency":"USD","amount_formatted":12.5,"status":"unpaid","mode"' .
-                ':"test","created_on":"2024-06-26T01:51:28.627023Z","period":"monthly"}'
+                '"amount":1250,"currency":"USD","amount_formatted":12.5,"schedule_settings":{"st' .
+                'art_on":"2024-07-01","zone_id":"Asia/Tokyo","preserve_end_of_month":false,"retr' .
+                'y_interval":"P7D","termination_mode":"immediate"},"status":"unpaid","mode":"tes' .
+                't","created_on":"2024-06-26T01:51:28.627023Z","period":"monthly"}'
             )))
             ->assert();
     }
@@ -552,8 +645,10 @@ class SubscriptionsApiTest extends BaseTestController
             ->bodyMatcher(KeysBodyMatcher::init(TestParam::object(
                 '{"id":"11ef335e-9aa5-c54a-8313-7f9847da313a","store_id":"11edf541-c42d-653c-8c' .
                 '3d-dfe0a55f95c0","transaction_token_id":"11ef3362-3700-c54a-9baa-6f7e6527c9d9",' .
-                '"amount":1250,"currency":"USD","amount_formatted":12.5,"status":"current","mode' .
-                '":"test","created_on":"2024-06-26T01:51:28.627023Z","period":"monthly"}'
+                '"amount":1250,"currency":"USD","amount_formatted":12.5,"schedule_settings":{"st' .
+                'art_on":"2024-07-01","zone_id":"Asia/Tokyo","preserve_end_of_month":false,"retr' .
+                'y_interval":"P7D","termination_mode":"immediate"},"status":"current","mode":"te' .
+                'st","created_on":"2024-06-26T01:51:28.627023Z","period":"monthly"}'
             )))
             ->assert();
     }

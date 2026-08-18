@@ -27,7 +27,22 @@ class TransactionTokenCreateRequestPaymentType
 
     public const BANK_TRANSFER = 'bank_transfer';
 
-    private const _ALL_VALUES = [self::CARD, self::ONLINE, self::KONBINI, self::BANK_TRANSFER];
+    public const QR_SCAN = 'qr_scan';
+
+    public const QR_MERCHANT = 'qr_merchant';
+
+    public const PAIDY = 'paidy';
+
+    private const _ALL_VALUES =
+        [
+            self::CARD,
+            self::ONLINE,
+            self::KONBINI,
+            self::BANK_TRANSFER,
+            self::QR_SCAN,
+            self::QR_MERCHANT,
+            self::PAIDY
+        ];
 
     /**
      * Ensures that all the given values are present in this Enum.

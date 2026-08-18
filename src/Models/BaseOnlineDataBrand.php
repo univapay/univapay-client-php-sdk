@@ -15,7 +15,10 @@ use Exception;
 use stdClass;
 
 /**
- * Base Online Data Brand schema.
+ * Base Online Data Brand schema. `alipay_china`, `alipay_hk`, `gcash`, `dana`, `truemoney`, `kakaopay`,
+ * `tng`, `rabbit_line_pay`, `bpi`, `boost`, `tinaba`, `naver_pay`, `toss_pay`, `maya`, `grab_sg`,
+ * `kredivo_id`, `k_plus`, and `kaspi_kz` are Alipay+ regional wallets routed through the
+ * `alipay_plus_online` gateway family.
  */
 class BaseOnlineDataBrand
 {
@@ -29,12 +32,66 @@ class BaseOnlineDataBrand
 
     public const D_BARAI_ONLINE = 'd_barai_online';
 
+    public const ALIPAY_CHINA = 'alipay_china';
+
+    public const ALIPAY_HK = 'alipay_hk';
+
+    public const GCASH = 'gcash';
+
+    public const DANA = 'dana';
+
+    public const TRUEMONEY = 'truemoney';
+
+    public const KAKAOPAY = 'kakaopay';
+
+    public const TNG = 'tng';
+
+    public const RABBIT_LINE_PAY = 'rabbit_line_pay';
+
+    public const BPI = 'bpi';
+
+    public const BOOST = 'boost';
+
+    public const TINABA = 'tinaba';
+
+    public const NAVER_PAY = 'naver_pay';
+
+    public const TOSS_PAY = 'toss_pay';
+
+    public const MAYA = 'maya';
+
+    public const GRAB_SG = 'grab_sg';
+
+    public const KREDIVO_ID = 'kredivo_id';
+
+    public const K_PLUS = 'k_plus';
+
+    public const KASPI_KZ = 'kaspi_kz';
+
     private const _ALL_VALUES = [
         self::ALIPAY_ONLINE,
         self::ALIPAY_PLUS_ONLINE,
         self::PAY_PAY_ONLINE,
         self::WE_CHAT_ONLINE,
-        self::D_BARAI_ONLINE
+        self::D_BARAI_ONLINE,
+        self::ALIPAY_CHINA,
+        self::ALIPAY_HK,
+        self::GCASH,
+        self::DANA,
+        self::TRUEMONEY,
+        self::KAKAOPAY,
+        self::TNG,
+        self::RABBIT_LINE_PAY,
+        self::BPI,
+        self::BOOST,
+        self::TINABA,
+        self::NAVER_PAY,
+        self::TOSS_PAY,
+        self::MAYA,
+        self::GRAB_SG,
+        self::KREDIVO_ID,
+        self::K_PLUS,
+        self::KASPI_KZ
     ];
 
     /**

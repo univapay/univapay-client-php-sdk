@@ -11,35 +11,34 @@ declare(strict_types=1);
 namespace UnivaPay\Models\Builders;
 
 use Core\Utils\CoreHelper;
+use UnivaPay\Models\BankTransferTransactionToken;
 use UnivaPay\Models\TokenResponseBankTransferData;
-use UnivaPay\Models\TokenResponseCardData;
-use UnivaPay\Models\TokenResponseKonbiniData;
-use UnivaPay\Models\TokenResponseOnlineData;
-use UnivaPay\Models\TransactionToken;
 
 /**
- * Builder for model TransactionToken
+ * Builder for model BankTransferTransactionToken
  *
- * @see TransactionToken
+ * @see BankTransferTransactionToken
  */
-class TransactionTokenBuilder
+class BankTransferTransactionTokenBuilder
 {
     /**
-     * @var TransactionToken
+     * @var BankTransferTransactionToken
      */
     private $instance;
 
-    private function __construct(TransactionToken $instance)
+    private function __construct(BankTransferTransactionToken $instance)
     {
         $this->instance = $instance;
     }
 
     /**
-     * Initializes a new Transaction Token Builder object.
+     * Initializes a new Bank Transfer Transaction Token Builder object.
+     *
+     * @param TokenResponseBankTransferData $data
      */
-    public static function init(): self
+    public static function init(TokenResponseBankTransferData $data): self
     {
-        return new self(new TransactionToken());
+        return new self(new BankTransferTransactionToken($data));
     }
 
     /**
@@ -81,17 +80,6 @@ class TransactionTokenBuilder
     public function unsetEmail(): self
     {
         $this->instance->unsetEmail();
-        return $this;
-    }
-
-    /**
-     * Sets payment type field.
-     *
-     * @param string|null $value
-     */
-    public function paymentType(?string $value): self
-    {
-        $this->instance->setPaymentType($value);
         return $this;
     }
 
@@ -222,17 +210,6 @@ class TransactionTokenBuilder
     }
 
     /**
-     * Sets data field.
-     *
-     * @param TokenResponseCardData|TokenResponseKonbiniData|TokenResponseOnlineData|TokenResponseBankTransferData|null $value
-     */
-    public function data($value): self
-    {
-        $this->instance->setData($value);
-        return $this;
-    }
-
-    /**
      * Add an additional property to this model.
      *
      * @param string $name Name of property.
@@ -245,9 +222,9 @@ class TransactionTokenBuilder
     }
 
     /**
-     * Initializes a new Transaction Token object.
+     * Initializes a new Bank Transfer Transaction Token object.
      */
-    public function build(): TransactionToken
+    public function build(): BankTransferTransactionToken
     {
         return CoreHelper::clone($this->instance);
     }

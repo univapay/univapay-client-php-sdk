@@ -88,8 +88,43 @@ class StoresApiTest extends BaseTestController
                 'e":true},"card_configuration":{"enabled":true,"debit_enabled":true,"prepaid_ena' .
                 'bled":false,"three_ds_required":true},"online_configuration":{"enabled":true},"' .
                 'bank_transfer_configuration":{"enabled":true,"match_amount":true,"expiration":"' .
-                'P7D"}}}'
+                'P7D"},"qr_scan_configuration":{"enabled":true,"forbidden_qr_scan_gateways":["we' .
+                'chat"]},"convenience_configuration":{"enabled":true,"expiration":"P3D"},"paidy_' .
+                'configuration":{"enabled":false},"recurring_token_configuration":{"recurring_ty' .
+                'pe":"infinite","charge_wait_period":"P7D","card_charge_cvv_confirmation":{"enab' .
+                'led":false}},"security_configuration":{"card_charge_cooldown":"PT5M","subscript' .
+                'ion_cooldown":"PT10M","restrict_ip_after_failed_charge":{"enabled":true,"count"' .
+                ':5,"cooldown":"PT1H"},"refund_percent_limit":100,"confirmation_required":false,' .
+                '"min_refund_threshold":100,"limit_refund_by_sales":{"enabled":true,"period":"mo' .
+                'nthly","rolling_window":true}},"installments_configuration":{"enabled":true,"ca' .
+                'rd_processor":{"revolving":true,"fixed_cycle":true},"supported_payment_types":[' .
+                '"card"],"min_charge_amount":{"amount":3000,"currency":"JPY"},"max_payout_period' .
+                '":"P12M","only_with_processor":true},"card_brand_percent_fees":{"visa":3.6,"mas' .
+                'tercard":3.6,"jcb":3.8}}}'
             )))
+            ->assert();
+    }
+
+    public function testCreateCustomerId()
+    {
+        // Parameters for the API call
+        $storeId = '0cab399b-5621-425b-993b-f8507eba1e78';
+        $body = TestParam::object('{"customer_id":"local-customer-1902"}', Models\CreateCustomerIdRequest::class);
+
+        // Perform API call
+        $result = self::$controller->createCustomerId($storeId, $body)->getResult();
+
+        $headers = [];
+        $headers['Content-Type'] = ['application/json', true];
+
+        // Assert result with expected response
+        $this->newTestCase($result)
+            ->expectStatus(200)
+            ->allowExtraHeaders()
+            ->expectHeaders($headers)
+            ->bodyMatcher(
+                KeysBodyMatcher::init(TestParam::object('{"customer_id":"8a3f1b8e-2c1a-4b7a-9c2e-6f6b6f6e2b10"}'))
+            )
             ->assert();
     }
 }

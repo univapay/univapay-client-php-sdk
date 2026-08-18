@@ -16,12 +16,14 @@ Transaction Token Payment Type schema.
 | `ONLINE` |
 | `KONBINI` |
 | `BANK_TRANSFER` |
+| `QR_SCAN` |
+| `QR_MERCHANT` |
 
 ## Example
 
 ```php
 use UnivaPay\Models\TransactionTokenPaymentType;
 
-$transactionTokenPaymentType = TransactionTokenPaymentType::PAIDY;
+$transactionTokenPaymentType = TransactionTokenPaymentType::CARD;
 ```
 

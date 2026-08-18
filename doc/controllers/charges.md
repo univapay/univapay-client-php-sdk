@@ -824,14 +824,14 @@ if ($apiResponse->isSuccess()) {
 
 # Capture Charge
 
-Captures a previously authorized charge (where `capture` was set to false during creation).  The capture amount must be less than or equal to the authorized amount, and the currency must match.
+Captures a previously authorized charge (where `capture` was set to false during creation).  The capture amount must be less than or equal to the authorized amount, and the currency must match. The request body — and both of its fields — is optional: if omitted entirely, the full outstanding authorized amount (in the originally requested currency) is captured.
 
 ```php
 function captureCharge(
     string $storeId,
     string $id,
-    ChargeCaptureRequest $body,
-    ?string $idempotencyKey = null
+    ?string $idempotencyKey = null,
+    ?ChargeCaptureRequest $body = null
 ): ApiResponse
 ```
 
@@ -845,8 +845,8 @@ This endpoint requires [JWT_TOKEN](../../doc/auth/oauth-2-bearer-token.md)
 |  --- | --- | --- | --- |
 | `storeId` | `string` | Template, Required | The unique identifier of the store. |
 | `id` | `string` | Template, Required | The unique identifier of the resource. |
-| `body` | [`ChargeCaptureRequest`](../../doc/models/charge-capture-request.md) | Body, Required | Request payload for capturing an authorized charge. |
 | `idempotencyKey` | `?string` | Header, Optional | An optional idempotency key to prevent double charges and duplicate operations. We recommend a randomly generated UUID (v4). |
+| `body` | [`?ChargeCaptureRequest`](../../doc/models/charge-capture-request.md) | Body, Optional | Optional request payload for capturing an authorized charge. Omit entirely to capture the full outstanding authorized amount. |
 
 ## Response Type
 
@@ -861,15 +861,16 @@ $storeId = '0cab399b-5621-425b-993b-f8507eba1e78';
 
 $id = 'c4e87129-cad4-47fb-8ded-b4c0a4ae0dd4';
 
-$body = ChargeCaptureRequestBuilder::init(
-    1000,
-    'JPY'
-)->build();
+$body = ChargeCaptureRequestBuilder::init()
+    ->amount(1000)
+    ->currency('JPY')
+    ->build();
 
 $chargesApi = $client->getChargesApi();
 $apiResponse = $chargesApi->captureCharge(
     $storeId,
     $id,
+    null,
     $body
 );
 

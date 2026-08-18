@@ -271,7 +271,10 @@ class ChargeCreateRequest implements \JsonSerializable
 
     /**
      * Returns Three Ds.
-     * Charge Create Request Three Ds schema.
+     * Charge Create Request Three Ds schema. Either supply `mode` (and optionally `redirect_endpoint`) to
+     * have Univapay run 3DS, or supply all six external-MPI fields (`authentication_value` through
+     * `transaction_status`) when 3DS authentication was already completed outside of Univapay — in that
+     * case `mode` is set to `provided` automatically and must not be sent.
      */
     public function getThreeDs(): ?ChargeCreateRequestThreeDs
     {
@@ -280,7 +283,10 @@ class ChargeCreateRequest implements \JsonSerializable
 
     /**
      * Sets Three Ds.
-     * Charge Create Request Three Ds schema.
+     * Charge Create Request Three Ds schema. Either supply `mode` (and optionally `redirect_endpoint`) to
+     * have Univapay run 3DS, or supply all six external-MPI fields (`authentication_value` through
+     * `transaction_status`) when 3DS authentication was already completed outside of Univapay — in that
+     * case `mode` is set to `provided` automatically and must not be sent.
      *
      * @maps three_ds
      */

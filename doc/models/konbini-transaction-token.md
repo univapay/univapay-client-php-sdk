@@ -1,13 +1,13 @@
 
-# Transaction Token
+# Konbini Transaction Token
 
-Stored transaction token resource.
+Stored transaction token resource for a `konbini` payment type.
 
 *This model accepts additional fields of type array.*
 
 ## Structure
 
-`TransactionToken`
+`KonbiniTransactionToken`
 
 ## Fields
 
@@ -16,7 +16,6 @@ Stored transaction token resource.
 | `id` | `?string` | Optional | Unique identifier. | getId(): ?string | setId(?string id): void |
 | `storeId` | `?string` | Optional | Store identifier. | getStoreId(): ?string | setStoreId(?string storeId): void |
 | `email` | `?string` | Optional | Customer email address. | getEmail(): ?string | setEmail(?string email): void |
-| `paymentType` | [`?string(TransactionTokenPaymentType)`](../../doc/models/transaction-token-payment-type.md) | Optional | Transaction Token Payment Type schema. | getPaymentType(): ?string | setPaymentType(?string paymentType): void |
 | `active` | `?bool` | Optional | Whether the resource is active. | getActive(): ?bool | setActive(?bool active): void |
 | `mode` | [`?string(TransactionTokenMode)`](../../doc/models/transaction-token-mode.md) | Optional | Transaction Token Mode schema. | getMode(): ?string | setMode(?string mode): void |
 | `type` | [`?string(TransactionTokenType)`](../../doc/models/transaction-token-type.md) | Optional | Transaction Token Type schema. | getType(): ?string | setType(?string type): void |
@@ -26,26 +25,41 @@ Stored transaction token resource.
 | `createdOn` | `?DateTime` | Optional | Timestamp when the resource was created. | getCreatedOn(): ?\DateTime | setCreatedOn(?\DateTime createdOn): void |
 | `updatedOn` | `?DateTime` | Optional | Timestamp when the resource was last updated. | getUpdatedOn(): ?\DateTime | setUpdatedOn(?\DateTime updatedOn): void |
 | `lastUsedOn` | `?DateTime` | Optional | Timestamp when the token was last used. | getLastUsedOn(): ?\DateTime | setLastUsedOn(?\DateTime lastUsedOn): void |
-| `data` | [TokenResponseCardData](../../doc/models/token-response-card-data.md)\|[TokenResponseKonbiniData](../../doc/models/token-response-konbini-data.md)\|[TokenResponseOnlineData](../../doc/models/token-response-online-data.md)\|[TokenResponseBankTransferData](../../doc/models/token-response-bank-transfer-data.md)\|null | Optional | Transaction token data payload. The actual structure depends on `payment_type` — card, konbini, online (QR / 3DS), or bank transfer. | getData(): | setData( data): void |
+| `paymentType` | `string` | Required, Constant | Payment method type. Always `konbini` for this variant.<br><br>**Value**: `'konbini'` | getPaymentType(): string | setPaymentType(string paymentType): void |
+| `data` | [`TokenResponseKonbiniData`](../../doc/models/token-response-konbini-data.md) | Required | Token Response Konbini Data schema. | getData(): TokenResponseKonbiniData | setData(TokenResponseKonbiniData data): void |
 | `additionalProperties` | `array<string, array>` | Optional | - | findAdditionalProperty(string key): array | additionalProperty(string key, array value): void |
 
 ## Example
 
 ```php
-use UnivaPay\Models\Builders\TransactionTokenBuilder;
-use UnivaPay\Models\TransactionTokenPaymentType;
+use UnivaPay\Models\Builders\KonbiniTransactionTokenBuilder;
+use UnivaPay\Models\Builders\TokenResponseKonbiniDataBuilder;
+use UnivaPay\Models\BaseKonbiniDataConvenienceStore;
+use UnivaPay\Models\Builders\TokenResponsePhoneNumberBuilder;
+use UnivaPay\ApiHelper;
 use UnivaPay\Models\TransactionTokenMode;
 use UnivaPay\Models\TransactionTokenType;
 use UnivaPay\Utils\DateTimeHelper;
-use UnivaPay\Models\Builders\TokenResponseCardDataBuilder;
-use UnivaPay\Models\Builders\TokenResponseCardDataCardBuilder;
-use UnivaPay\ApiHelper;
 
-$transactionToken = TransactionTokenBuilder::init()
+$konbiniTransactionToken = KonbiniTransactionTokenBuilder::init(
+    TokenResponseKonbiniDataBuilder::init()
+        ->customerName('Taro Yamada')
+        ->convenienceStore(BaseKonbiniDataConvenienceStore::SEVEN_ELEVEN)
+        ->expirationPeriod('P7D')
+        ->expirationTimeShift(null)
+        ->phoneNumber(
+            TokenResponsePhoneNumberBuilder::init()
+                ->countryCode(81)
+                ->localNumber('08012341234')
+                ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
+                ->build()
+        )
+        ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
+        ->build()
+)
     ->id('6426bbd2-17bd-41bf-883b-1fe970db48ee')
     ->storeId('fc264608-9a9e-495e-844e-a08129a81af4')
     ->email('test@univapay.com')
-    ->paymentType(TransactionTokenPaymentType::CARD)
     ->active(true)
     ->mode(TransactionTokenMode::LIVE)
     ->type(TransactionTokenType::ONE_TIME)
@@ -59,34 +73,6 @@ $transactionToken = TransactionTokenBuilder::init()
     ->createdOn(DateTimeHelper::fromRfc3339DateTime('2026-04-09T07:35:50Z'))
     ->updatedOn(DateTimeHelper::fromRfc3339DateTime('2026-04-09T07:35:50Z'))
     ->lastUsedOn(DateTimeHelper::fromRfc3339DateTime('2026-04-09T07:35:50.000000Z'))
-    ->data(
-        TokenResponseCardDataBuilder::init()
-            ->card(
-                TokenResponseCardDataCardBuilder::init()
-                    ->cardholder('TARO YAMADA')
-                    ->expMonth(12)
-                    ->expYear(2026)
-                    ->cardBin('card_bin0')
-                    ->lastFour('4242')
-                    ->brand('visa')
-                    ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
-                    ->build()
-            )
-            ->billing(
-                null
-            )
-            ->cvvAuthorize(
-                null
-            )
-            ->cvvAuthorizeCheck(
-                null
-            )
-            ->threeDs(
-                null
-            )
-            ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
-            ->build()
-    )
     ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
     ->build();
 ```

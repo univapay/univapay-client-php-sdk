@@ -465,21 +465,24 @@ class ChargesApi extends BaseApi
 
     /**
      * Captures a previously authorized charge (where `capture` was set to false during creation).  The
-     * capture amount must be less than or equal to the authorized amount, and the currency must match.
+     * capture amount must be less than or equal to the authorized amount, and the currency must match. The
+     * request body — and both of its fields — is optional: if omitted entirely, the full outstanding
+     * authorized amount (in the originally requested currency) is captured.
      *
      * @param string $storeId The unique identifier of the store.
      * @param string $id The unique identifier of the resource.
-     * @param ChargeCaptureRequest $body Request payload for capturing an authorized charge.
      * @param string|null $idempotencyKey An optional idempotency key to prevent double charges and
      *        duplicate operations. We recommend a randomly generated UUID (v4).
+     * @param ChargeCaptureRequest|null $body Optional request payload for capturing an authorized
+     *        charge. Omit entirely to capture the full outstanding authorized amount.
      *
      * @return ApiResponse Response from the API call
      */
     public function captureCharge(
         string $storeId,
         string $id,
-        ChargeCaptureRequest $body,
-        ?string $idempotencyKey = null
+        ?string $idempotencyKey = null,
+        ?ChargeCaptureRequest $body = null
     ): ApiResponse {
         $_reqBuilder = $this->requestBuilder(RequestMethod::POST, '/stores/{storeId}/charges/{id}/capture')
             ->auth('JWT_TOKEN')
@@ -487,8 +490,8 @@ class ChargesApi extends BaseApi
                 TemplateParam::init('storeId', $storeId)->required(),
                 TemplateParam::init('id', $id)->required(),
                 HeaderParam::init('Content-Type', 'application/json'),
-                BodyParam::init($body)->required(),
-                HeaderParam::init('Idempotency-Key', $idempotencyKey)
+                HeaderParam::init('Idempotency-Key', $idempotencyKey),
+                BodyParam::init($body)
             );
 
         $_resHandler = $this->responseHandler()

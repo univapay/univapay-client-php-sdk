@@ -15,7 +15,7 @@ Webhook envelope for transaction token lifecycle events. Fired as `token_created
 |  --- | --- | --- | --- | --- | --- |
 | `id` | `string` | Required | Unique ID of this webhook delivery. | getId(): string | setId(string id): void |
 | `event` | [`string(TokenEvent)`](../../doc/models/token-event.md) | Required | Event type discriminator — `token_created`, `token_updated`, `token_three_d_s_updated`, `token_cvv_auth_updated`, `token_cvv_auth_check_updated`, `token_replaced`, or `recurring_token_deleted`. | getEvent(): string | setEvent(string event): void |
-| `data` | [`?TransactionToken`](../../doc/models/transaction-token.md) | Optional | Stored transaction token resource. | getData(): ?TransactionToken | setData(?TransactionToken data): void |
+| `data` | [CardTransactionToken](../../doc/models/card-transaction-token.md)\|[KonbiniTransactionToken](../../doc/models/konbini-transaction-token.md)\|[OnlineTransactionToken](../../doc/models/online-transaction-token.md)\|[BankTransferTransactionToken](../../doc/models/bank-transfer-transaction-token.md)\|[PaidyTransactionToken](../../doc/models/paidy-transaction-token.md)\|[QrScanTransactionToken](../../doc/models/qr-scan-transaction-token.md)\|[QrMerchantTransactionToken](../../doc/models/qr-merchant-transaction-token.md)\|null | Optional | Stored transaction token resource. `payment_type` discriminates which variant applies — and therefore the concrete shape of `data` — per the mapping above. | getData(): | setData( data): void |
 | `createdOn` | `DateTime` | Required | Timestamp when the event was fired. | getCreatedOn(): \DateTime | setCreatedOn(\DateTime createdOn): void |
 | `additionalProperties` | `array<string, array>` | Optional | - | findAdditionalProperty(string key): array | additionalProperty(string key, array value): void |
 
@@ -25,8 +25,9 @@ Webhook envelope for transaction token lifecycle events. Fired as `token_created
 use UnivaPay\Models\Builders\TokenWebhookEventBuilder;
 use UnivaPay\Models\TokenEvent;
 use UnivaPay\Utils\DateTimeHelper;
-use UnivaPay\Models\Builders\TransactionTokenBuilder;
-use UnivaPay\Models\TransactionTokenPaymentType;
+use UnivaPay\Models\Builders\CardTransactionTokenBuilder;
+use UnivaPay\Models\Builders\TokenResponseCardDataBuilder;
+use UnivaPay\Models\Builders\TokenResponseCardDataCardBuilder;
 use UnivaPay\Models\TransactionTokenMode;
 use UnivaPay\Models\TransactionTokenType;
 
@@ -36,11 +37,22 @@ $tokenWebhookEvent = TokenWebhookEventBuilder::init(
     DateTimeHelper::fromRfc3339DateTimeRequired('2026-04-09T07:35:50.000000Z')
 )
     ->data(
-        TransactionTokenBuilder::init()
+        CardTransactionTokenBuilder::init(
+            TokenResponseCardDataBuilder::init()
+                ->card(
+                    TokenResponseCardDataCardBuilder::init()
+                        ->cardholder('TARO YAMADA')
+                        ->expMonth(12)
+                        ->expYear(2026)
+                        ->lastFour('4242')
+                        ->brand('visa')
+                        ->build()
+                )
+                ->build()
+        )
             ->id('6426bbd2-17bd-41bf-883b-1fe970db48ee')
             ->storeId('fc264608-9a9e-495e-844e-a08129a81af4')
             ->email('test@univapay.com')
-            ->paymentType(TransactionTokenPaymentType::CARD)
             ->active(true)
             ->mode(TransactionTokenMode::LIVE)
             ->type(TransactionTokenType::RECURRING)

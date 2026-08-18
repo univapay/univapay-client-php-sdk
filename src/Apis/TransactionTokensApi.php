@@ -19,10 +19,13 @@ use CoreInterfaces\Core\Request\RequestMethod;
 use UnivaPay\Exceptions\ApiErrorException;
 use UnivaPay\Http\ApiResponse;
 use UnivaPay\Models\CursorDirectionQuery;
+use UnivaPay\Models\EnableTokenThreeDsRequest;
+use UnivaPay\Models\ModeQuery;
 use UnivaPay\Models\ThreeDsIssuerToken;
-use UnivaPay\Models\TransactionToken;
+use UnivaPay\Models\TransactionTokenActiveFilter;
 use UnivaPay\Models\TransactionTokenCreateRequest;
 use UnivaPay\Models\TransactionTokenList;
+use UnivaPay\Models\TransactionTokenListType;
 use UnivaPay\Models\TransactionTokenUpdateRequest;
 
 class TransactionTokensApi extends BaseApi
@@ -84,7 +87,10 @@ class TransactionTokensApi extends BaseApi
             ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
             ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
             ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
-            ->type(TransactionToken::class)
+            ->typeGroup('oneOf{paymentType}(CardTransactionToken{card},KonbiniTransactionToken{konbini},Onl' .
+            'ineTransactionToken{online},BankTransferTransactionToken{bankTransfer},PaidyTransac' .
+            'tionToken{paidy},QrScanTransactionToken{qrScan},QrMerchantTransactionToken{qrMercha' .
+            'nt})')
             ->returnApiResponse();
 
         return $this->execute($_reqBuilder, $_resHandler);
@@ -93,6 +99,12 @@ class TransactionTokensApi extends BaseApi
     /**
      * Lists all transaction tokens across all stores.
      *
+     * @param string|null $search Case-insensitive free-text search.
+     * @param string|null $customerId Filter by customer ID.
+     * @param string|null $type Filter by token type. `one_time` tokens are excluded from listings
+     *        and cannot be filtered on; filtering to `recurring` requires the App Token Secret.
+     * @param string|null $mode Filter by environment mode.
+     * @param string|null $active Filter recurring tokens by whether they are still active.
      * @param int|null $limit Maximum number of resources to return in one page.
      * @param string|null $cursor Cursor pointing to the resource after which pagination should
      *        continue.
@@ -101,6 +113,11 @@ class TransactionTokensApi extends BaseApi
      * @return ApiResponse Response from the API call
      */
     public function listAllTransactionTokens(
+        ?string $search = null,
+        ?string $customerId = null,
+        ?string $type = null,
+        ?string $mode = null,
+        ?string $active = TransactionTokenActiveFilter::ACTIVE,
         ?int $limit = 10,
         ?string $cursor = null,
         ?string $cursorDirection = CursorDirectionQuery::DESC
@@ -108,6 +125,15 @@ class TransactionTokensApi extends BaseApi
         $_reqBuilder = $this->requestBuilder(RequestMethod::GET, '/tokens')
             ->auth('JWT_TOKEN')
             ->parameters(
+                QueryParam::init('search', $search)->unIndexed(),
+                QueryParam::init('customer_id', $customerId)->unIndexed(),
+                QueryParam::init('type', $type)
+                    ->unIndexed()
+                    ->serializeBy([TransactionTokenListType::class, 'checkValue']),
+                QueryParam::init('mode', $mode)->unIndexed()->serializeBy([ModeQuery::class, 'checkValue']),
+                QueryParam::init('active', $active)
+                    ->unIndexed()
+                    ->serializeBy([TransactionTokenActiveFilter::class, 'checkValue']),
                 QueryParam::init('limit', $limit)->unIndexed(),
                 QueryParam::init('cursor', $cursor)->unIndexed(),
                 QueryParam::init('cursor_direction', $cursorDirection)
@@ -160,6 +186,12 @@ class TransactionTokensApi extends BaseApi
      * Lists all transaction tokens for a specific store.
      *
      * @param string $storeId The unique identifier of the store.
+     * @param string|null $search Case-insensitive free-text search.
+     * @param string|null $customerId Filter by customer ID.
+     * @param string|null $type Filter by token type. `one_time` tokens are excluded from listings
+     *        and cannot be filtered on; filtering to `recurring` requires the App Token Secret.
+     * @param string|null $mode Filter by environment mode.
+     * @param string|null $active Filter recurring tokens by whether they are still active.
      * @param int|null $limit Maximum number of resources to return in one page.
      * @param string|null $cursor Cursor pointing to the resource after which pagination should
      *        continue.
@@ -169,6 +201,11 @@ class TransactionTokensApi extends BaseApi
      */
     public function listStoreTransactionTokens(
         string $storeId,
+        ?string $search = null,
+        ?string $customerId = null,
+        ?string $type = null,
+        ?string $mode = null,
+        ?string $active = TransactionTokenActiveFilter::ACTIVE,
         ?int $limit = 10,
         ?string $cursor = null,
         ?string $cursorDirection = CursorDirectionQuery::DESC
@@ -177,6 +214,15 @@ class TransactionTokensApi extends BaseApi
             ->auth('JWT_TOKEN')
             ->parameters(
                 TemplateParam::init('storeId', $storeId)->required(),
+                QueryParam::init('search', $search)->unIndexed(),
+                QueryParam::init('customer_id', $customerId)->unIndexed(),
+                QueryParam::init('type', $type)
+                    ->unIndexed()
+                    ->serializeBy([TransactionTokenListType::class, 'checkValue']),
+                QueryParam::init('mode', $mode)->unIndexed()->serializeBy([ModeQuery::class, 'checkValue']),
+                QueryParam::init('active', $active)
+                    ->unIndexed()
+                    ->serializeBy([TransactionTokenActiveFilter::class, 'checkValue']),
                 QueryParam::init('limit', $limit)->unIndexed(),
                 QueryParam::init('cursor', $cursor)->unIndexed(),
                 QueryParam::init('cursor_direction', $cursorDirection)
@@ -230,16 +276,20 @@ class TransactionTokensApi extends BaseApi
      *
      * @param string $storeId The unique identifier of the store.
      * @param string $id The unique identifier of the resource.
+     * @param bool|null $polling If set to true, instructs the API to internally poll the token's
+     *        3DS or CVV authorization sub-status until it transitions to another status, or until
+     *        the ~3 second server-side timeout is reached.
      *
      * @return ApiResponse Response from the API call
      */
-    public function getTransactionToken(string $storeId, string $id): ApiResponse
+    public function getTransactionToken(string $storeId, string $id, ?bool $polling = null): ApiResponse
     {
         $_reqBuilder = $this->requestBuilder(RequestMethod::GET, '/stores/{storeId}/tokens/{id}')
             ->auth('JWT_TOKEN')
             ->parameters(
                 TemplateParam::init('storeId', $storeId)->required(),
-                TemplateParam::init('id', $id)->required()
+                TemplateParam::init('id', $id)->required(),
+                QueryParam::init('polling', $polling)->unIndexed()
             );
 
         $_resHandler = $this->responseHandler()
@@ -283,7 +333,10 @@ class TransactionTokensApi extends BaseApi
             ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
             ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
             ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
-            ->type(TransactionToken::class)
+            ->typeGroup('oneOf{paymentType}(CardTransactionToken{card},KonbiniTransactionToken{konbini},Onl' .
+            'ineTransactionToken{online},BankTransferTransactionToken{bankTransfer},PaidyTransac' .
+            'tionToken{paidy},QrScanTransactionToken{qrScan},QrMerchantTransactionToken{qrMercha' .
+            'nt})')
             ->returnApiResponse();
 
         return $this->execute($_reqBuilder, $_resHandler);
@@ -367,7 +420,10 @@ class TransactionTokensApi extends BaseApi
             ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
             ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
             ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
-            ->type(TransactionToken::class)
+            ->typeGroup('oneOf{paymentType}(CardTransactionToken{card},KonbiniTransactionToken{konbini},Onl' .
+            'ineTransactionToken{online},BankTransferTransactionToken{bankTransfer},PaidyTransac' .
+            'tionToken{paidy},QrScanTransactionToken{qrScan},QrMerchantTransactionToken{qrMercha' .
+            'nt})')
             ->returnApiResponse();
 
         return $this->execute($_reqBuilder, $_resHandler);
@@ -434,6 +490,154 @@ class TransactionTokensApi extends BaseApi
             ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
             ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
             ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
+            ->returnApiResponse();
+
+        return $this->execute($_reqBuilder, $_resHandler);
+    }
+
+    /**
+     * Enables 3-D Secure on an existing `recurring` transaction token that was created without it. Only
+     * applies to `recurring` tokens; returns an error if 3DS is already enabled. After calling this
+     * endpoint, poll the token until `data.three_ds.status` becomes `awaiting`, then use the token 3DS
+     * issuer token endpoint to complete authentication.
+     *
+     * @param string $storeId The unique identifier of the store.
+     * @param string $id The unique identifier of the resource.
+     * @param string|null $idempotencyKey An optional idempotency key to prevent double charges and
+     *        duplicate operations. We recommend a randomly generated UUID (v4).
+     * @param EnableTokenThreeDsRequest|null $body Optional request payload. Omit entirely, or omit
+     *        `redirect_endpoint`, if no redirect is needed.
+     *
+     * @return ApiResponse Response from the API call
+     */
+    public function enableTokenThreeDs(
+        string $storeId,
+        string $id,
+        ?string $idempotencyKey = null,
+        ?EnableTokenThreeDsRequest $body = null
+    ): ApiResponse {
+        $_reqBuilder = $this->requestBuilder(RequestMethod::POST, '/stores/{storeId}/tokens/{id}/three_ds')
+            ->auth('JWT_TOKEN')
+            ->parameters(
+                TemplateParam::init('storeId', $storeId)->required(),
+                TemplateParam::init('id', $id)->required(),
+                HeaderParam::init('Content-Type', 'application/json'),
+                HeaderParam::init('Idempotency-Key', $idempotencyKey),
+                BodyParam::init($body)
+            );
+
+        $_resHandler = $this->responseHandler()
+            ->throwErrorOn(
+                '400',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 400 Bad Request: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '401',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 401 Unauthorized: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '403',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 403 Forbidden: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '404',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 404 Not Found: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '429',
+                ErrorType::initWithErrorTemplate('HTTP 429 Rate Limited: {$response.body#/code}')
+            )
+            ->throwErrorOn('409', ErrorType::initWithErrorTemplate('HTTP 409 Conflict: {$response.body#/code}'))
+            ->throwErrorOn(
+                '500',
+                ErrorType::initWithErrorTemplate('HTTP 500 Server Error: {$response.body#/code}')
+            )
+            ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
+            ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
+            ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
+            ->typeGroup('oneOf{paymentType}(CardTransactionToken{card},KonbiniTransactionToken{konbini},Onl' .
+            'ineTransactionToken{online},BankTransferTransactionToken{bankTransfer},PaidyTransac' .
+            'tionToken{paidy},QrScanTransactionToken{qrScan},QrMerchantTransactionToken{qrMercha' .
+            'nt})')
+            ->returnApiResponse();
+
+        return $this->execute($_reqBuilder, $_resHandler);
+    }
+
+    /**
+     * Disables 3-D Secure on an existing `recurring` transaction token. Only applies to `recurring` tokens.
+     *
+     * @param string $storeId The unique identifier of the store.
+     * @param string $id The unique identifier of the resource.
+     *
+     * @return ApiResponse Response from the API call
+     */
+    public function disableTokenThreeDs(string $storeId, string $id): ApiResponse
+    {
+        $_reqBuilder = $this->requestBuilder(RequestMethod::DELETE, '/stores/{storeId}/tokens/{id}/three_ds')
+            ->auth('JWT_TOKEN')
+            ->parameters(
+                TemplateParam::init('storeId', $storeId)->required(),
+                TemplateParam::init('id', $id)->required()
+            );
+
+        $_resHandler = $this->responseHandler()
+            ->throwErrorOn(
+                '400',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 400 Bad Request: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '401',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 401 Unauthorized: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '403',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 403 Forbidden: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '404',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 404 Not Found: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '429',
+                ErrorType::initWithErrorTemplate('HTTP 429 Rate Limited: {$response.body#/code}')
+            )
+            ->throwErrorOn('409', ErrorType::initWithErrorTemplate('HTTP 409 Conflict: {$response.body#/code}'))
+            ->throwErrorOn(
+                '500',
+                ErrorType::initWithErrorTemplate('HTTP 500 Server Error: {$response.body#/code}')
+            )
+            ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
+            ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
+            ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
+            ->typeGroup('oneOf{paymentType}(CardTransactionToken{card},KonbiniTransactionToken{konbini},Onl' .
+            'ineTransactionToken{online},BankTransferTransactionToken{bankTransfer},PaidyTransac' .
+            'tionToken{paidy},QrScanTransactionToken{qrScan},QrMerchantTransactionToken{qrMercha' .
+            'nt})')
             ->returnApiResponse();
 
         return $this->execute($_reqBuilder, $_resHandler);

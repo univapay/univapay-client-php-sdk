@@ -35,7 +35,7 @@ class TokenWebhookEvent implements \JsonSerializable
     private $event;
 
     /**
-     * @var TransactionToken|null
+     * @var CardTransactionToken|KonbiniTransactionToken|OnlineTransactionToken|BankTransferTransactionToken|PaidyTransactionToken|QrScanTransactionToken|QrMerchantTransactionToken|null
      */
     private $data;
 
@@ -105,20 +105,27 @@ class TokenWebhookEvent implements \JsonSerializable
 
     /**
      * Returns Data.
-     * Stored transaction token resource.
+     * Stored transaction token resource. `payment_type` discriminates which variant applies — and
+     * therefore the concrete shape of `data` — per the mapping above.
+     *
+     * @return CardTransactionToken|KonbiniTransactionToken|OnlineTransactionToken|BankTransferTransactionToken|PaidyTransactionToken|QrScanTransactionToken|QrMerchantTransactionToken|null
      */
-    public function getData(): ?TransactionToken
+    public function getData()
     {
         return $this->data;
     }
 
     /**
      * Sets Data.
-     * Stored transaction token resource.
+     * Stored transaction token resource. `payment_type` discriminates which variant applies — and
+     * therefore the concrete shape of `data` — per the mapping above.
      *
      * @maps data
+     * @mapsBy anyOf(oneOf{paymentType2}(CardTransactionToken{card2},KonbiniTransactionToken{konbini2},OnlineTransactionToken{online2},BankTransferTransactionToken{bankTransfer2},PaidyTransactionToken{paidy2},QrScanTransactionToken{qrScan2},QrMerchantTransactionToken{qrMerchant2}),null)
+     *
+     * @param CardTransactionToken|KonbiniTransactionToken|OnlineTransactionToken|BankTransferTransactionToken|PaidyTransactionToken|QrScanTransactionToken|QrMerchantTransactionToken|null $data
      */
-    public function setData(?TransactionToken $data): void
+    public function setData($data): void
     {
         $this->data = $data;
     }
@@ -215,7 +222,14 @@ class TokenWebhookEvent implements \JsonSerializable
         $json['id']         = $this->id;
         $json['event']      = TokenEvent::checkValue($this->event);
         if (isset($this->data)) {
-            $json['data']   = $this->data;
+            $json['data']   =
+                ApiHelper::getJsonHelper()->verifyTypes(
+                    $this->data,
+                    'anyOf(oneOf{paymentType2}(CardTransactionToken{card2},KonbiniTransactionToken{ko' .
+                    'nbini2},OnlineTransactionToken{online2},BankTransferTransactionToken{bankTransfe' .
+                    'r2},PaidyTransactionToken{paidy2},QrScanTransactionToken{qrScan2},QrMerchantTran' .
+                    'sactionToken{qrMerchant2}),null)'
+                );
         }
         $json['created_on'] = DateTimeHelper::toRfc3339DateTime($this->createdOn);
         $json = array_merge($json, $this->additionalProperties);

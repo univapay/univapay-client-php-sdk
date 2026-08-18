@@ -25,7 +25,7 @@ use UnivaPay\Models\Builders\TokenResponseCardDataCvvAuthorizeCheckBuilder;
 use UnivaPay\Utils\DateTimeHelper;
 
 $tokenResponseCardDataCvvAuthorizeCheck = TokenResponseCardDataCvvAuthorizeCheckBuilder::init()
-    ->status('successful')
+    ->status('current')
     ->chargeId(null)
     ->date(DateTimeHelper::fromRfc3339DateTime('2026-04-09T07:35:50Z'))
     ->build();

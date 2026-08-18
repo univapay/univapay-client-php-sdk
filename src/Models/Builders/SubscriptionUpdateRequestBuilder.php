@@ -12,6 +12,8 @@ namespace UnivaPay\Models\Builders;
 
 use Core\Utils\CoreHelper;
 use UnivaPay\Models\GenericMetadata;
+use UnivaPay\Models\SubscriptionInstallmentPlan;
+use UnivaPay\Models\SubscriptionPlanSettings;
 use UnivaPay\Models\SubscriptionUpdateNextPayment;
 use UnivaPay\Models\SubscriptionUpdateRequest;
 use UnivaPay\Models\SubscriptionUpdateScheduleSettings;
@@ -60,6 +62,61 @@ class SubscriptionUpdateRequestBuilder
     public function amount(?int $value): self
     {
         $this->instance->setAmount($value);
+        return $this;
+    }
+
+    /**
+     * Sets period field.
+     *
+     * @param string|null $value
+     */
+    public function period(?string $value): self
+    {
+        $this->instance->setPeriod($value);
+        return $this;
+    }
+
+    /**
+     * Sets cyclical period field.
+     *
+     * @param string|null $value
+     */
+    public function cyclicalPeriod(?string $value): self
+    {
+        $this->instance->setCyclicalPeriod($value);
+        return $this;
+    }
+
+    /**
+     * Sets initial amount field.
+     *
+     * @param int|null $value
+     */
+    public function initialAmount(?int $value): self
+    {
+        $this->instance->setInitialAmount($value);
+        return $this;
+    }
+
+    /**
+     * Sets subscription plan field.
+     *
+     * @param SubscriptionPlanSettings|null $value
+     */
+    public function subscriptionPlan(?SubscriptionPlanSettings $value): self
+    {
+        $this->instance->setSubscriptionPlan($value);
+        return $this;
+    }
+
+    /**
+     * Sets installment plan field.
+     *
+     * @param SubscriptionInstallmentPlan|null $value
+     */
+    public function installmentPlan(?SubscriptionInstallmentPlan $value): self
+    {
+        $this->instance->setInstallmentPlan($value);
         return $this;
     }
 

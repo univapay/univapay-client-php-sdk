@@ -32,13 +32,32 @@ class ChargeCaptureRequestBuilder
 
     /**
      * Initializes a new Charge Capture Request Builder object.
-     *
-     * @param int $amount
-     * @param string $currency
      */
-    public static function init(int $amount, string $currency): self
+    public static function init(): self
     {
-        return new self(new ChargeCaptureRequest($amount, $currency));
+        return new self(new ChargeCaptureRequest());
+    }
+
+    /**
+     * Sets amount field.
+     *
+     * @param int|null $value
+     */
+    public function amount(?int $value): self
+    {
+        $this->instance->setAmount($value);
+        return $this;
+    }
+
+    /**
+     * Sets currency field.
+     *
+     * @param string|null $value
+     */
+    public function currency(?string $value): self
+    {
+        $this->instance->setCurrency($value);
+        return $this;
     }
 
     /**

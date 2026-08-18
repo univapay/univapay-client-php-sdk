@@ -31,7 +31,18 @@ use UnivaPay\Models\Builders\MerchantBuilder;
 use UnivaPay\Models\Builders\MerchantWebhookConfigurationBuilder;
 use UnivaPay\Models\Builders\MerchantWebhookMoneyAmountBuilder;
 use UnivaPay\Models\Builders\MerchantWebhookUserTransactionsConfigurationBuilder;
+use UnivaPay\Models\Builders\MerchantWebhookRecurringTokenConfigurationBuilder;
+use UnivaPay\Models\Builders\MerchantWebhookRecurringCvvConfirmationConfigBuilder;
+use UnivaPay\Models\Builders\MerchantWebhookSecurityConfigurationBuilder;
+use UnivaPay\Models\Builders\RestrictIpAfterFailedChargeConfigBuilder;
+use UnivaPay\Models\Builders\MerchantWebhookLimitRefundBySalesConfigurationBuilder;
+use UnivaPay\Models\Builders\MerchantWebhookInstallmentPlanConfigurationBuilder;
+use UnivaPay\Models\Builders\CardProcessorInstallmentConfigBuilder;
+use UnivaPay\Models\Builders\MerchantWebhookCardBrandPercentFeesBuilder;
 use UnivaPay\Models\Builders\MerchantWebhookCardConfigurationBuilder;
+use UnivaPay\Models\Builders\MerchantWebhookQrScanConfigurationBuilder;
+use UnivaPay\Models\Builders\MerchantWebhookConvenienceConfigurationBuilder;
+use UnivaPay\Models\Builders\MerchantWebhookPaidyConfigurationBuilder;
 use UnivaPay\Models\Builders\MerchantWebhookOnlineConfigurationBuilder;
 use UnivaPay\Models\Builders\MerchantWebhookBankTransferConfigurationBuilder;
 use UnivaPay\Utils\DateTimeHelper;
@@ -72,12 +83,98 @@ $merchant = MerchantBuilder::init()
                     ->notifyOnWebhookFailure(true)
                     ->build()
             )
+            ->recurringTokenConfiguration(
+                MerchantWebhookRecurringTokenConfigurationBuilder::init()
+                    ->recurringType('infinite')
+                    ->chargeWaitPeriod('P7D')
+                    ->cardChargeCvvConfirmation(
+                        MerchantWebhookRecurringCvvConfirmationConfigBuilder::init()
+                            ->enabled(false)
+                            ->build()
+                    )
+                    ->build()
+            )
+            ->securityConfiguration(
+                MerchantWebhookSecurityConfigurationBuilder::init()
+                    ->cardChargeCooldown('PT5M')
+                    ->subscriptionCooldown('PT10M')
+                    ->restrictIpAfterFailedCharge(
+                        RestrictIpAfterFailedChargeConfigBuilder::init()
+                            ->enabled(true)
+                            ->count(5)
+                            ->cooldown('PT1H')
+                            ->build()
+                    )
+                    ->refundPercentLimit(100)
+                    ->confirmationRequired(false)
+                    ->minRefundThreshold(100)
+                    ->limitRefundBySales(
+                        MerchantWebhookLimitRefundBySalesConfigurationBuilder::init()
+                            ->enabled(true)
+                            ->period('monthly')
+                            ->rollingWindow(true)
+                            ->build()
+                    )
+                    ->build()
+            )
+            ->installmentsConfiguration(
+                MerchantWebhookInstallmentPlanConfigurationBuilder::init()
+                    ->enabled(true)
+                    ->cardProcessor(
+                        CardProcessorInstallmentConfigBuilder::init()
+                            ->revolving(true)
+                            ->fixedCycle(true)
+                            ->build()
+                    )
+                    ->supportedPaymentTypes(
+                        [
+                            'card'
+                        ]
+                    )
+                    ->minChargeAmount(
+                        MerchantWebhookMoneyAmountBuilder::init()
+                            ->amount(3000)
+                            ->currency('JPY')
+                            ->build()
+                    )
+                    ->maxPayoutPeriod('P12M')
+                    ->onlyWithProcessor(true)
+                    ->build()
+            )
+            ->cardBrandPercentFees(
+                MerchantWebhookCardBrandPercentFeesBuilder::init()
+                    ->visa(3.6)
+                    ->mastercard(3.6)
+                    ->jcb(3.8)
+                    ->build()
+            )
             ->cardConfiguration(
                 MerchantWebhookCardConfigurationBuilder::init()
                     ->enabled(true)
                     ->debitEnabled(true)
                     ->prepaidEnabled(false)
                     ->threeDsRequired(true)
+                    ->build()
+            )
+            ->qrScanConfiguration(
+                MerchantWebhookQrScanConfigurationBuilder::init()
+                    ->enabled(true)
+                    ->forbiddenQrScanGateways(
+                        [
+                            'wechat'
+                        ]
+                    )
+                    ->build()
+            )
+            ->convenienceConfiguration(
+                MerchantWebhookConvenienceConfigurationBuilder::init()
+                    ->enabled(true)
+                    ->expiration('P3D')
+                    ->build()
+            )
+            ->paidyConfiguration(
+                MerchantWebhookPaidyConfigurationBuilder::init()
+                    ->enabled(false)
                     ->build()
             )
             ->onlineConfiguration(

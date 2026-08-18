@@ -27,7 +27,7 @@ use UnivaPay\Models\Builders\TokenResponseCardDataCvvAuthorizeBuilder;
 
 $tokenResponseCardDataCvvAuthorize = TokenResponseCardDataCvvAuthorizeBuilder::init()
     ->enabled(true)
-    ->status('successful')
+    ->status('current')
     ->chargeId(null)
     ->credentialsId(null)
     ->currency('JPY')

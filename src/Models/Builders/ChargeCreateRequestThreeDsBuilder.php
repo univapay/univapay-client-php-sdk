@@ -61,6 +61,72 @@ class ChargeCreateRequestThreeDsBuilder
     }
 
     /**
+     * Sets authentication value field.
+     *
+     * @param string|null $value
+     */
+    public function authenticationValue(?string $value): self
+    {
+        $this->instance->setAuthenticationValue($value);
+        return $this;
+    }
+
+    /**
+     * Sets eci field.
+     *
+     * @param string|null $value
+     */
+    public function eci(?string $value): self
+    {
+        $this->instance->setEci($value);
+        return $this;
+    }
+
+    /**
+     * Sets ds transaction id field.
+     *
+     * @param string|null $value
+     */
+    public function dsTransactionId(?string $value): self
+    {
+        $this->instance->setDsTransactionId($value);
+        return $this;
+    }
+
+    /**
+     * Sets server transaction id field.
+     *
+     * @param string|null $value
+     */
+    public function serverTransactionId(?string $value): self
+    {
+        $this->instance->setServerTransactionId($value);
+        return $this;
+    }
+
+    /**
+     * Sets message version field.
+     *
+     * @param string|null $value
+     */
+    public function messageVersion(?string $value): self
+    {
+        $this->instance->setMessageVersion($value);
+        return $this;
+    }
+
+    /**
+     * Sets transaction status field.
+     *
+     * @param string|null $value
+     */
+    public function transactionStatus(?string $value): self
+    {
+        $this->instance->setTransactionStatus($value);
+        return $this;
+    }
+
+    /**
      * Add an additional property to this model.
      *
      * @param string $name Name of property.

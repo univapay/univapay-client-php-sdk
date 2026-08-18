@@ -29,6 +29,31 @@ class SubscriptionUpdateRequest implements \JsonSerializable
     private $amount;
 
     /**
+     * @var string|null
+     */
+    private $period;
+
+    /**
+     * @var string|null
+     */
+    private $cyclicalPeriod;
+
+    /**
+     * @var int|null
+     */
+    private $initialAmount;
+
+    /**
+     * @var SubscriptionPlanSettings|null
+     */
+    private $subscriptionPlan;
+
+    /**
+     * @var SubscriptionInstallmentPlan|null
+     */
+    private $installmentPlan;
+
+    /**
      * @var GenericMetadata|null
      */
     private $metadata;
@@ -94,6 +119,111 @@ class SubscriptionUpdateRequest implements \JsonSerializable
     public function setAmount(?int $amount): void
     {
         $this->amount = $amount;
+    }
+
+    /**
+     * Returns Period.
+     * Subscription Period schema.
+     */
+    public function getPeriod(): ?string
+    {
+        return $this->period;
+    }
+
+    /**
+     * Sets Period.
+     * Subscription Period schema.
+     *
+     * @maps period
+     * @factory \UnivaPay\Models\SubscriptionPeriod::checkValue
+     */
+    public function setPeriod(?string $period): void
+    {
+        $this->period = $period;
+    }
+
+    /**
+     * Returns Cyclical Period.
+     * ISO-8601 Duration for custom frequency (e.g., P3D, P2M). Cannot be used together with `period`. Only
+     * allowed before the subscription's first payment has been paid.
+     */
+    public function getCyclicalPeriod(): ?string
+    {
+        return $this->cyclicalPeriod;
+    }
+
+    /**
+     * Sets Cyclical Period.
+     * ISO-8601 Duration for custom frequency (e.g., P3D, P2M). Cannot be used together with `period`. Only
+     * allowed before the subscription's first payment has been paid.
+     *
+     * @maps cyclical_period
+     */
+    public function setCyclicalPeriod(?string $cyclicalPeriod): void
+    {
+        $this->cyclicalPeriod = $cyclicalPeriod;
+    }
+
+    /**
+     * Returns Initial Amount.
+     * Different amount for the first charge. Only allowed while the subscription status is still editable
+     * (before it has started) and requires the App Token Secret.
+     */
+    public function getInitialAmount(): ?int
+    {
+        return $this->initialAmount;
+    }
+
+    /**
+     * Sets Initial Amount.
+     * Different amount for the first charge. Only allowed while the subscription status is still editable
+     * (before it has started) and requires the App Token Secret.
+     *
+     * @maps initial_amount
+     */
+    public function setInitialAmount(?int $initialAmount): void
+    {
+        $this->initialAmount = $initialAmount;
+    }
+
+    /**
+     * Returns Subscription Plan.
+     * Configuration for limited-cycle subscriptions (Univapay side).
+     */
+    public function getSubscriptionPlan(): ?SubscriptionPlanSettings
+    {
+        return $this->subscriptionPlan;
+    }
+
+    /**
+     * Sets Subscription Plan.
+     * Configuration for limited-cycle subscriptions (Univapay side).
+     *
+     * @maps subscription_plan
+     */
+    public function setSubscriptionPlan(?SubscriptionPlanSettings $subscriptionPlan): void
+    {
+        $this->subscriptionPlan = $subscriptionPlan;
+    }
+
+    /**
+     * Returns Installment Plan.
+     * Configuration for credit card company side installments.
+     */
+    public function getInstallmentPlan(): ?SubscriptionInstallmentPlan
+    {
+        return $this->installmentPlan;
+    }
+
+    /**
+     * Sets Installment Plan.
+     * Configuration for credit card company side installments.
+     *
+     * @maps installment_plan
+     */
+    public function setInstallmentPlan(?SubscriptionInstallmentPlan $installmentPlan): void
+    {
+        $this->installmentPlan = $installmentPlan;
     }
 
     /**
@@ -191,6 +321,11 @@ class SubscriptionUpdateRequest implements \JsonSerializable
             [
                 'transactionTokenId' => $this->transactionTokenId,
                 'amount' => $this->amount,
+                'period' => $this->period,
+                'cyclicalPeriod' => $this->cyclicalPeriod,
+                'initialAmount' => $this->initialAmount,
+                'subscriptionPlan' => $this->subscriptionPlan,
+                'installmentPlan' => $this->installmentPlan,
                 'metadata' => $this->metadata,
                 'status' => $this->status,
                 'scheduleSettings' => $this->scheduleSettings,
@@ -203,6 +338,11 @@ class SubscriptionUpdateRequest implements \JsonSerializable
     protected $propertyNames = [
         'transaction_token_id',
         'amount',
+        'period',
+        'cyclical_period',
+        'initial_amount',
+        'subscription_plan',
+        'installment_plan',
         'metadata',
         'status',
         'schedule_settings',
@@ -260,6 +400,21 @@ class SubscriptionUpdateRequest implements \JsonSerializable
         }
         if (isset($this->amount)) {
             $json['amount']               = $this->amount;
+        }
+        if (isset($this->period)) {
+            $json['period']               = SubscriptionPeriod::checkValue($this->period);
+        }
+        if (isset($this->cyclicalPeriod)) {
+            $json['cyclical_period']      = $this->cyclicalPeriod;
+        }
+        if (isset($this->initialAmount)) {
+            $json['initial_amount']       = $this->initialAmount;
+        }
+        if (isset($this->subscriptionPlan)) {
+            $json['subscription_plan']    = $this->subscriptionPlan;
+        }
+        if (isset($this->installmentPlan)) {
+            $json['installment_plan']     = $this->installmentPlan;
         }
         if (isset($this->metadata)) {
             $json['metadata']             = $this->metadata;

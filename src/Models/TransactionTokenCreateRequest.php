@@ -50,14 +50,14 @@ class TransactionTokenCreateRequest implements \JsonSerializable
     private $metadata;
 
     /**
-     * @var TokenCreateCardData|TokenCreateKonbiniData|TokenCreateOnlineData|TokenCreateBankTransferData
+     * @var TokenCreateCardData|TokenCreateKonbiniData|TokenCreateOnlineData|TokenCreateBankTransferData|TokenCreatePaidyData|TokenCreateQrScanData|TokenCreateQrMerchantData
      */
     private $data;
 
     /**
      * @param string $paymentType
      * @param string $type
-     * @param TokenCreateCardData|TokenCreateKonbiniData|TokenCreateOnlineData|TokenCreateBankTransferData $data
+     * @param TokenCreateCardData|TokenCreateKonbiniData|TokenCreateOnlineData|TokenCreateBankTransferData|TokenCreatePaidyData|TokenCreateQrScanData|TokenCreateQrMerchantData $data
      */
     public function __construct(string $paymentType, string $type, $data)
     {
@@ -196,7 +196,7 @@ class TransactionTokenCreateRequest implements \JsonSerializable
      * Returns Data.
      * Transaction Token Create Request Data schema.
      *
-     * @return TokenCreateCardData|TokenCreateKonbiniData|TokenCreateOnlineData|TokenCreateBankTransferData
+     * @return TokenCreateCardData|TokenCreateKonbiniData|TokenCreateOnlineData|TokenCreateBankTransferData|TokenCreatePaidyData|TokenCreateQrScanData|TokenCreateQrMerchantData
      */
     public function getData()
     {
@@ -209,9 +209,9 @@ class TransactionTokenCreateRequest implements \JsonSerializable
      *
      * @required
      * @maps data
-     * @mapsBy anyOf(TokenCreateCardData,TokenCreateKonbiniData,TokenCreateOnlineData,TokenCreateBankTransferData)
+     * @mapsBy anyOf(TokenCreateCardData,TokenCreateKonbiniData,TokenCreateOnlineData,TokenCreateBankTransferData,TokenCreatePaidyData,TokenCreateQrScanData,TokenCreateQrMerchantData)
      *
-     * @param TokenCreateCardData|TokenCreateKonbiniData|TokenCreateOnlineData|TokenCreateBankTransferData $data
+     * @param TokenCreateCardData|TokenCreateKonbiniData|TokenCreateOnlineData|TokenCreateBankTransferData|TokenCreatePaidyData|TokenCreateQrScanData|TokenCreateQrMerchantData $data
      */
     public function setData($data): void
     {
@@ -306,7 +306,7 @@ class TransactionTokenCreateRequest implements \JsonSerializable
             ApiHelper::getJsonHelper()->verifyTypes(
                 $this->data,
                 'anyOf(TokenCreateCardData,TokenCreateKonbiniData,TokenCreateOnlineData,TokenCreateBa' .
-                'nkTransferData)'
+                'nkTransferData,TokenCreatePaidyData,TokenCreateQrScanData,TokenCreateQrMerchantData)'
             );
         $json = array_merge($json, $this->additionalProperties);
 

@@ -15,9 +15,9 @@ use UnivaPay\ApiHelper;
 use UnivaPay\Utils\DateTimeHelper;
 
 /**
- * Stored transaction token resource.
+ * Stored transaction token resource for an `online` payment type.
  */
-class TransactionToken implements \JsonSerializable
+class OnlineTransactionToken implements \JsonSerializable
 {
     /**
      * @var string|null
@@ -33,11 +33,6 @@ class TransactionToken implements \JsonSerializable
      * @var array
      */
     private $email = [];
-
-    /**
-     * @var string|null
-     */
-    private $paymentType;
 
     /**
      * @var bool|null
@@ -85,9 +80,22 @@ class TransactionToken implements \JsonSerializable
     private $lastUsedOn = [];
 
     /**
-     * @var TokenResponseCardData|TokenResponseKonbiniData|TokenResponseOnlineData|TokenResponseBankTransferData|null
+     * @var string
+     */
+    private $paymentType;
+
+    /**
+     * @var TokenResponseOnlineData
      */
     private $data;
+
+    /**
+     * @param TokenResponseOnlineData $data
+     */
+    public function __construct(TokenResponseOnlineData $data)
+    {
+        $this->data = $data;
+    }
 
     /**
      * Returns Id.
@@ -159,27 +167,6 @@ class TransactionToken implements \JsonSerializable
     public function unsetEmail(): void
     {
         $this->email = [];
-    }
-
-    /**
-     * Returns Payment Type.
-     * Transaction Token Payment Type schema.
-     */
-    public function getPaymentType(): ?string
-    {
-        return $this->paymentType;
-    }
-
-    /**
-     * Sets Payment Type.
-     * Transaction Token Payment Type schema.
-     *
-     * @maps payment_type
-     * @factory \UnivaPay\Models\TransactionTokenPaymentType::checkValue
-     */
-    public function setPaymentType(?string $paymentType): void
-    {
-        $this->paymentType = $paymentType;
     }
 
     /**
@@ -409,46 +396,59 @@ class TransactionToken implements \JsonSerializable
     }
 
     /**
-     * Returns Data.
-     * Transaction token data payload. The actual structure depends on `payment_type` — card, konbini,
-     * online (QR / 3DS), or bank transfer.
-     *
-     * @return TokenResponseCardData|TokenResponseKonbiniData|TokenResponseOnlineData|TokenResponseBankTransferData|null
+     * Returns Payment Type.
+     * Payment method type. Always `online` for this variant.
      */
-    public function getData()
+    public function getPaymentType(): string
+    {
+        return $this->paymentType;
+    }
+
+    /**
+     * Sets Payment Type.
+     * Payment method type. Always `online` for this variant.
+     *
+     * @maps payment_type
+     */
+    public function setPaymentType(string $paymentType): void
+    {
+        $this->paymentType = $paymentType;
+    }
+
+    /**
+     * Returns Data.
+     * Token Response Online Data schema.
+     */
+    public function getData(): TokenResponseOnlineData
     {
         return $this->data;
     }
 
     /**
      * Sets Data.
-     * Transaction token data payload. The actual structure depends on `payment_type` — card, konbini,
-     * online (QR / 3DS), or bank transfer.
+     * Token Response Online Data schema.
      *
+     * @required
      * @maps data
-     * @mapsBy anyOf(anyOf(TokenResponseCardData,TokenResponseKonbiniData,TokenResponseOnlineData,TokenResponseBankTransferData),null)
-     *
-     * @param TokenResponseCardData|TokenResponseKonbiniData|TokenResponseOnlineData|TokenResponseBankTransferData|null $data
      */
-    public function setData($data): void
+    public function setData(TokenResponseOnlineData $data): void
     {
         $this->data = $data;
     }
 
     /**
-     * Converts the TransactionToken object to a human-readable string representation.
+     * Converts the OnlineTransactionToken object to a human-readable string representation.
      *
-     * @return string The string representation of the TransactionToken object.
+     * @return string The string representation of the OnlineTransactionToken object.
      */
     public function __toString(): string
     {
         return ApiHelper::stringify(
-            'TransactionToken',
+            'OnlineTransactionToken',
             [
                 'id' => $this->id,
                 'storeId' => $this->storeId,
                 'email' => $this->getEmail(),
-                'paymentType' => $this->paymentType,
                 'active' => $this->active,
                 'mode' => $this->mode,
                 'type' => $this->type,
@@ -458,6 +458,7 @@ class TransactionToken implements \JsonSerializable
                 'createdOn' => $this->createdOn,
                 'updatedOn' => $this->updatedOn,
                 'lastUsedOn' => $this->getLastUsedOn(),
+                'paymentType' => $this->paymentType,
                 'data' => $this->data,
                 'additionalProperties' => $this->additionalProperties
             ]
@@ -468,7 +469,6 @@ class TransactionToken implements \JsonSerializable
         'id',
         'store_id',
         'email',
-        'payment_type',
         'active',
         'mode',
         'type',
@@ -478,6 +478,7 @@ class TransactionToken implements \JsonSerializable
         'created_on',
         'updated_on',
         'last_used_on',
+        'payment_type',
         'data'
     ];
 
@@ -536,9 +537,6 @@ class TransactionToken implements \JsonSerializable
         if (!empty($this->email)) {
             $json['email']        = $this->email['value'];
         }
-        if (isset($this->paymentType)) {
-            $json['payment_type'] = TransactionTokenPaymentType::checkValue($this->paymentType);
-        }
         if (isset($this->active)) {
             $json['active']       = $this->active;
         }
@@ -570,14 +568,8 @@ class TransactionToken implements \JsonSerializable
         if (!empty($this->lastUsedOn)) {
             $json['last_used_on'] = DateTimeHelper::toRfc3339DateTime($this->lastUsedOn['value']);
         }
-        if (isset($this->data)) {
-            $json['data']         =
-                ApiHelper::getJsonHelper()->verifyTypes(
-                    $this->data,
-                    'anyOf(anyOf(TokenResponseCardData,TokenResponseKonbiniData,TokenResponseOnlineDa' .
-                    'ta,TokenResponseBankTransferData),null)'
-                );
-        }
+        $json['payment_type']     = $this->paymentType;
+        $json['data']             = $this->data;
         $json = array_merge($json, $this->additionalProperties);
 
         return (!$asArrayWhenEmpty && empty($json)) ? new stdClass() : $json;

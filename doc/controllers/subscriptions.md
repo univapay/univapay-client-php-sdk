@@ -14,7 +14,9 @@ $subscriptionsApi = $client->getSubscriptionsApi();
 
 * [Create Subscription](../../doc/controllers/subscriptions.md#create-subscription)
 * [List All Subscriptions](../../doc/controllers/subscriptions.md#list-all-subscriptions)
+* [Simulate Subscription Plan](../../doc/controllers/subscriptions.md#simulate-subscription-plan)
 * [List Store Subscriptions](../../doc/controllers/subscriptions.md#list-store-subscriptions)
+* [Simulate Store Subscription Plan](../../doc/controllers/subscriptions.md#simulate-store-subscription-plan)
 * [Get Subscription](../../doc/controllers/subscriptions.md#get-subscription)
 * [Update Subscription](../../doc/controllers/subscriptions.md#update-subscription)
 * [Cancel Subscription](../../doc/controllers/subscriptions.md#cancel-subscription)
@@ -101,6 +103,13 @@ if ($apiResponse->isSuccess()) {
   "initial_amount": 1000,
   "initial_amount_formatted": 10.0,
   "subsequent_cycles_start": null,
+  "schedule_settings": {
+    "start_on": "2024-06-26",
+    "zone_id": "Asia/Tokyo",
+    "preserve_end_of_month": false,
+    "retry_interval": "P7D",
+    "termination_mode": "immediate"
+  },
   "only_direct_currency": false,
   "first_charge_authorization_only": false,
   "status": "current",
@@ -129,6 +138,9 @@ Lists all subscriptions across all stores.
 
 ```php
 function listAllSubscriptions(
+    ?string $search = null,
+    ?string $status = null,
+    ?string $mode = null,
     ?int $limit = 10,
     ?string $cursor = null,
     ?string $cursorDirection = CursorDirectionQuery::DESC
@@ -143,6 +155,9 @@ This endpoint requires [JWT_TOKEN](../../doc/auth/oauth-2-bearer-token.md)
 
 | Parameter | Type | Tags | Description |
 |  --- | --- | --- | --- |
+| `search` | `?string` | Query, Optional | Search by metadata values. |
+| `status` | [`?string(SubscriptionStatus)`](../../doc/models/subscription-status.md) | Query, Optional | Filter subscriptions by current status. |
+| `mode` | [`?string(ChargeMode)`](../../doc/models/charge-mode.md) | Query, Optional | Filter subscriptions by processing mode. |
 | `limit` | `?int` | Query, Optional | Maximum number of resources to return in one page.<br><br>**Default**: `10`<br><br>**Constraints**: `<= 100` |
 | `cursor` | `?string` | Query, Optional | Cursor pointing to the resource after which pagination should continue. |
 | `cursorDirection` | [`?string(CursorDirectionQuery)`](../../doc/models/cursor-direction-query.md) | Query, Optional | Pagination direction relative to the supplied cursor.<br><br>**Default**: `CursorDirectionQuery::DESC` |
@@ -156,6 +171,12 @@ This method returns an [`ApiResponse`](../../doc/api-response.md) instance. The 
 ## Example Usage
 
 ```php
+$search = 'order_id:12345';
+
+$status = SubscriptionStatus::CURRENT;
+
+$mode = ChargeMode::LIVE;
+
 $limit = 10;
 
 $cursor = '3541d4fa-596d-428e-8a36-f274e1b3d505';
@@ -164,6 +185,9 @@ $cursorDirection = CursorDirectionQuery::ASC;
 
 $subscriptionsApi = $client->getSubscriptionsApi();
 $apiResponse = $subscriptionsApi->listAllSubscriptions(
+    $search,
+    $status,
+    $mode,
     $limit,
     $cursor,
     $cursorDirection
@@ -196,6 +220,13 @@ if ($apiResponse->isSuccess()) {
       "currency": "USD",
       "amount_formatted": 12.5,
       "status": "current",
+      "mode": "live",
+      "created_on": "2024-06-26T01:51:28.627023Z",
+      "schedule_settings": {
+        "zone_id": "Asia/Tokyo",
+        "retry_interval": "P7D",
+        "termination_mode": "immediate"
+      },
       "merchant_name": "管理画面ガイド",
       "store_name": "管理画面ガイド_TEST店舗",
       "payment_type": "card",
@@ -215,6 +246,13 @@ if ($apiResponse->isSuccess()) {
       "currency": "JPY",
       "amount_formatted": 3000,
       "status": "current",
+      "mode": "live",
+      "created_on": "2024-07-11T09:20:00.627023Z",
+      "schedule_settings": {
+        "zone_id": "Asia/Tokyo",
+        "retry_interval": "P7D",
+        "termination_mode": "immediate"
+      },
       "merchant_name": "管理画面ガイド",
       "store_name": "管理画面ガイド_Online店舗",
       "payment_type": "card",
@@ -234,6 +272,13 @@ if ($apiResponse->isSuccess()) {
       "currency": "JPY",
       "amount_formatted": 9800,
       "status": "suspended",
+      "mode": "live",
+      "created_on": "2024-08-15T13:05:22.627023Z",
+      "schedule_settings": {
+        "zone_id": "Asia/Tokyo",
+        "retry_interval": "P7D",
+        "termination_mode": "on_next_payment"
+      },
       "merchant_name": "管理画面ガイド",
       "store_name": "管理画面ガイド_Osaka店舗",
       "payment_type": "card",
@@ -250,6 +295,107 @@ if ($apiResponse->isSuccess()) {
   "total_hits": 3
 }
 ```
+
+
+# Simulate Subscription Plan
+
+Simulates the payment schedule that a subscription would follow, without creating a live subscription or a transaction token. Returns a bare array of the scheduled payments that would result from the given amount, currency, period (or cyclical period), and plan settings.
+
+```php
+function simulateSubscriptionPlan(
+    ?string $idempotencyKey = null,
+    ?SubscriptionSimulationRequest $body = null
+): ApiResponse
+```
+
+## Authentication
+
+This endpoint requires [JWT_TOKEN](../../doc/auth/oauth-2-bearer-token.md)
+
+## Parameters
+
+| Parameter | Type | Tags | Description |
+|  --- | --- | --- | --- |
+| `idempotencyKey` | `?string` | Header, Optional | An optional idempotency key to prevent double charges and duplicate operations. We recommend a randomly generated UUID (v4). |
+| `body` | [`?SubscriptionSimulationRequest`](../../doc/models/subscription-simulation-request.md) | Body, Optional | Subscription Plan Simulation request |
+
+## Response Type
+
+**200**: Simulated Subscription Payment Schedule
+
+This method returns an [`ApiResponse`](../../doc/api-response.md) instance. The `getResult()` method on this instance returns the response data which is of type [`SubscriptionSimulationPayment[]`](../../doc/models/subscription-simulation-payment.md).
+
+## Example Usage
+
+```php
+$body = SubscriptionSimulationRequestBuilder::init(
+    1000,
+    'JPY',
+    TransactionTokenPaymentType::CARD,
+    SubscriptionScheduleSettingsBuilder::init()
+        ->zoneId('Asia/Tokyo')
+        ->build()
+)
+    ->period(SubscriptionSimulationPeriod::MONTHLY)
+    ->build();
+
+$subscriptionsApi = $client->getSubscriptionsApi();
+$apiResponse = $subscriptionsApi->simulateSubscriptionPlan(
+    null,
+    $body
+);
+
+// Extracting response status code
+var_dump($apiResponse->getStatusCode());
+// Extracting response headers
+var_dump($apiResponse->getHeaders());
+
+if ($apiResponse->isSuccess()) {
+    echo 'SubscriptionSimulationPayment[]:';
+    var_dump($apiResponse->getResult());
+} else {
+    $error = $apiResponse->getResult();
+    var_dump($error);
+}
+```
+
+## Example Response *(as JSON)*
+
+```json
+[
+  {
+    "due_date": "2026-09-01",
+    "zone_id": "Asia/Tokyo",
+    "amount": 1000,
+    "currency": "JPY",
+    "is_paid": false,
+    "is_last_payment": false,
+    "successful_payment_date": null,
+    "terminate_with_status": null,
+    "retry_interval": null
+  },
+  {
+    "due_date": "2026-10-01",
+    "zone_id": "Asia/Tokyo",
+    "amount": 1000,
+    "currency": "JPY",
+    "is_paid": false,
+    "is_last_payment": true,
+    "successful_payment_date": null,
+    "terminate_with_status": null,
+    "retry_interval": null
+  }
+]
+```
+
+## Errors
+
+| HTTP Status Code | Error Description | Exception Class |
+|  --- | --- | --- |
+| 400 | Bad Request (400). The request was invalid or could not be processed.  Common codes: VALIDATION_ERROR, INVALID_TOKEN_TYPE, NOT_SUPPORTED_BY_PROCESSOR. | [`ApiErrorException`](../../doc/models/api-error-exception.md) |
+| 401 | Unauthorized (401). Authentication failed.  Common codes: AUTH_HEADER_MISSING, INVALID_APP_TOKEN, INVALID_CREDENTIALS. | [`ApiErrorException`](../../doc/models/api-error-exception.md) |
+| 403 | Forbidden (403). The request is understood, but access is refused.  This occurs if permissions are insufficient or if a security lock is triggered. | [`ApiErrorException`](../../doc/models/api-error-exception.md) |
+| 429 | Too Many Requests (429). Rate limit exceeded. Returns an empty JSON object in this spec. | `ApiException` |
 
 
 # List Store Subscriptions
@@ -345,6 +491,13 @@ if ($apiResponse->isSuccess()) {
       "currency": "USD",
       "amount_formatted": 12.5,
       "status": "current",
+      "mode": "live",
+      "created_on": "2024-06-26T01:51:28.627023Z",
+      "schedule_settings": {
+        "zone_id": "Asia/Tokyo",
+        "retry_interval": "P7D",
+        "termination_mode": "immediate"
+      },
       "merchant_name": "管理画面ガイド",
       "store_name": "管理画面ガイド_TEST店舗",
       "payment_type": "card",
@@ -364,6 +517,13 @@ if ($apiResponse->isSuccess()) {
       "currency": "JPY",
       "amount_formatted": 5000,
       "status": "current",
+      "mode": "live",
+      "created_on": "2024-07-01T10:00:00.627023Z",
+      "schedule_settings": {
+        "zone_id": "Asia/Tokyo",
+        "retry_interval": "P7D",
+        "termination_mode": "immediate"
+      },
       "merchant_name": "管理画面ガイド",
       "store_name": "管理画面ガイド_TEST店舗",
       "payment_type": "card",
@@ -383,6 +543,13 @@ if ($apiResponse->isSuccess()) {
       "currency": "JPY",
       "amount_formatted": 9800,
       "status": "suspended",
+      "mode": "live",
+      "created_on": "2024-08-15T13:05:22.627023Z",
+      "schedule_settings": {
+        "zone_id": "Asia/Tokyo",
+        "retry_interval": "P7D",
+        "termination_mode": "on_next_payment"
+      },
       "merchant_name": "管理画面ガイド",
       "store_name": "管理画面ガイド_TEST店舗",
       "payment_type": "card",
@@ -399,6 +566,112 @@ if ($apiResponse->isSuccess()) {
   "total_hits": 3
 }
 ```
+
+
+# Simulate Store Subscription Plan
+
+Simulates the payment schedule that a subscription would follow for a specific store, without creating a live subscription or a transaction token. Returns a bare array of the scheduled payments that would result from the given amount, currency, period (or cyclical period), and plan settings.
+
+```php
+function simulateStoreSubscriptionPlan(
+    string $storeId,
+    ?string $idempotencyKey = null,
+    ?SubscriptionSimulationRequest $body = null
+): ApiResponse
+```
+
+## Authentication
+
+This endpoint requires [JWT_TOKEN](../../doc/auth/oauth-2-bearer-token.md)
+
+## Parameters
+
+| Parameter | Type | Tags | Description |
+|  --- | --- | --- | --- |
+| `storeId` | `string` | Template, Required | The unique identifier of the store. |
+| `idempotencyKey` | `?string` | Header, Optional | An optional idempotency key to prevent double charges and duplicate operations. We recommend a randomly generated UUID (v4). |
+| `body` | [`?SubscriptionSimulationRequest`](../../doc/models/subscription-simulation-request.md) | Body, Optional | Subscription Plan Simulation request |
+
+## Response Type
+
+**200**: Simulated Subscription Payment Schedule
+
+This method returns an [`ApiResponse`](../../doc/api-response.md) instance. The `getResult()` method on this instance returns the response data which is of type [`SubscriptionSimulationPayment[]`](../../doc/models/subscription-simulation-payment.md).
+
+## Example Usage
+
+```php
+$storeId = '0cab399b-5621-425b-993b-f8507eba1e78';
+
+$body = SubscriptionSimulationRequestBuilder::init(
+    1000,
+    'JPY',
+    TransactionTokenPaymentType::CARD,
+    SubscriptionScheduleSettingsBuilder::init()
+        ->zoneId('Asia/Tokyo')
+        ->build()
+)
+    ->period(SubscriptionSimulationPeriod::MONTHLY)
+    ->build();
+
+$subscriptionsApi = $client->getSubscriptionsApi();
+$apiResponse = $subscriptionsApi->simulateStoreSubscriptionPlan(
+    $storeId,
+    null,
+    $body
+);
+
+// Extracting response status code
+var_dump($apiResponse->getStatusCode());
+// Extracting response headers
+var_dump($apiResponse->getHeaders());
+
+if ($apiResponse->isSuccess()) {
+    echo 'SubscriptionSimulationPayment[]:';
+    var_dump($apiResponse->getResult());
+} else {
+    $error = $apiResponse->getResult();
+    var_dump($error);
+}
+```
+
+## Example Response *(as JSON)*
+
+```json
+[
+  {
+    "due_date": "2026-09-01",
+    "zone_id": "Asia/Tokyo",
+    "amount": 1000,
+    "currency": "JPY",
+    "is_paid": false,
+    "is_last_payment": false,
+    "successful_payment_date": null,
+    "terminate_with_status": null,
+    "retry_interval": null
+  },
+  {
+    "due_date": "2026-10-01",
+    "zone_id": "Asia/Tokyo",
+    "amount": 1000,
+    "currency": "JPY",
+    "is_paid": false,
+    "is_last_payment": true,
+    "successful_payment_date": null,
+    "terminate_with_status": null,
+    "retry_interval": null
+  }
+]
+```
+
+## Errors
+
+| HTTP Status Code | Error Description | Exception Class |
+|  --- | --- | --- |
+| 400 | Bad Request (400). The request was invalid or could not be processed.  Common codes: VALIDATION_ERROR, INVALID_TOKEN_TYPE, NOT_SUPPORTED_BY_PROCESSOR. | [`ApiErrorException`](../../doc/models/api-error-exception.md) |
+| 401 | Unauthorized (401). Authentication failed.  Common codes: AUTH_HEADER_MISSING, INVALID_APP_TOKEN, INVALID_CREDENTIALS. | [`ApiErrorException`](../../doc/models/api-error-exception.md) |
+| 403 | Forbidden (403). The request is understood, but access is refused.  This occurs if permissions are insufficient or if a security lock is triggered. | [`ApiErrorException`](../../doc/models/api-error-exception.md) |
+| 429 | Too Many Requests (429). Rate limit exceeded. Returns an empty JSON object in this spec. | `ApiException` |
 
 
 # Get Subscription
@@ -1391,6 +1664,13 @@ if ($apiResponse->isSuccess()) {
   "amount": 1250,
   "currency": "USD",
   "amount_formatted": 12.5,
+  "schedule_settings": {
+    "start_on": "2024-07-01",
+    "zone_id": "Asia/Tokyo",
+    "preserve_end_of_month": false,
+    "retry_interval": "P7D",
+    "termination_mode": "on_next_payment"
+  },
   "status": "suspended",
   "mode": "test",
   "created_on": "2024-06-26T01:51:28.627023Z",
@@ -1479,6 +1759,13 @@ if ($apiResponse->isSuccess()) {
   "amount": 1250,
   "currency": "USD",
   "amount_formatted": 12.5,
+  "schedule_settings": {
+    "start_on": "2024-07-01",
+    "zone_id": "Asia/Tokyo",
+    "preserve_end_of_month": false,
+    "retry_interval": "P7D",
+    "termination_mode": "immediate"
+  },
   "status": "unpaid",
   "mode": "test",
   "created_on": "2024-06-26T01:51:28.627023Z",
@@ -1574,6 +1861,13 @@ if ($apiResponse->isSuccess()) {
   "amount": 1250,
   "currency": "USD",
   "amount_formatted": 12.5,
+  "schedule_settings": {
+    "start_on": "2024-07-01",
+    "zone_id": "Asia/Tokyo",
+    "preserve_end_of_month": false,
+    "retry_interval": "P7D",
+    "termination_mode": "immediate"
+  },
   "status": "current",
   "mode": "test",
   "created_on": "2024-06-26T01:51:28.627023Z",

@@ -29,6 +29,8 @@ use UnivaPay\Models\SubscriptionPatchPaymentRequest;
 use UnivaPay\Models\SubscriptionPatchTokenRequest;
 use UnivaPay\Models\SubscriptionPayment;
 use UnivaPay\Models\SubscriptionPaymentList;
+use UnivaPay\Models\SubscriptionSimulationPayment;
+use UnivaPay\Models\SubscriptionSimulationRequest;
 use UnivaPay\Models\SubscriptionStatus;
 use UnivaPay\Models\SubscriptionSuspendRequest;
 use UnivaPay\Models\SubscriptionUpdateRequest;
@@ -85,6 +87,9 @@ class SubscriptionsApi extends BaseApi
     /**
      * Lists all subscriptions across all stores.
      *
+     * @param string|null $search Search by metadata values.
+     * @param string|null $status Filter subscriptions by current status.
+     * @param string|null $mode Filter subscriptions by processing mode.
      * @param int|null $limit Maximum number of resources to return in one page.
      * @param string|null $cursor Cursor pointing to the resource after which pagination should
      *        continue.
@@ -93,6 +98,9 @@ class SubscriptionsApi extends BaseApi
      * @return ApiResponse Response from the API call
      */
     public function listAllSubscriptions(
+        ?string $search = null,
+        ?string $status = null,
+        ?string $mode = null,
         ?int $limit = 10,
         ?string $cursor = null,
         ?string $cursorDirection = CursorDirectionQuery::DESC
@@ -100,6 +108,11 @@ class SubscriptionsApi extends BaseApi
         $_reqBuilder = $this->requestBuilder(RequestMethod::GET, '/subscriptions')
             ->auth('JWT_TOKEN')
             ->parameters(
+                QueryParam::init('search', $search)->unIndexed(),
+                QueryParam::init('status', $status)
+                    ->unIndexed()
+                    ->serializeBy([SubscriptionStatus::class, 'checkValue']),
+                QueryParam::init('mode', $mode)->unIndexed()->serializeBy([ChargeMode::class, 'checkValue']),
                 QueryParam::init('limit', $limit)->unIndexed(),
                 QueryParam::init('cursor', $cursor)->unIndexed(),
                 QueryParam::init('cursor_direction', $cursorDirection)
@@ -128,6 +141,70 @@ class SubscriptionsApi extends BaseApi
             ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
             ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
             ->type(SubscriptionList::class)
+            ->returnApiResponse();
+
+        return $this->execute($_reqBuilder, $_resHandler);
+    }
+
+    /**
+     * Simulates the payment schedule that a subscription would follow, without creating a live
+     * subscription or a transaction token. Returns a bare array of the scheduled payments that would
+     * result from the given amount, currency, period (or cyclical period), and plan settings.
+     *
+     * @param string|null $idempotencyKey An optional idempotency key to prevent double charges and
+     *        duplicate operations. We recommend a randomly generated UUID (v4).
+     * @param SubscriptionSimulationRequest|null $body Subscription Plan Simulation request
+     *
+     * @return ApiResponse Response from the API call
+     */
+    public function simulateSubscriptionPlan(
+        ?string $idempotencyKey = null,
+        ?SubscriptionSimulationRequest $body = null
+    ): ApiResponse {
+        $_reqBuilder = $this->requestBuilder(RequestMethod::POST, '/subscriptions/simulate_plan')
+            ->auth('JWT_TOKEN')
+            ->parameters(
+                HeaderParam::init('Content-Type', 'application/json'),
+                HeaderParam::init('Idempotency-Key', $idempotencyKey),
+                BodyParam::init($body)
+            );
+
+        $_resHandler = $this->responseHandler()
+            ->throwErrorOn(
+                '400',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 400 Bad Request: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '401',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 401 Unauthorized: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '403',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 403 Forbidden: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '429',
+                ErrorType::initWithErrorTemplate('HTTP 429 Rate Limited: {$response.body#/code}')
+            )
+            ->throwErrorOn('404', ErrorType::initWithErrorTemplate('HTTP 404 Not Found: {$response.body#/code}'))
+            ->throwErrorOn('409', ErrorType::initWithErrorTemplate('HTTP 409 Conflict: {$response.body#/code}'))
+            ->throwErrorOn(
+                '500',
+                ErrorType::initWithErrorTemplate('HTTP 500 Server Error: {$response.body#/code}')
+            )
+            ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
+            ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
+            ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
+            ->type(SubscriptionSimulationPayment::class, 1)
             ->returnApiResponse();
 
         return $this->execute($_reqBuilder, $_resHandler);
@@ -193,6 +270,73 @@ class SubscriptionsApi extends BaseApi
             ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
             ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
             ->type(SubscriptionList::class)
+            ->returnApiResponse();
+
+        return $this->execute($_reqBuilder, $_resHandler);
+    }
+
+    /**
+     * Simulates the payment schedule that a subscription would follow for a specific store, without
+     * creating a live subscription or a transaction token. Returns a bare array of the scheduled payments
+     * that would result from the given amount, currency, period (or cyclical period), and plan settings.
+     *
+     * @param string $storeId The unique identifier of the store.
+     * @param string|null $idempotencyKey An optional idempotency key to prevent double charges and
+     *        duplicate operations. We recommend a randomly generated UUID (v4).
+     * @param SubscriptionSimulationRequest|null $body Subscription Plan Simulation request
+     *
+     * @return ApiResponse Response from the API call
+     */
+    public function simulateStoreSubscriptionPlan(
+        string $storeId,
+        ?string $idempotencyKey = null,
+        ?SubscriptionSimulationRequest $body = null
+    ): ApiResponse {
+        $_reqBuilder = $this->requestBuilder(RequestMethod::POST, '/stores/{storeId}/subscriptions/simulate_plan')
+            ->auth('JWT_TOKEN')
+            ->parameters(
+                TemplateParam::init('storeId', $storeId)->required(),
+                HeaderParam::init('Content-Type', 'application/json'),
+                HeaderParam::init('Idempotency-Key', $idempotencyKey),
+                BodyParam::init($body)
+            );
+
+        $_resHandler = $this->responseHandler()
+            ->throwErrorOn(
+                '400',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 400 Bad Request: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '401',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 401 Unauthorized: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '403',
+                ErrorType::initWithErrorTemplate(
+                    'HTTP 403 Forbidden: {$response.body#/code}',
+                    ApiErrorException::class
+                )
+            )
+            ->throwErrorOn(
+                '429',
+                ErrorType::initWithErrorTemplate('HTTP 429 Rate Limited: {$response.body#/code}')
+            )
+            ->throwErrorOn('404', ErrorType::initWithErrorTemplate('HTTP 404 Not Found: {$response.body#/code}'))
+            ->throwErrorOn('409', ErrorType::initWithErrorTemplate('HTTP 409 Conflict: {$response.body#/code}'))
+            ->throwErrorOn(
+                '500',
+                ErrorType::initWithErrorTemplate('HTTP 500 Server Error: {$response.body#/code}')
+            )
+            ->throwErrorOn('503', ErrorType::initWithErrorTemplate('HTTP 503 Unavailable: {$response.body#/code}'))
+            ->throwErrorOn('504', ErrorType::initWithErrorTemplate('HTTP 504 Timeout: {$response.body#/code}'))
+            ->throwErrorOn('0', ErrorType::initWithErrorTemplate('HTTP {$statusCode}: {$response.body#/code}'))
+            ->type(SubscriptionSimulationPayment::class, 1)
             ->returnApiResponse();
 
         return $this->execute($_reqBuilder, $_resHandler);

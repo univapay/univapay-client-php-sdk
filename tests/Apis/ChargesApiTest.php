@@ -309,11 +309,11 @@ class ChargesApiTest extends BaseTestController
         // Parameters for the API call
         $storeId = '0cab399b-5621-425b-993b-f8507eba1e78';
         $id = 'c4e87129-cad4-47fb-8ded-b4c0a4ae0dd4';
-        $body = TestParam::object('{"amount":1000,"currency":"JPY"}', Models\ChargeCaptureRequest::class);
         $idempotencyKey = 'f64be872-353d-4c3c-84cb-3dc617fe89f7';
+        $body = TestParam::object('{"amount":1000,"currency":"JPY"}', Models\ChargeCaptureRequest::class);
 
         // Perform API call
-        $result = self::$controller->captureCharge($storeId, $id, $body, $idempotencyKey)->getResult();
+        $result = self::$controller->captureCharge($storeId, $id, $idempotencyKey, $body)->getResult();
 
         $headers = [];
         $headers['Content-Type'] = ['application/json', true];
