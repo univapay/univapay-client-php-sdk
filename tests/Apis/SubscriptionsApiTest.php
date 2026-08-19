@@ -59,10 +59,11 @@ class SubscriptionsApiTest extends BaseTestController
                 '":{"start_on":"2024-06-26","zone_id":"Asia/Tokyo","preserve_end_of_month":false' .
                 ',"retry_interval":"P7D","termination_mode":"immediate"},"only_direct_currency":' .
                 'false,"first_charge_authorization_only":false,"status":"current","metadata":{"o' .
-                'rder_id":"ORD-987"},"mode":"live","created_on":"2024-06-26T01:51:28.627023Z","p' .
-                'eriod":"monthly","next_payment":{"id":"11ef3360-1f9a-c54a-8313-7f9847da313b","d' .
-                'ue_date":"2024-07-26","zone_id":"Asia/Tokyo","amount":1250,"currency":"USD","am' .
-                'ount_formatted":12.5,"is_paid":false}}'
+                'rder_id":"ORD-987"},"mode":"live","created_on":"2024-06-26T01:51:28.627023Z","t' .
+                'hree_ds":{"mode":"normal","redirect_endpoint":null,"redirect_id":null},"period"' .
+                ':"monthly","next_payment":{"id":"11ef3360-1f9a-c54a-8313-7f9847da313b","due_dat' .
+                'e":"2024-07-26","zone_id":"Asia/Tokyo","amount":1250,"currency":"USD","amount_f' .
+                'ormatted":12.5,"is_paid":false}}'
             )))
             ->assert();
     }
@@ -100,27 +101,33 @@ class SubscriptionsApiTest extends BaseTestController
                 '{"items":[{"id":"11ef3410-aaaa-4bcd-8e1f-1a2b3c4d5e60","store_id":"11edf541-c4' .
                 '2d-653c-8c3d-dfe0a55f95c0","transaction_token_id":"11ef3413-dddd-4ef0-b142-4d5e' .
                 '6f809193","amount":1250,"currency":"USD","amount_formatted":12.5,"status":"curr' .
-                'ent","mode":"live","created_on":"2024-06-26T01:51:28.627023Z","schedule_setting' .
-                's":{"zone_id":"Asia/Tokyo","retry_interval":"P7D","termination_mode":"immediate' .
-                '"},"merchant_name":"管理画面ガイド","store_name":"管理画面ガイド_TEST店舗","payment_type":"card' .
-                '","next_payment_date":"2024-07-26","user_data":{"type":"charge","cardholder_nam' .
-                'e":"taro yamada","email":"taro@test.com","brand":"visa"}},{"id":"11ef3411-bbbb-' .
-                '4cde-9f20-2b3c4d5e6f71","store_id":"22af6520-d53e-764d-9d4e-ef01b66fa6d1","tran' .
-                'saction_token_id":"11ef3414-eeee-4f01-c253-5e6f80919204","amount":3000,"currenc' .
-                'y":"JPY","amount_formatted":3000,"status":"current","mode":"live","created_on":' .
-                '"2024-07-11T09:20:00.627023Z","schedule_settings":{"zone_id":"Asia/Tokyo","retr' .
-                'y_interval":"P7D","termination_mode":"immediate"},"merchant_name":"管理画面ガイド","st' .
-                'ore_name":"管理画面ガイド_Online店舗","payment_type":"card","next_payment_date":"2024-08' .
-                '-10","user_data":{"type":"charge","cardholder_name":"hanako suzuki","email":"ha' .
-                'nako@test.com","brand":"mastercard"}},{"id":"11ef3412-cccc-4def-a031-3c4d5e6f80' .
-                '82","store_id":"33af7631-e64f-875e-ae5f-f012c77fb7e2","transaction_token_id":"1' .
-                '1ef3415-ffff-4012-d364-6f8091920315","amount":9800,"currency":"JPY","amount_for' .
-                'matted":9800,"status":"suspended","mode":"live","created_on":"2024-08-15T13:05:' .
-                '22.627023Z","schedule_settings":{"zone_id":"Asia/Tokyo","retry_interval":"P7D",' .
-                '"termination_mode":"on_next_payment"},"merchant_name":"管理画面ガイド","store_name":"管' .
-                '理画面ガイド_Osaka店舗","payment_type":"card","next_payment_date":"2024-09-15","user_da' .
-                'ta":{"type":"charge","cardholder_name":"jiro tanaka","email":"jiro@test.com","b' .
-                'rand":"jcb"}}],"has_more":false,"total_hits":3}'
+                'ent","mode":"live","created_on":"2024-06-26T01:51:28.627023Z","three_ds":{"mode' .
+                '":"normal","redirect_endpoint":null,"redirect_id":null},"schedule_settings":{"z' .
+                'one_id":"Asia/Tokyo","retry_interval":"P7D","termination_mode":"immediate"},"su' .
+                'bscription_plan":{"plan_type":"fixed_cycles","fixed_cycles":12},"merchant_name"' .
+                ':"管理画面ガイド","store_name":"管理画面ガイド_TEST店舗","payment_type":"card","next_payment_da' .
+                'te":"2024-07-26","user_data":{"type":"charge","cardholder_name":"taro yamada","' .
+                'email":"taro@test.com","brand":"visa"}},{"id":"11ef3411-bbbb-4cde-9f20-2b3c4d5e' .
+                '6f71","store_id":"22af6520-d53e-764d-9d4e-ef01b66fa6d1","transaction_token_id":' .
+                '"11ef3414-eeee-4f01-c253-5e6f80919204","amount":3000,"currency":"JPY","amount_f' .
+                'ormatted":3000,"status":"current","mode":"live","created_on":"2024-07-11T09:20:' .
+                '00.627023Z","three_ds":{"mode":"normal","redirect_endpoint":null,"redirect_id":' .
+                'null},"schedule_settings":{"zone_id":"Asia/Tokyo","retry_interval":"P7D","termi' .
+                'nation_mode":"immediate"},"installment_plan":{"plan_type":"fixed_cycle_amount",' .
+                '"fixed_cycles":null,"fixed_cycles_amount":30000},"merchant_name":"管理画面ガイド","sto' .
+                're_name":"管理画面ガイド_Online店舗","payment_type":"card","next_payment_date":"2024-08-' .
+                '10","user_data":{"type":"charge","cardholder_name":"hanako suzuki","email":"han' .
+                'ako@test.com","brand":"mastercard"}},{"id":"11ef3412-cccc-4def-a031-3c4d5e6f808' .
+                '2","store_id":"33af7631-e64f-875e-ae5f-f012c77fb7e2","transaction_token_id":"11' .
+                'ef3415-ffff-4012-d364-6f8091920315","amount":9800,"currency":"JPY","amount_form' .
+                'atted":9800,"status":"suspended","mode":"live","created_on":"2024-08-15T13:05:2' .
+                '2.627023Z","three_ds":{"mode":"normal","redirect_endpoint":null,"redirect_id":n' .
+                'ull},"schedule_settings":{"zone_id":"Asia/Tokyo","retry_interval":"P7D","termin' .
+                'ation_mode":"on_next_payment"},"installment_plan":{"plan_type":"revolving","fix' .
+                'ed_cycles":null,"fixed_cycles_amount":null},"merchant_name":"管理画面ガイド","store_na' .
+                'me":"管理画面ガイド_Osaka店舗","payment_type":"card","next_payment_date":"2024-09-15","u' .
+                'ser_data":{"type":"charge","cardholder_name":"jiro tanaka","email":"jiro@test.c' .
+                'om","brand":"jcb"}}],"has_more":false,"total_hits":3}'
             )))
             ->assert();
     }
@@ -192,27 +199,32 @@ class SubscriptionsApiTest extends BaseTestController
                 '{"items":[{"id":"11ef335e-9aa5-c54a-8313-7f9847da313a","store_id":"11edf541-c4' .
                 '2d-653c-8c3d-dfe0a55f95c0","transaction_token_id":"11ef32a7-3a71-8662-803f-1bc2' .
                 '7702eeec","amount":1250,"currency":"USD","amount_formatted":12.5,"status":"curr' .
-                'ent","mode":"live","created_on":"2024-06-26T01:51:28.627023Z","schedule_setting' .
-                's":{"zone_id":"Asia/Tokyo","retry_interval":"P7D","termination_mode":"immediate' .
-                '"},"merchant_name":"管理画面ガイド","store_name":"管理画面ガイド_TEST店舗","payment_type":"card' .
-                '","next_payment_date":"2024-07-26","user_data":{"type":"charge","cardholder_nam' .
-                'e":"taro yamada","email":"test@test.com","brand":"visa"}},{"id":"11ef3401-1a2b-' .
-                '4c3d-8e4f-5a6b7c8d9e0f","store_id":"11edf541-c42d-653c-8c3d-dfe0a55f95c0","tran' .
-                'saction_token_id":"11ef3402-2b3c-4d5e-9f60-6b7c8d9e0f11","amount":5000,"currenc' .
-                'y":"JPY","amount_formatted":5000,"status":"current","mode":"live","created_on":' .
-                '"2024-07-01T10:00:00.627023Z","schedule_settings":{"zone_id":"Asia/Tokyo","retr' .
-                'y_interval":"P7D","termination_mode":"immediate"},"merchant_name":"管理画面ガイド","st' .
-                'ore_name":"管理画面ガイド_TEST店舗","payment_type":"card","next_payment_date":"2024-08-0' .
-                '1","user_data":{"type":"charge","cardholder_name":"hanako suzuki","email":"hana' .
-                'ko@test.com","brand":"mastercard"}},{"id":"11ef3403-3c4d-5e6f-a071-7c8d9e0f1122' .
-                '","store_id":"11edf541-c42d-653c-8c3d-dfe0a55f95c0","transaction_token_id":"11e' .
-                'f3404-4d5e-6f70-b182-8d9e0f112233","amount":9800,"currency":"JPY","amount_forma' .
-                'tted":9800,"status":"suspended","mode":"live","created_on":"2024-08-15T13:05:22' .
-                '.627023Z","schedule_settings":{"zone_id":"Asia/Tokyo","retry_interval":"P7D","t' .
-                'ermination_mode":"on_next_payment"},"merchant_name":"管理画面ガイド","store_name":"管理画' .
-                '面ガイド_TEST店舗","payment_type":"card","next_payment_date":"2024-09-15","user_data"' .
-                ':{"type":"charge","cardholder_name":"jiro tanaka","email":"jiro@test.com","bran' .
-                'd":"jcb"}}],"has_more":false,"total_hits":3}'
+                'ent","mode":"live","created_on":"2024-06-26T01:51:28.627023Z","three_ds":{"mode' .
+                '":"normal","redirect_endpoint":null,"redirect_id":null},"schedule_settings":{"z' .
+                'one_id":"Asia/Tokyo","retry_interval":"P7D","termination_mode":"immediate"},"su' .
+                'bscription_plan":{"plan_type":"fixed_cycles","fixed_cycles":12},"merchant_name"' .
+                ':"管理画面ガイド","store_name":"管理画面ガイド_TEST店舗","payment_type":"card","next_payment_da' .
+                'te":"2024-07-26","user_data":{"type":"charge","cardholder_name":"taro yamada","' .
+                'email":"test@test.com","brand":"visa"}},{"id":"11ef3401-1a2b-4c3d-8e4f-5a6b7c8d' .
+                '9e0f","store_id":"11edf541-c42d-653c-8c3d-dfe0a55f95c0","transaction_token_id":' .
+                '"11ef3402-2b3c-4d5e-9f60-6b7c8d9e0f11","amount":5000,"currency":"JPY","amount_f' .
+                'ormatted":5000,"status":"current","mode":"live","created_on":"2024-07-01T10:00:' .
+                '00.627023Z","three_ds":{"mode":"normal","redirect_endpoint":null,"redirect_id":' .
+                'null},"schedule_settings":{"zone_id":"Asia/Tokyo","retry_interval":"P7D","termi' .
+                'nation_mode":"immediate"},"merchant_name":"管理画面ガイド","store_name":"管理画面ガイド_TEST店' .
+                '舗","payment_type":"card","next_payment_date":"2024-08-01","user_data":{"type":"' .
+                'charge","cardholder_name":"hanako suzuki","email":"hanako@test.com","brand":"ma' .
+                'stercard"}},{"id":"11ef3403-3c4d-5e6f-a071-7c8d9e0f1122","store_id":"11edf541-c' .
+                '42d-653c-8c3d-dfe0a55f95c0","transaction_token_id":"11ef3404-4d5e-6f70-b182-8d9' .
+                'e0f112233","amount":9800,"currency":"JPY","amount_formatted":9800,"status":"sus' .
+                'pended","mode":"live","created_on":"2024-08-15T13:05:22.627023Z","three_ds":{"m' .
+                'ode":"normal","redirect_endpoint":null,"redirect_id":null},"schedule_settings":' .
+                '{"zone_id":"Asia/Tokyo","retry_interval":"P7D","termination_mode":"on_next_paym' .
+                'ent"},"installment_plan":{"plan_type":"revolving","fixed_cycles":null,"fixed_cy' .
+                'cles_amount":null},"merchant_name":"管理画面ガイド","store_name":"管理画面ガイド_TEST店舗","pay' .
+                'ment_type":"card","next_payment_date":"2024-09-15","user_data":{"type":"charge"' .
+                ',"cardholder_name":"jiro tanaka","email":"jiro@test.com","brand":"jcb"}}],"has_' .
+                'more":false,"total_hits":3}'
             )))
             ->assert();
     }
@@ -277,11 +289,14 @@ class SubscriptionsApiTest extends BaseTestController
                 ',"retry_interval":"P7D","termination_mode":"immediate"},"only_direct_currency":' .
                 'false,"first_charge_capture_after":null,"first_charge_authorization_only":false' .
                 ',"status":"current","metadata":{"order_id":"12345"},"mode":"test","created_on":' .
-                '"2024-06-26T01:51:28.627023Z","period":"monthly","next_payment":{"id":"11ef335e' .
-                '-9ae2-8322-8e79-e7ba4b56234e","due_date":"2024-07-26","zone_id":"Asia/Tokyo","a' .
-                'mount":1250,"currency":"USD","amount_formatted":12.5,"is_paid":false,"is_last_p' .
-                'ayment":false,"created_on":"2024-06-26T01:51:29.025129Z","updated_on":"2024-06-' .
-                '26T01:51:29.025129Z","retry_date":null}}'
+                '"2024-06-26T01:51:28.627023Z","three_ds":{"mode":"normal","redirect_endpoint":n' .
+                'ull,"redirect_id":null},"period":"monthly","next_payment":{"id":"11ef335e-9ae2-' .
+                '8322-8e79-e7ba4b56234e","due_date":"2024-07-26","zone_id":"Asia/Tokyo","amount"' .
+                ':1250,"currency":"USD","amount_formatted":12.5,"is_paid":false,"is_last_payment' .
+                '":false,"created_on":"2024-06-26T01:51:29.025129Z","updated_on":"2024-06-26T01:' .
+                '51:29.025129Z","retry_date":null},"cycles_left":5,"subscription_plan":{"plan_ty' .
+                'pe":"fixed_cycles","fixed_cycles":12},"amount_left":6250,"amount_left_formatted' .
+                '":62.5}'
             )))
             ->assert();
     }
@@ -317,11 +332,12 @@ class SubscriptionsApiTest extends BaseTestController
                 ',"retry_interval":"P7D","termination_mode":"on_next_payment"},"only_direct_curr' .
                 'ency":false,"first_charge_capture_after":null,"first_charge_authorization_only"' .
                 ':false,"status":"current","metadata":{"order_id":"12345"},"mode":"test","create' .
-                'd_on":"2024-06-26T01:51:28.627023Z","period":"monthly","next_payment":{"id":"11' .
-                'ef335e-9ae2-8322-8e79-e7ba4b56234e","due_date":"2030-01-01","zone_id":"Asia/Tok' .
-                'yo","amount":1250,"currency":"USD","amount_formatted":12.5,"is_paid":false,"is_' .
-                'last_payment":false,"created_on":"2024-06-26T01:51:29.025129Z","updated_on":"20' .
-                '24-06-26T01:51:29.025129Z","retry_date":null}}'
+                'd_on":"2024-06-26T01:51:28.627023Z","three_ds":{"mode":"normal","redirect_endpo' .
+                'int":null,"redirect_id":null},"period":"monthly","next_payment":{"id":"11ef335e' .
+                '-9ae2-8322-8e79-e7ba4b56234e","due_date":"2030-01-01","zone_id":"Asia/Tokyo","a' .
+                'mount":1250,"currency":"USD","amount_formatted":12.5,"is_paid":false,"is_last_p' .
+                'ayment":false,"created_on":"2024-06-26T01:51:29.025129Z","updated_on":"2024-06-' .
+                '26T01:51:29.025129Z","retry_date":null}}'
             )))
             ->assert();
     }
@@ -585,7 +601,8 @@ class SubscriptionsApiTest extends BaseTestController
                 '"amount":1250,"currency":"USD","amount_formatted":12.5,"schedule_settings":{"st' .
                 'art_on":"2024-07-01","zone_id":"Asia/Tokyo","preserve_end_of_month":false,"retr' .
                 'y_interval":"P7D","termination_mode":"on_next_payment"},"status":"suspended","m' .
-                'ode":"test","created_on":"2024-06-26T01:51:28.627023Z","period":"monthly"}'
+                'ode":"test","created_on":"2024-06-26T01:51:28.627023Z","three_ds":{"mode":"norm' .
+                'al","redirect_endpoint":null,"redirect_id":null},"period":"monthly"}'
             )))
             ->assert();
     }
@@ -614,7 +631,8 @@ class SubscriptionsApiTest extends BaseTestController
                 '"amount":1250,"currency":"USD","amount_formatted":12.5,"schedule_settings":{"st' .
                 'art_on":"2024-07-01","zone_id":"Asia/Tokyo","preserve_end_of_month":false,"retr' .
                 'y_interval":"P7D","termination_mode":"immediate"},"status":"unpaid","mode":"tes' .
-                't","created_on":"2024-06-26T01:51:28.627023Z","period":"monthly"}'
+                't","created_on":"2024-06-26T01:51:28.627023Z","three_ds":{"mode":"normal","redi' .
+                'rect_endpoint":null,"redirect_id":null},"period":"monthly"}'
             )))
             ->assert();
     }
@@ -648,7 +666,8 @@ class SubscriptionsApiTest extends BaseTestController
                 '"amount":1250,"currency":"USD","amount_formatted":12.5,"schedule_settings":{"st' .
                 'art_on":"2024-07-01","zone_id":"Asia/Tokyo","preserve_end_of_month":false,"retr' .
                 'y_interval":"P7D","termination_mode":"immediate"},"status":"current","mode":"te' .
-                'st","created_on":"2024-06-26T01:51:28.627023Z","period":"monthly"}'
+                'st","created_on":"2024-06-26T01:51:28.627023Z","three_ds":{"mode":"normal","red' .
+                'irect_endpoint":null,"redirect_id":null},"period":"monthly"}'
             )))
             ->assert();
     }

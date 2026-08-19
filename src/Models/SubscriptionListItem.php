@@ -106,14 +106,54 @@ class SubscriptionListItem implements \JsonSerializable
     private $createdOn;
 
     /**
+     * @var SubscriptionThreeDs|null
+     */
+    private $threeDs;
+
+    /**
      * @var string|null
      */
     private $period;
 
     /**
+     * @var array
+     */
+    private $cyclicalPeriod = [];
+
+    /**
      * @var SubscriptionNextPayment|null
      */
     private $nextPayment;
+
+    /**
+     * @var array
+     */
+    private $cyclesLeft = [];
+
+    /**
+     * @var SubscriptionPlanSettings|null
+     */
+    private $subscriptionPlan;
+
+    /**
+     * @var SubscriptionInstallmentPlanResponse|null
+     */
+    private $installmentPlan;
+
+    /**
+     * @var array
+     */
+    private $chargeId = [];
+
+    /**
+     * @var array
+     */
+    private $amountLeft = [];
+
+    /**
+     * @var array
+     */
+    private $amountLeftFormatted = [];
 
     /**
      * @var string|null
@@ -535,6 +575,26 @@ class SubscriptionListItem implements \JsonSerializable
     }
 
     /**
+     * Returns Three Ds.
+     * 3-D Secure configuration and redirect details applied to the subscription's payments.
+     */
+    public function getThreeDs(): ?SubscriptionThreeDs
+    {
+        return $this->threeDs;
+    }
+
+    /**
+     * Sets Three Ds.
+     * 3-D Secure configuration and redirect details applied to the subscription's payments.
+     *
+     * @maps three_ds
+     */
+    public function setThreeDs(?SubscriptionThreeDs $threeDs): void
+    {
+        $this->threeDs = $threeDs;
+    }
+
+    /**
      * Returns Period.
      * Subscription Period schema.
      */
@@ -556,6 +616,44 @@ class SubscriptionListItem implements \JsonSerializable
     }
 
     /**
+     * Returns Cyclical Period.
+     * ISO-8601 Duration for a custom billing frequency (e.g., P3D, P1M), returned instead of `period` when
+     * the subscription uses a custom cycle length rather than one of the fixed period presets. Mutually
+     * exclusive with `period` — exactly one of the two is present.
+     */
+    public function getCyclicalPeriod(): ?string
+    {
+        if (count($this->cyclicalPeriod) == 0) {
+            return null;
+        }
+        return $this->cyclicalPeriod['value'];
+    }
+
+    /**
+     * Sets Cyclical Period.
+     * ISO-8601 Duration for a custom billing frequency (e.g., P3D, P1M), returned instead of `period` when
+     * the subscription uses a custom cycle length rather than one of the fixed period presets. Mutually
+     * exclusive with `period` — exactly one of the two is present.
+     *
+     * @maps cyclical_period
+     */
+    public function setCyclicalPeriod(?string $cyclicalPeriod): void
+    {
+        $this->cyclicalPeriod['value'] = $cyclicalPeriod;
+    }
+
+    /**
+     * Unsets Cyclical Period.
+     * ISO-8601 Duration for a custom billing frequency (e.g., P3D, P1M), returned instead of `period` when
+     * the subscription uses a custom cycle length rather than one of the fixed period presets. Mutually
+     * exclusive with `period` — exactly one of the two is present.
+     */
+    public function unsetCyclicalPeriod(): void
+    {
+        $this->cyclicalPeriod = [];
+    }
+
+    /**
      * Returns Next Payment.
      * Next scheduled payment details for a subscription.
      */
@@ -573,6 +671,187 @@ class SubscriptionListItem implements \JsonSerializable
     public function setNextPayment(?SubscriptionNextPayment $nextPayment): void
     {
         $this->nextPayment = $nextPayment;
+    }
+
+    /**
+     * Returns Cycles Left.
+     * Number of remaining billing cycles before the subscription completes. Only present for cycle-limited
+     * plans (`subscription_plan` or `installment_plan`); `null` for indefinite subscriptions.
+     */
+    public function getCyclesLeft(): ?int
+    {
+        if (count($this->cyclesLeft) == 0) {
+            return null;
+        }
+        return $this->cyclesLeft['value'];
+    }
+
+    /**
+     * Sets Cycles Left.
+     * Number of remaining billing cycles before the subscription completes. Only present for cycle-limited
+     * plans (`subscription_plan` or `installment_plan`); `null` for indefinite subscriptions.
+     *
+     * @maps cycles_left
+     */
+    public function setCyclesLeft(?int $cyclesLeft): void
+    {
+        $this->cyclesLeft['value'] = $cyclesLeft;
+    }
+
+    /**
+     * Unsets Cycles Left.
+     * Number of remaining billing cycles before the subscription completes. Only present for cycle-limited
+     * plans (`subscription_plan` or `installment_plan`); `null` for indefinite subscriptions.
+     */
+    public function unsetCyclesLeft(): void
+    {
+        $this->cyclesLeft = [];
+    }
+
+    /**
+     * Returns Subscription Plan.
+     * Configuration for limited-cycle subscriptions (Univapay side).
+     */
+    public function getSubscriptionPlan(): ?SubscriptionPlanSettings
+    {
+        return $this->subscriptionPlan;
+    }
+
+    /**
+     * Sets Subscription Plan.
+     * Configuration for limited-cycle subscriptions (Univapay side).
+     *
+     * @maps subscription_plan
+     */
+    public function setSubscriptionPlan(?SubscriptionPlanSettings $subscriptionPlan): void
+    {
+        $this->subscriptionPlan = $subscriptionPlan;
+    }
+
+    /**
+     * Returns Installment Plan.
+     * Installment plan applied to the subscription, as returned by the API. Covers both card-network
+     * installment plans (`revolving`, `fixed_cycles`) and legacy fixed-amount installment plans
+     * (`fixed_cycle_amount`).
+     */
+    public function getInstallmentPlan(): ?SubscriptionInstallmentPlanResponse
+    {
+        return $this->installmentPlan;
+    }
+
+    /**
+     * Sets Installment Plan.
+     * Installment plan applied to the subscription, as returned by the API. Covers both card-network
+     * installment plans (`revolving`, `fixed_cycles`) and legacy fixed-amount installment plans
+     * (`fixed_cycle_amount`).
+     *
+     * @maps installment_plan
+     */
+    public function setInstallmentPlan(?SubscriptionInstallmentPlanResponse $installmentPlan): void
+    {
+        $this->installmentPlan = $installmentPlan;
+    }
+
+    /**
+     * Returns Charge Id.
+     * Identifier of the charge associated with the subscription's installment plan. Only present when
+     * `installment_plan` is set.
+     */
+    public function getChargeId(): ?string
+    {
+        if (count($this->chargeId) == 0) {
+            return null;
+        }
+        return $this->chargeId['value'];
+    }
+
+    /**
+     * Sets Charge Id.
+     * Identifier of the charge associated with the subscription's installment plan. Only present when
+     * `installment_plan` is set.
+     *
+     * @maps charge_id
+     */
+    public function setChargeId(?string $chargeId): void
+    {
+        $this->chargeId['value'] = $chargeId;
+    }
+
+    /**
+     * Unsets Charge Id.
+     * Identifier of the charge associated with the subscription's installment plan. Only present when
+     * `installment_plan` is set.
+     */
+    public function unsetChargeId(): void
+    {
+        $this->chargeId = [];
+    }
+
+    /**
+     * Returns Amount Left.
+     * Remaining amount to be charged over the life of the plan, in the smallest currency unit. Only
+     * present for cycle-limited plans.
+     */
+    public function getAmountLeft(): ?int
+    {
+        if (count($this->amountLeft) == 0) {
+            return null;
+        }
+        return $this->amountLeft['value'];
+    }
+
+    /**
+     * Sets Amount Left.
+     * Remaining amount to be charged over the life of the plan, in the smallest currency unit. Only
+     * present for cycle-limited plans.
+     *
+     * @maps amount_left
+     */
+    public function setAmountLeft(?int $amountLeft): void
+    {
+        $this->amountLeft['value'] = $amountLeft;
+    }
+
+    /**
+     * Unsets Amount Left.
+     * Remaining amount to be charged over the life of the plan, in the smallest currency unit. Only
+     * present for cycle-limited plans.
+     */
+    public function unsetAmountLeft(): void
+    {
+        $this->amountLeft = [];
+    }
+
+    /**
+     * Returns Amount Left Formatted.
+     * `amount_left` formatted for display.
+     */
+    public function getAmountLeftFormatted(): ?float
+    {
+        if (count($this->amountLeftFormatted) == 0) {
+            return null;
+        }
+        return $this->amountLeftFormatted['value'];
+    }
+
+    /**
+     * Sets Amount Left Formatted.
+     * `amount_left` formatted for display.
+     *
+     * @maps amount_left_formatted
+     */
+    public function setAmountLeftFormatted(?float $amountLeftFormatted): void
+    {
+        $this->amountLeftFormatted['value'] = $amountLeftFormatted;
+    }
+
+    /**
+     * Unsets Amount Left Formatted.
+     * `amount_left` formatted for display.
+     */
+    public function unsetAmountLeftFormatted(): void
+    {
+        $this->amountLeftFormatted = [];
     }
 
     /**
@@ -703,8 +982,16 @@ class SubscriptionListItem implements \JsonSerializable
                 'metadata' => $this->metadata,
                 'mode' => $this->mode,
                 'createdOn' => $this->createdOn,
+                'threeDs' => $this->threeDs,
                 'period' => $this->period,
+                'cyclicalPeriod' => $this->getCyclicalPeriod(),
                 'nextPayment' => $this->nextPayment,
+                'cyclesLeft' => $this->getCyclesLeft(),
+                'subscriptionPlan' => $this->subscriptionPlan,
+                'installmentPlan' => $this->installmentPlan,
+                'chargeId' => $this->getChargeId(),
+                'amountLeft' => $this->getAmountLeft(),
+                'amountLeftFormatted' => $this->getAmountLeftFormatted(),
                 'merchantName' => $this->merchantName,
                 'storeName' => $this->storeName,
                 'paymentType' => $this->paymentType,
@@ -733,8 +1020,16 @@ class SubscriptionListItem implements \JsonSerializable
         'metadata',
         'mode',
         'created_on',
+        'three_ds',
         'period',
+        'cyclical_period',
         'next_payment',
+        'cycles_left',
+        'subscription_plan',
+        'installment_plan',
+        'charge_id',
+        'amount_left',
+        'amount_left_formatted',
         'merchant_name',
         'store_name',
         'payment_type',
@@ -842,11 +1137,35 @@ class SubscriptionListItem implements \JsonSerializable
         if (isset($this->createdOn)) {
             $json['created_on']                      = DateTimeHelper::toRfc3339DateTime($this->createdOn);
         }
+        if (isset($this->threeDs)) {
+            $json['three_ds']                        = $this->threeDs;
+        }
         if (isset($this->period)) {
             $json['period']                          = SubscriptionPeriod::checkValue($this->period);
         }
+        if (!empty($this->cyclicalPeriod)) {
+            $json['cyclical_period']                 = $this->cyclicalPeriod['value'];
+        }
         if (isset($this->nextPayment)) {
             $json['next_payment']                    = $this->nextPayment;
+        }
+        if (!empty($this->cyclesLeft)) {
+            $json['cycles_left']                     = $this->cyclesLeft['value'];
+        }
+        if (isset($this->subscriptionPlan)) {
+            $json['subscription_plan']               = $this->subscriptionPlan;
+        }
+        if (isset($this->installmentPlan)) {
+            $json['installment_plan']                = $this->installmentPlan;
+        }
+        if (!empty($this->chargeId)) {
+            $json['charge_id']                       = $this->chargeId['value'];
+        }
+        if (!empty($this->amountLeft)) {
+            $json['amount_left']                     = $this->amountLeft['value'];
+        }
+        if (!empty($this->amountLeftFormatted)) {
+            $json['amount_left_formatted']           = $this->amountLeftFormatted['value'];
         }
         if (isset($this->merchantName)) {
             $json['merchant_name']                   = $this->merchantName;

@@ -26,6 +26,12 @@ use UnivaPay\Models\Builders\SubscriptionListItemBuilder;
 use UnivaPay\Utils\DateTimeHelper;
 use UnivaPay\ApiHelper;
 use UnivaPay\Models\SubscriptionStatus;
+use UnivaPay\Models\Builders\SubscriptionThreeDsBuilder;
+use UnivaPay\Models\SubscriptionThreeDsMode;
+use UnivaPay\Models\Builders\SubscriptionPlanSettingsBuilder;
+use UnivaPay\Models\PlanSettingsType;
+use UnivaPay\Models\Builders\SubscriptionInstallmentPlanResponseBuilder;
+use UnivaPay\Models\CombinedPlanType;
 use UnivaPay\Models\Builders\SubscriptionUserDataBuilder;
 
 $subscriptionList = SubscriptionListBuilder::init()
@@ -39,6 +45,22 @@ $subscriptionList = SubscriptionListBuilder::init()
                 ->currency('USD')
                 ->amountFormatted(12.5)
                 ->status(SubscriptionStatus::CURRENT)
+                ->threeDs(
+                    SubscriptionThreeDsBuilder::init()
+                        ->mode(SubscriptionThreeDsMode::NORMAL)
+                        ->redirectEndpoint(null)
+                        ->redirectId(null)
+                        ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
+                        ->build()
+                )
+                ->subscriptionPlan(
+                    SubscriptionPlanSettingsBuilder::init()
+                        ->planType(PlanSettingsType::FIXED_CYCLES)
+                        ->fixedCycles(12)
+                        ->fixedCycleAmount(112)
+                        ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
+                        ->build()
+                )
                 ->merchantName('管理画面ガイド')
                 ->storeName('管理画面ガイド_TEST店舗')
                 ->paymentType('card')
@@ -63,6 +85,22 @@ $subscriptionList = SubscriptionListBuilder::init()
                 ->currency('JPY')
                 ->amountFormatted(3000)
                 ->status(SubscriptionStatus::CURRENT)
+                ->threeDs(
+                    SubscriptionThreeDsBuilder::init()
+                        ->mode(SubscriptionThreeDsMode::NORMAL)
+                        ->redirectEndpoint(null)
+                        ->redirectId(null)
+                        ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
+                        ->build()
+                )
+                ->installmentPlan(
+                    SubscriptionInstallmentPlanResponseBuilder::init()
+                        ->planType(CombinedPlanType::FIXED_CYCLE_AMOUNT)
+                        ->fixedCycles(null)
+                        ->fixedCyclesAmount(30000)
+                        ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
+                        ->build()
+                )
                 ->merchantName('管理画面ガイド')
                 ->storeName('管理画面ガイド_Online店舗')
                 ->paymentType('card')

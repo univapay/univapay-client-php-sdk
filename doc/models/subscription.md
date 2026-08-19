@@ -30,8 +30,16 @@ The Subscription object represents a recurring payment schedule.
 | `metadata` | [`?GenericMetadata`](../../doc/models/generic-metadata.md) | Optional | A free-form dictionary for custom metadata. | getMetadata(): ?GenericMetadata | setMetadata(?GenericMetadata metadata): void |
 | `mode` | [`?string(ChargeMode)`](../../doc/models/charge-mode.md) | Optional | Charge Mode schema. | getMode(): ?string | setMode(?string mode): void |
 | `createdOn` | `?DateTime` | Optional | Timestamp when the resource was created. | getCreatedOn(): ?\DateTime | setCreatedOn(?\DateTime createdOn): void |
+| `threeDs` | [`?SubscriptionThreeDs`](../../doc/models/subscription-three-ds.md) | Optional | 3-D Secure configuration and redirect details applied to the subscription's payments. | getThreeDs(): ?SubscriptionThreeDs | setThreeDs(?SubscriptionThreeDs threeDs): void |
 | `period` | [`?string(SubscriptionPeriod)`](../../doc/models/subscription-period.md) | Optional | Subscription Period schema. | getPeriod(): ?string | setPeriod(?string period): void |
+| `cyclicalPeriod` | `?string` | Optional | ISO-8601 Duration for a custom billing frequency (e.g., P3D, P1M), returned instead of `period` when the subscription uses a custom cycle length rather than one of the fixed period presets. Mutually exclusive with `period` — exactly one of the two is present. | getCyclicalPeriod(): ?string | setCyclicalPeriod(?string cyclicalPeriod): void |
 | `nextPayment` | [`?SubscriptionNextPayment`](../../doc/models/subscription-next-payment.md) | Optional | Next scheduled payment details for a subscription. | getNextPayment(): ?SubscriptionNextPayment | setNextPayment(?SubscriptionNextPayment nextPayment): void |
+| `cyclesLeft` | `?int` | Optional | Number of remaining billing cycles before the subscription completes. Only present for cycle-limited plans (`subscription_plan` or `installment_plan`); `null` for indefinite subscriptions.<br><br>**Constraints**: `>= 0` | getCyclesLeft(): ?int | setCyclesLeft(?int cyclesLeft): void |
+| `subscriptionPlan` | [`?SubscriptionPlanSettings`](../../doc/models/subscription-plan-settings.md) | Optional | Configuration for limited-cycle subscriptions (Univapay side). | getSubscriptionPlan(): ?SubscriptionPlanSettings | setSubscriptionPlan(?SubscriptionPlanSettings subscriptionPlan): void |
+| `installmentPlan` | [`?SubscriptionInstallmentPlanResponse`](../../doc/models/subscription-installment-plan-response.md) | Optional | Installment plan applied to the subscription, as returned by the API. Covers both card-network installment plans (`revolving`, `fixed_cycles`) and legacy fixed-amount installment plans (`fixed_cycle_amount`). | getInstallmentPlan(): ?SubscriptionInstallmentPlanResponse | setInstallmentPlan(?SubscriptionInstallmentPlanResponse installmentPlan): void |
+| `chargeId` | `?string` | Optional | Identifier of the charge associated with the subscription's installment plan. Only present when `installment_plan` is set. | getChargeId(): ?string | setChargeId(?string chargeId): void |
+| `amountLeft` | `?int` | Optional | Remaining amount to be charged over the life of the plan, in the smallest currency unit. Only present for cycle-limited plans.<br><br>**Constraints**: `>= 0` | getAmountLeft(): ?int | setAmountLeft(?int amountLeft): void |
+| `amountLeftFormatted` | `?float` | Optional | `amount_left` formatted for display. | getAmountLeftFormatted(): ?float | setAmountLeftFormatted(?float amountLeftFormatted): void |
 | `additionalProperties` | `array<string, array>` | Optional | - | findAdditionalProperty(string key): array | additionalProperty(string key, array value): void |
 
 ## Example
@@ -45,8 +53,15 @@ use UnivaPay\ApiHelper;
 use UnivaPay\Models\SubscriptionStatus;
 use UnivaPay\Models\Builders\GenericMetadataBuilder;
 use UnivaPay\Models\ChargeMode;
+use UnivaPay\Models\Builders\SubscriptionThreeDsBuilder;
+use UnivaPay\Models\SubscriptionThreeDsMode;
 use UnivaPay\Models\SubscriptionPeriod;
 use UnivaPay\Models\Builders\SubscriptionNextPaymentBuilder;
+use UnivaPay\Models\Builders\SubscriptionPlanSettingsBuilder;
+use UnivaPay\Models\PlanSettingsType;
+use UnivaPay\Models\Builders\SubscriptionInstallmentPlanResponseBuilder;
+use UnivaPay\Models\CombinedPlanType;
+use UnivaPay\Models\CombinedInstallmentFixedCycles;
 
 $subscription = SubscriptionBuilder::init()
     ->id('11ef335e-9aa5-c54a-8313-7f9847da313a')
@@ -78,6 +93,14 @@ $subscription = SubscriptionBuilder::init()
     )
     ->mode(ChargeMode::LIVE)
     ->createdOn(DateTimeHelper::fromRfc3339DateTime('2024-06-26T01:51:28.627023Z'))
+    ->threeDs(
+        SubscriptionThreeDsBuilder::init()
+            ->mode(SubscriptionThreeDsMode::NORMAL)
+            ->redirectEndpoint('redirect_endpoint8')
+            ->redirectId('000023a4-0000-0000-0000-000000000000')
+            ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
+            ->build()
+    )
     ->period(SubscriptionPeriod::MONTHLY)
     ->nextPayment(
         SubscriptionNextPaymentBuilder::init()
@@ -86,6 +109,22 @@ $subscription = SubscriptionBuilder::init()
             ->zoneId('zone_id8')
             ->amount(126)
             ->currency('currency8')
+            ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
+            ->build()
+    )
+    ->subscriptionPlan(
+        SubscriptionPlanSettingsBuilder::init()
+            ->planType(PlanSettingsType::FIXED_CYCLES)
+            ->fixedCycles(46)
+            ->fixedCycleAmount(112)
+            ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
+            ->build()
+    )
+    ->installmentPlan(
+        SubscriptionInstallmentPlanResponseBuilder::init()
+            ->planType(CombinedPlanType::FIXED_CYCLES)
+            ->fixedCycles(CombinedInstallmentFixedCycles::CYCLES_12)
+            ->fixedCyclesAmount(198)
             ->additionalProperty('exampleAdditionalProperty', ApiHelper::deserialize('{"key1":"val1","key2":"val2"}'))
             ->build()
     )

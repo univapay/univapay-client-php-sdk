@@ -30,8 +30,16 @@ Subscription entry returned in list responses.
 | `metadata` | [`?GenericMetadata`](../../doc/models/generic-metadata.md) | Optional | A free-form dictionary for custom metadata. | getMetadata(): ?GenericMetadata | setMetadata(?GenericMetadata metadata): void |
 | `mode` | [`?string(ChargeMode)`](../../doc/models/charge-mode.md) | Optional | Charge Mode schema. | getMode(): ?string | setMode(?string mode): void |
 | `createdOn` | `?DateTime` | Optional | Timestamp when the resource was created. | getCreatedOn(): ?\DateTime | setCreatedOn(?\DateTime createdOn): void |
+| `threeDs` | [`?SubscriptionThreeDs`](../../doc/models/subscription-three-ds.md) | Optional | 3-D Secure configuration and redirect details applied to the subscription's payments. | getThreeDs(): ?SubscriptionThreeDs | setThreeDs(?SubscriptionThreeDs threeDs): void |
 | `period` | [`?string(SubscriptionPeriod)`](../../doc/models/subscription-period.md) | Optional | Subscription Period schema. | getPeriod(): ?string | setPeriod(?string period): void |
+| `cyclicalPeriod` | `?string` | Optional | ISO-8601 Duration for a custom billing frequency (e.g., P3D, P1M), returned instead of `period` when the subscription uses a custom cycle length rather than one of the fixed period presets. Mutually exclusive with `period` — exactly one of the two is present. | getCyclicalPeriod(): ?string | setCyclicalPeriod(?string cyclicalPeriod): void |
 | `nextPayment` | [`?SubscriptionNextPayment`](../../doc/models/subscription-next-payment.md) | Optional | Next scheduled payment details for a subscription. | getNextPayment(): ?SubscriptionNextPayment | setNextPayment(?SubscriptionNextPayment nextPayment): void |
+| `cyclesLeft` | `?int` | Optional | Number of remaining billing cycles before the subscription completes. Only present for cycle-limited plans (`subscription_plan` or `installment_plan`); `null` for indefinite subscriptions.<br><br>**Constraints**: `>= 0` | getCyclesLeft(): ?int | setCyclesLeft(?int cyclesLeft): void |
+| `subscriptionPlan` | [`?SubscriptionPlanSettings`](../../doc/models/subscription-plan-settings.md) | Optional | Configuration for limited-cycle subscriptions (Univapay side). | getSubscriptionPlan(): ?SubscriptionPlanSettings | setSubscriptionPlan(?SubscriptionPlanSettings subscriptionPlan): void |
+| `installmentPlan` | [`?SubscriptionInstallmentPlanResponse`](../../doc/models/subscription-installment-plan-response.md) | Optional | Installment plan applied to the subscription, as returned by the API. Covers both card-network installment plans (`revolving`, `fixed_cycles`) and legacy fixed-amount installment plans (`fixed_cycle_amount`). | getInstallmentPlan(): ?SubscriptionInstallmentPlanResponse | setInstallmentPlan(?SubscriptionInstallmentPlanResponse installmentPlan): void |
+| `chargeId` | `?string` | Optional | Identifier of the charge associated with the subscription's installment plan. Only present when `installment_plan` is set. | getChargeId(): ?string | setChargeId(?string chargeId): void |
+| `amountLeft` | `?int` | Optional | Remaining amount to be charged over the life of the plan, in the smallest currency unit. Only present for cycle-limited plans.<br><br>**Constraints**: `>= 0` | getAmountLeft(): ?int | setAmountLeft(?int amountLeft): void |
+| `amountLeftFormatted` | `?float` | Optional | `amount_left` formatted for display. | getAmountLeftFormatted(): ?float | setAmountLeftFormatted(?float amountLeftFormatted): void |
 | `merchantName` | `?string` | Optional | Merchant display name. | getMerchantName(): ?string | setMerchantName(?string merchantName): void |
 | `storeName` | `?string` | Optional | Store display name. | getStoreName(): ?string | setStoreName(?string storeName): void |
 | `paymentType` | `?string` | Optional | Payment method type. | getPaymentType(): ?string | setPaymentType(?string paymentType): void |
@@ -45,6 +53,10 @@ Subscription entry returned in list responses.
 use UnivaPay\Models\Builders\SubscriptionListItemBuilder;
 use UnivaPay\Utils\DateTimeHelper;
 use UnivaPay\Models\SubscriptionStatus;
+use UnivaPay\Models\Builders\SubscriptionThreeDsBuilder;
+use UnivaPay\Models\SubscriptionThreeDsMode;
+use UnivaPay\Models\Builders\SubscriptionPlanSettingsBuilder;
+use UnivaPay\Models\PlanSettingsType;
 use UnivaPay\Models\Builders\SubscriptionUserDataBuilder;
 
 $subscriptionListItem = SubscriptionListItemBuilder::init()
@@ -55,6 +67,19 @@ $subscriptionListItem = SubscriptionListItemBuilder::init()
     ->currency('USD')
     ->amountFormatted(12.5)
     ->status(SubscriptionStatus::CURRENT)
+    ->threeDs(
+        SubscriptionThreeDsBuilder::init()
+            ->mode(SubscriptionThreeDsMode::NORMAL)
+            ->redirectEndpoint(null)
+            ->redirectId(null)
+            ->build()
+    )
+    ->subscriptionPlan(
+        SubscriptionPlanSettingsBuilder::init()
+            ->planType(PlanSettingsType::FIXED_CYCLES)
+            ->fixedCycles(12)
+            ->build()
+    )
     ->merchantName('管理画面ガイド')
     ->storeName('管理画面ガイド_TEST店舗')
     ->paymentType('card')

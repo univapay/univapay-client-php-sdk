@@ -13,8 +13,11 @@ namespace UnivaPay\Models\Builders;
 use Core\Utils\CoreHelper;
 use UnivaPay\Models\GenericMetadata;
 use UnivaPay\Models\Subscription;
+use UnivaPay\Models\SubscriptionInstallmentPlanResponse;
 use UnivaPay\Models\SubscriptionNextPayment;
+use UnivaPay\Models\SubscriptionPlanSettings;
 use UnivaPay\Models\SubscriptionScheduleSettings;
+use UnivaPay\Models\SubscriptionThreeDs;
 
 /**
  * Builder for model Subscription
@@ -265,6 +268,17 @@ class SubscriptionBuilder
     }
 
     /**
+     * Sets three ds field.
+     *
+     * @param SubscriptionThreeDs|null $value
+     */
+    public function threeDs(?SubscriptionThreeDs $value): self
+    {
+        $this->instance->setThreeDs($value);
+        return $this;
+    }
+
+    /**
      * Sets period field.
      *
      * @param string|null $value
@@ -276,6 +290,26 @@ class SubscriptionBuilder
     }
 
     /**
+     * Sets cyclical period field.
+     *
+     * @param string|null $value
+     */
+    public function cyclicalPeriod(?string $value): self
+    {
+        $this->instance->setCyclicalPeriod($value);
+        return $this;
+    }
+
+    /**
+     * Unsets cyclical period field.
+     */
+    public function unsetCyclicalPeriod(): self
+    {
+        $this->instance->unsetCyclicalPeriod();
+        return $this;
+    }
+
+    /**
      * Sets next payment field.
      *
      * @param SubscriptionNextPayment|null $value
@@ -283,6 +317,108 @@ class SubscriptionBuilder
     public function nextPayment(?SubscriptionNextPayment $value): self
     {
         $this->instance->setNextPayment($value);
+        return $this;
+    }
+
+    /**
+     * Sets cycles left field.
+     *
+     * @param int|null $value
+     */
+    public function cyclesLeft(?int $value): self
+    {
+        $this->instance->setCyclesLeft($value);
+        return $this;
+    }
+
+    /**
+     * Unsets cycles left field.
+     */
+    public function unsetCyclesLeft(): self
+    {
+        $this->instance->unsetCyclesLeft();
+        return $this;
+    }
+
+    /**
+     * Sets subscription plan field.
+     *
+     * @param SubscriptionPlanSettings|null $value
+     */
+    public function subscriptionPlan(?SubscriptionPlanSettings $value): self
+    {
+        $this->instance->setSubscriptionPlan($value);
+        return $this;
+    }
+
+    /**
+     * Sets installment plan field.
+     *
+     * @param SubscriptionInstallmentPlanResponse|null $value
+     */
+    public function installmentPlan(?SubscriptionInstallmentPlanResponse $value): self
+    {
+        $this->instance->setInstallmentPlan($value);
+        return $this;
+    }
+
+    /**
+     * Sets charge id field.
+     *
+     * @param string|null $value
+     */
+    public function chargeId(?string $value): self
+    {
+        $this->instance->setChargeId($value);
+        return $this;
+    }
+
+    /**
+     * Unsets charge id field.
+     */
+    public function unsetChargeId(): self
+    {
+        $this->instance->unsetChargeId();
+        return $this;
+    }
+
+    /**
+     * Sets amount left field.
+     *
+     * @param int|null $value
+     */
+    public function amountLeft(?int $value): self
+    {
+        $this->instance->setAmountLeft($value);
+        return $this;
+    }
+
+    /**
+     * Unsets amount left field.
+     */
+    public function unsetAmountLeft(): self
+    {
+        $this->instance->unsetAmountLeft();
+        return $this;
+    }
+
+    /**
+     * Sets amount left formatted field.
+     *
+     * @param float|null $value
+     */
+    public function amountLeftFormatted(?float $value): self
+    {
+        $this->instance->setAmountLeftFormatted($value);
+        return $this;
+    }
+
+    /**
+     * Unsets amount left formatted field.
+     */
+    public function unsetAmountLeftFormatted(): self
+    {
+        $this->instance->unsetAmountLeftFormatted();
         return $this;
     }
 
